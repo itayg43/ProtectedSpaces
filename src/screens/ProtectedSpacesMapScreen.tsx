@@ -1,62 +1,26 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React from 'react';
 import {StyleSheet, View} from 'react-native';
-import MapView, {
-  type UserLocationChangeEvent,
-  type LatLng,
-} from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
+import MapView from 'react-native-maps';
 
-Geolocation.setRNConfiguration({
-  skipPermissionRequests: true,
-});
+import useLocation from '../hooks/useLocation';
 
 const ProtectedSpacesMapScreen = () => {
-  const [latLng, setLatLng] = useState<LatLng | null>(null);
-
-  const handleGetInitialLocation = useCallback(() => {
-    Geolocation.getCurrentPosition(
-      position => {
-        setLatLng({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-      },
-      _ => {},
-      {
-        enableHighAccuracy: true,
-        maximumAge: 1000,
-      },
-    );
-  }, []);
-
-  const handleLocationChange = (e: UserLocationChangeEvent) => {
-    if (e.nativeEvent.coordinate) {
-      setLatLng({
-        latitude: e.nativeEvent.coordinate.latitude,
-        longitude: e.nativeEvent.coordinate.longitude,
-      });
-    }
-  };
-
-  useEffect(() => {
-    handleGetInitialLocation();
-  }, [handleGetInitialLocation]);
+  const {location} = useLocation();
 
   return (
     <View style={styles.container}>
       <MapView
         style={styles.mapContainer}
         region={
-          latLng
+          location
             ? {
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421,
-                ...latLng,
+                ...location,
               }
             : undefined
         }
         showsUserLocation
-        onUserLocationChange={handleLocationChange}
       />
     </View>
   );
