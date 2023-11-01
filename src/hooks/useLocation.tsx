@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {Alert, Platform, Linking} from 'react-native';
 import RNPermissions, {PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
@@ -23,6 +23,7 @@ type Location = {
 };
 
 const useLocation = () => {
+  const locationSubscriptionRef = useRef<number | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
 
   const handleRequestPermission = async () => {
@@ -34,20 +35,7 @@ const useLocation = () => {
       }
 
       if (status === 'blocked') {
-        Alert.alert(
-          'Error',
-          'Please provide access to your location and reopen the app',
-          [
-            {
-              text: 'Cancel',
-              style: 'destructive',
-            },
-            {
-              text: 'OK',
-              onPress: async () => await Linking.openSettings(),
-            },
-          ],
-        );
+        showPermissionBlockedAlert();
       }
 
       return status;
@@ -56,30 +44,58 @@ const useLocation = () => {
     }
   };
 
-  const handleGetCurrentLocation = () => {
-    Geolocation.getCurrentPosition(
+  const handleLocationSubscription = () => {
+    locationSubscriptionRef.current = Geolocation.watchPosition(
       position => {
         setLocation(position.coords);
       },
       _ => {},
       {
         enableHighAccuracy: true,
-        maximumAge: 1000,
       },
     );
+  };
+
+  const handleLocationUnsubscribe = () => {
+    if (locationSubscriptionRef.current) {
+      Geolocation.clearWatch(locationSubscriptionRef.current);
+    }
   };
 
   useEffect(() => {
     (async () => {
       const permissionsStatus = await handleRequestPermission();
 
-      if (permissionsStatus === 'granted') {
-        handleGetCurrentLocation();
+      if (permissionsStatus !== 'granted') {
+        return;
       }
+
+      handleLocationSubscription();
     })();
+
+    return () => {
+      handleLocationUnsubscribe();
+    };
   }, []);
 
   return location;
 };
 
 export default useLocation;
+
+function showPermissionBlockedAlert() {
+  Alert.alert(
+    'Error',
+    'Please provide access to your location and reopen the app',
+    [
+      {
+        text: 'Cancel',
+        style: 'destructive',
+      },
+      {
+        text: 'OK',
+        onPress: async () => await Linking.openSettings(),
+      },
+    ],
+  );
+}
