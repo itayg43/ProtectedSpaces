@@ -3,6 +3,8 @@ import {Alert, Platform, Linking} from 'react-native';
 import RNPermissions, {PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
 
+import {type Location} from '../utils/types';
+
 Geolocation.setRNConfiguration({
   skipPermissionRequests: true,
 });
@@ -11,16 +13,6 @@ const LOCATION_PERMISSION =
   Platform.OS === 'ios'
     ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
     : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
-
-type Location = {
-  latitude: number;
-  longitude: number;
-  altitude: number | null;
-  accuracy: number;
-  altitudeAccuracy: number | null;
-  heading: number | null;
-  speed: number | null;
-};
 
 const useLocation = () => {
   const locationSubscriptionRef = useRef<number | null>(null);
