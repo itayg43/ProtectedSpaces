@@ -31,7 +31,9 @@ const useLocation = () => {
 
       if (status === 'denied') {
         status = await RNPermissions.request(LOCATION_PERMISSION);
-      } else if (status === 'blocked') {
+      }
+
+      if (status === 'blocked') {
         Alert.alert(
           'Error',
           'Please provide access to your location and reopen the app',
@@ -68,15 +70,13 @@ const useLocation = () => {
   };
 
   useEffect(() => {
-    const handleInitialize = async () => {
+    (async () => {
       const permissionsStatus = await handleRequestPermission();
 
       if (permissionsStatus === 'granted') {
         handleGetCurrentLocation();
       }
-    };
-
-    handleInitialize();
+    })();
   }, []);
 
   return location;
