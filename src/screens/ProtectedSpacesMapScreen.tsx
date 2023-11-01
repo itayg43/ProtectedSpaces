@@ -4,8 +4,11 @@ import MapView from 'react-native-maps';
 
 import useLocation from '../hooks/useLocation';
 
+const DEFAULT_LATITUDE_DELTA = 0.05;
+const DEFAULT_LONGITUDE_DELTA = 0.01;
+
 const ProtectedSpacesMapScreen = () => {
-  const {location} = useLocation();
+  const location = useLocation();
 
   return (
     <View style={styles.container}>
@@ -14,9 +17,10 @@ const ProtectedSpacesMapScreen = () => {
         region={
           location
             ? {
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-                ...location,
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: DEFAULT_LATITUDE_DELTA,
+                longitudeDelta: DEFAULT_LONGITUDE_DELTA,
               }
             : undefined
         }

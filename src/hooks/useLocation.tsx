@@ -15,6 +15,11 @@ const LOCATION_PERMISSION =
 type Location = {
   latitude: number;
   longitude: number;
+  altitude: number | null;
+  accuracy: number;
+  altitudeAccuracy: number | null;
+  heading: number | null;
+  speed: number | null;
 };
 
 const useLocation = () => {
@@ -52,10 +57,7 @@ const useLocation = () => {
   const handleGetCurrentLocation = () => {
     Geolocation.getCurrentPosition(
       position => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
+        setLocation(position.coords);
       },
       _ => {},
       {
@@ -77,9 +79,7 @@ const useLocation = () => {
     handleInitialize();
   }, []);
 
-  return {
-    location,
-  };
+  return location;
 };
 
 export default useLocation;
