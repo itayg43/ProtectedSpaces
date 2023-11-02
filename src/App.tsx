@@ -5,12 +5,10 @@ import LoginScreen from './screens/LoginScreen';
 import ProtectedSpacesMapScreen from './screens/ProtectedSpacesMapScreen';
 
 const App = () => {
-  const [currentUser, setCurrentUser] = useState<FirebaseAuthTypes.User | null>(
-    null,
-  );
+  const [isUserSignedIn, setIsUserSignedIn] = useState(false);
 
   const handleAuthStateChange = (user: FirebaseAuthTypes.User | null) => {
-    setCurrentUser(user);
+    setIsUserSignedIn(!!user);
   };
 
   useEffect(() => {
@@ -19,7 +17,7 @@ const App = () => {
     return authSubscription;
   }, []);
 
-  return currentUser ? <ProtectedSpacesMapScreen /> : <LoginScreen />;
+  return isUserSignedIn ? <ProtectedSpacesMapScreen /> : <LoginScreen />;
 };
 
 export default App;

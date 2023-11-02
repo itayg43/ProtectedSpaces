@@ -1,3 +1,5 @@
+export type RequestStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
+
 export type Location = {
   latitude: number;
   longitude: number;

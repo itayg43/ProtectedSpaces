@@ -1,16 +1,22 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {GoogleSigninButton} from '@react-native-google-signin/google-signin';
 
 import authService from '../services/authService';
+import {type RequestStatus} from '../utils/types';
 import SafeView from '../components/SafeView';
 
 const LoginScreen = () => {
+  const [signInRequestStatus, setSignInRequestStatus] =
+    useState<RequestStatus>('idle');
+
   const handleGoogleSignIn = async () => {
     try {
-      await authService.signInWithGoogle();
+      setSignInRequestStatus('loading');
+      await authService.googleSignIn();
+      setSignInRequestStatus('succeeded');
     } catch (error) {
-      console.error(error);
+      setSignInRequestStatus('failed');
     }
   };
 
@@ -20,7 +26,7 @@ const LoginScreen = () => {
         size={GoogleSigninButton.Size.Wide}
         color={GoogleSigninButton.Color.Dark}
         onPress={handleGoogleSignIn}
-        // disabled={this.state.isSigninInProgress}
+        disabled={signInRequestStatus === 'loading'}
       />
     </SafeView>
   );
