@@ -1,25 +1,14 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-} from '@react-native-google-signin/google-signin';
-import auth from '@react-native-firebase/auth';
+import {GoogleSigninButton} from '@react-native-google-signin/google-signin';
 
+import authService from '../services/authService';
 import SafeView from '../components/SafeView';
-
-GoogleSignin.configure({
-  webClientId:
-    '895570054208-902hue55r6c4u4a6fo0t434nm231uq28.apps.googleusercontent.com',
-});
 
 const LoginScreen = () => {
   const handleGoogleSignIn = async () => {
     try {
-      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
-      const {idToken} = await GoogleSignin.signIn();
-      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      await auth().signInWithCredential(googleCredential);
+      await authService.signInWithGoogle();
     } catch (error) {
       console.error(error);
     }
