@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Button, StyleSheet, View} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 
 import useLocation from '../hooks/useLocation';
 import {type ProtectedSpace} from '../utils/types';
 import {protectedSpaces} from '../utils/dammyData';
 import ProtectedSpaceCard from '../components/ProtectedSpaceCard';
+import authService from '../services/authService';
 
 const DEFAULT_LATITUDE_DELTA = 0.01;
 const DEFAULT_LONGITUDE_DELTA = 0.01;
@@ -48,6 +49,10 @@ const ProtectedSpacesMapScreen = () => {
         ))}
       </MapView>
 
+      <View style={styles.signOutButtonContainer}>
+        <Button title="Logout" onPress={async () => authService.signOut()} />
+      </View>
+
       {selectedProtectedSpace && (
         <ProtectedSpaceCard
           contentContainerStyle={styles.protectedSpaceCardContainer}
@@ -68,6 +73,12 @@ const styles = StyleSheet.create({
 
   map: {
     flex: 1,
+  },
+
+  signOutButtonContainer: {
+    position: 'absolute',
+    top: 60,
+    right: 30,
   },
 
   protectedSpaceCardContainer: {
