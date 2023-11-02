@@ -6,8 +6,8 @@ import {
   StyleProp,
   ViewStyle,
   TouchableOpacity,
-  Image,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 import {ProtectedSpace} from '../utils/types';
 
@@ -32,7 +32,7 @@ const ProtectedSpaceCard = ({
       </View>
 
       {/** image */}
-      <Image style={styles.image} source={{uri: protectedSpace.imageUrl}} />
+      <FastImage style={styles.image} source={{uri: protectedSpace.imageUrl}} />
 
       {/** details */}
       <View style={styles.detailsContainer}>
