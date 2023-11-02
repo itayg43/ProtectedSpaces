@@ -36,7 +36,9 @@ const ProtectedSpaceCard = ({
 
       {/** details */}
       <View style={styles.detailsContainer}>
-        <Text style={styles.address}>{protectedSpace.address}</Text>
+        <Text style={styles.address} numberOfLines={1}>
+          {protectedSpace.address}
+        </Text>
 
         <Text numberOfLines={2}>{protectedSpace.description}</Text>
       </View>
@@ -53,13 +55,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 10,
-    height: 100,
+    height: 120,
   },
 
   closeButtonContainer: {
+    zIndex: 1,
     position: 'absolute',
-    top: -15,
-    right: 10,
+    top: 0,
+    left: 0,
   },
   closeButton: {
     justifyContent: 'center',
@@ -67,13 +70,12 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     backgroundColor: '#eee',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderTopLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
 
   image: {
-    width: 80,
+    width: 90,
     height: '100%',
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,

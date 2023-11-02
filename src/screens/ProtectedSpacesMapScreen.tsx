@@ -85,6 +85,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 40,
     alignSelf: 'center',
-    width: '85%',
+    width: '90%',
   },
 });
