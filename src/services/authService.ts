@@ -1,5 +1,5 @@
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import auth from '@react-native-firebase/auth';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 GoogleSignin.configure({
   webClientId:
@@ -23,8 +23,15 @@ const getCurrentUser = () => {
   return auth().currentUser;
 };
 
+const stateSubscription = (
+  onChange: (user: FirebaseAuthTypes.User | null) => void,
+) => {
+  return auth().onAuthStateChanged(onChange);
+};
+
 export default {
   googleSignIn,
   getCurrentUser,
   signOut,
+  stateSubscription,
 };

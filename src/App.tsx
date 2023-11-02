@@ -1,20 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 import LoginScreen from './screens/LoginScreen';
 import ProtectedSpacesMapScreen from './screens/ProtectedSpacesMapScreen';
+import authService from './services/authService';
 
 const App = () => {
   const [isUserSignedIn, setIsUserSignedIn] = useState(false);
 
-  const handleAuthStateChange = (user: FirebaseAuthTypes.User | null) => {
-    setIsUserSignedIn(!!user);
-  };
-
   useEffect(() => {
-    const authSubscription = auth().onAuthStateChanged(handleAuthStateChange);
+    const authUnsubscribe = authService.stateSubscription(user =>
+      setIsUserSignedIn(!!user),
+    );
 
-    return authSubscription;
+    return authUnsubscribe;
   }, []);
 
   return isUserSignedIn ? <ProtectedSpacesMapScreen /> : <LoginScreen />;
