@@ -1,3 +1,5 @@
+export type AuthProvider = 'Apple' | 'Google';
+
 export type RequestStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
 
 export type Location = {
