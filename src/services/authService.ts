@@ -21,9 +21,9 @@ const getCurrentUser = () => {
 };
 
 const stateSubscription = (
-  onChange: (user: FirebaseAuthTypes.User | null) => void,
+  onChangeCallback: (user: FirebaseAuthTypes.User | null) => void,
 ) => {
-  return auth().onAuthStateChanged(onChange);
+  return auth().onAuthStateChanged(onChangeCallback);
 };
 
 export default {

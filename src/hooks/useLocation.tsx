@@ -65,9 +65,7 @@ const useLocation = () => {
       handleLocationSubscription();
     })();
 
-    return () => {
-      handleLocationUnsubscribe();
-    };
+    return handleLocationUnsubscribe;
   }, []);
 
   return location;
