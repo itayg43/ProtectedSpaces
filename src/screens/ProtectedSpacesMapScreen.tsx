@@ -1,12 +1,12 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, StyleSheet, View} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 
 import useLocation from '../hooks/useLocation';
 import {type ProtectedSpace} from '../utils/types';
-import {protectedSpaces} from '../utils/dammyData';
 import ProtectedSpaceCard from '../components/ProtectedSpaceCard';
 import authService from '../services/authService';
+import protectedSpacesService from '../services/protectedSpacesService';
 
 const DEFAULT_LATITUDE_DELTA = 0.01;
 const DEFAULT_LONGITUDE_DELTA = 0.01;
@@ -14,6 +14,7 @@ const DEFAULT_LONGITUDE_DELTA = 0.01;
 const ProtectedSpacesMapScreen = () => {
   const location = useLocation();
 
+  const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
   const [selectedProtectedSpace, setSelectedProtectedSpace] =
     useState<ProtectedSpace | null>(null);
 
@@ -24,6 +25,15 @@ const ProtectedSpacesMapScreen = () => {
   const handleCloseSpaceCard = () => {
     setSelectedProtectedSpace(null);
   };
+
+  useEffect(() => {
+    const protectedSpacesUnsubscribe =
+      protectedSpacesService.collectionSubscription(spaces =>
+        setProtectedSpaces(spaces),
+      );
+
+    return protectedSpacesUnsubscribe;
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -43,7 +53,10 @@ const ProtectedSpacesMapScreen = () => {
         {protectedSpaces.map(space => (
           <Marker
             key={space.id}
-            coordinate={space.coordinate}
+            coordinate={{
+              latitude: space.coordinate.latitude,
+              longitude: space.coordinate.longitude,
+            }}
             onPress={() => handleMarkerPress(space)}
           />
         ))}

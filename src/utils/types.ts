@@ -1,3 +1,5 @@
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+
 export type AuthProvider = 'Apple' | 'Google';
 
 export type RequestStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -12,15 +14,14 @@ export type Location = {
   speed: number | null;
 };
 
-export type Coordinate = {
-  latitude: number;
-  longitude: number;
-};
-
-export type ProtectedSpace = {
-  id: number;
+export type ProtectedSpaceFormData = {
   address: string;
   description: string;
   imageUrl: string;
-  coordinate: Coordinate;
+  coordinate: FirebaseFirestoreTypes.GeoPoint;
 };
+
+export type ProtectedSpace = {
+  id: string;
+  createdAt: FirebaseFirestoreTypes.Timestamp;
+} & ProtectedSpaceFormData;
