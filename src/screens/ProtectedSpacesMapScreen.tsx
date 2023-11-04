@@ -7,14 +7,14 @@ import {type ProtectedSpace} from '../utils/types';
 import ProtectedSpaceCard from '../components/ProtectedSpaceCard';
 import authService from '../services/authService';
 import protectedSpacesService from '../services/protectedSpacesService';
+import {useProtectedSpacesContext} from '../contexts/ProtectedSpacesContext';
 
 const DEFAULT_LATITUDE_DELTA = 0.01;
 const DEFAULT_LONGITUDE_DELTA = 0.01;
 
 const ProtectedSpacesMapScreen = () => {
   const location = useLocation();
-
-  const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
+  const {protectedSpaces, setProtectedSpaces} = useProtectedSpacesContext();
   const [selectedProtectedSpace, setSelectedProtectedSpace] =
     useState<ProtectedSpace | null>(null);
 
@@ -33,7 +33,7 @@ const ProtectedSpacesMapScreen = () => {
       );
 
     return protectedSpacesUnsubscribe;
-  }, []);
+  }, [setProtectedSpaces]);
 
   return (
     <View style={styles.container}>
