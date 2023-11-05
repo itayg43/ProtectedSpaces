@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 
@@ -7,6 +7,7 @@ import useLocation from '../hooks/useLocation';
 import protectedSpacesService from '../services/protectedSpacesService';
 import {useProtectedSpacesContext} from '../contexts/ProtectedSpacesContext';
 import type {ProtectedSpace} from '../utils/types';
+import ProtectedSpaceDetails from '../components/ProtectedSpaceDetails';
 
 const DEFAULT_LATITUDE_DELTA = 0.01;
 const DEFAULT_LONGITUDE_DELTA = 0.01;
@@ -79,9 +80,10 @@ const ProtectedSpacesMapScreen = () => {
             index={0}
             snapPoints={['25%', '50%']}
             onDismiss={handleBottomSheetModalDismiss}>
-            <View>
-              <Text>{selectedProtectedSpace.address}</Text>
-            </View>
+            <ProtectedSpaceDetails
+              contentContainerStyles={styles.protectedSpaceDetailsContainer}
+              protectedSpace={selectedProtectedSpace}
+            />
           </BottomSheetModal>
         )}
       </View>
@@ -98,5 +100,9 @@ const styles = StyleSheet.create({
 
   map: {
     flex: 1,
+  },
+
+  protectedSpaceDetailsContainer: {
+    padding: 10,
   },
 });
