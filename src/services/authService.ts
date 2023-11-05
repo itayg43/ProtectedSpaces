@@ -1,11 +1,11 @@
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
+import {GOOGLE_SIGN_IN_WEB_CLIENT_ID} from '@env';
 import type {AuthProvider} from '../utils/types';
 
 GoogleSignin.configure({
-  webClientId:
-    '895570054208-902hue55r6c4u4a6fo0t434nm231uq28.apps.googleusercontent.com',
+  webClientId: GOOGLE_SIGN_IN_WEB_CLIENT_ID,
 });
 
 const signIn = async (provider: AuthProvider) => {
