@@ -17,7 +17,6 @@ export type Location = {
 export type ProtectedSpaceFormData = {
   address: string;
   description: string;
-  imageUrl: string;
   coordinate: FirebaseFirestoreTypes.GeoPoint;
 };
 

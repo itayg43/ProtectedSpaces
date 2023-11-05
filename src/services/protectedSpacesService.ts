@@ -1,6 +1,6 @@
 import firestore from '@react-native-firebase/firestore';
 
-import {type ProtectedSpaceFormData, type ProtectedSpace} from '../utils/types';
+import type {ProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
 
 const protectedSpacesCollection = firestore().collection('ProtectedSpaces');
 

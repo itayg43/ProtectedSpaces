@@ -6,7 +6,7 @@ import React, {
   PropsWithChildren,
 } from 'react';
 
-import {type ProtectedSpace} from '../utils/types';
+import type {ProtectedSpace} from '../utils/types';
 
 type ContextParams = {
   protectedSpaces: ProtectedSpace[];

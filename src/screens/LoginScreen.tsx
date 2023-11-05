@@ -3,7 +3,7 @@ import {StyleSheet} from 'react-native';
 import {GoogleSigninButton} from '@react-native-google-signin/google-signin';
 
 import authService from '../services/authService';
-import {type AuthProvider, type RequestStatus} from '../utils/types';
+import type {AuthProvider, RequestStatus} from '../utils/types';
 import SafeView from '../components/SafeView';
 
 const LoginScreen = () => {

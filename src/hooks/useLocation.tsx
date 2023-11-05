@@ -3,7 +3,7 @@ import {Alert, Platform, Linking} from 'react-native';
 import RNPermissions, {PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
 
-import {type Location} from '../utils/types';
+import type {Location} from '../utils/types';
 
 Geolocation.setRNConfiguration({
   skipPermissionRequests: true,
