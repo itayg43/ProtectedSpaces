@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Alert, StyleSheet, View} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 
@@ -39,8 +39,9 @@ const ProtectedSpacesMapScreen = () => {
 
   useEffect(() => {
     const protectedSpacesUnsubscribe =
-      protectedSpacesService.collectionSubscription(spaces =>
-        setProtectedSpaces(spaces),
+      protectedSpacesService.collectionSubscription(
+        spaces => setProtectedSpaces(spaces),
+        error => Alert.alert('Error', error.message),
       );
 
     return protectedSpacesUnsubscribe;

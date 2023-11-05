@@ -3,6 +3,7 @@ import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 import {GOOGLE_SIGN_IN_WEB_CLIENT_ID} from '@env';
 import type {AuthProvider} from '../utils/types';
+import {authClient} from '../clients/firebaseClients';
 
 GoogleSignin.configure({
   webClientId: GOOGLE_SIGN_IN_WEB_CLIENT_ID,
@@ -13,17 +14,17 @@ const signIn = async (provider: AuthProvider) => {
 };
 
 const signOut = async () => {
-  await auth().signOut();
+  await authClient.signOut();
 };
 
 const getCurrentUser = () => {
-  return auth().currentUser;
+  return authClient.currentUser;
 };
 
 const stateSubscription = (
   onChangeCallback: (user: FirebaseAuthTypes.User | null) => void,
 ) => {
-  return auth().onAuthStateChanged(onChangeCallback);
+  return authClient.onAuthStateChanged(onChangeCallback);
 };
 
 export default {
@@ -39,7 +40,7 @@ async function googleSignIn() {
   });
   const {idToken} = await GoogleSignin.signIn();
   const credential = auth.GoogleAuthProvider.credential(idToken);
-  await auth().signInWithCredential(credential);
+  await authClient.signInWithCredential(credential);
 }
 
 async function appleSignIn() {}

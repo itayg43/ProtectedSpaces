@@ -1,8 +1,9 @@
 import firestore from '@react-native-firebase/firestore';
 
 import type {ProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
+import {firestoreClient} from '../clients/firebaseClients';
 
-const protectedSpacesCollection = firestore().collection('ProtectedSpaces');
+const protectedSpacesCollection = firestoreClient.collection('ProtectedSpaces');
 
 const add = async (spaceFormData: ProtectedSpaceFormData) => {
   await protectedSpacesCollection.add({
@@ -13,19 +14,23 @@ const add = async (spaceFormData: ProtectedSpaceFormData) => {
 
 const collectionSubscription = (
   onChangeCallback: (spaces: ProtectedSpace[]) => void,
+  onErrorCallback: (error: Error) => void,
 ) => {
-  return protectedSpacesCollection.onSnapshot(query => {
-    const spaces: ProtectedSpace[] = [];
+  return protectedSpacesCollection.onSnapshot(
+    query => {
+      const spaces: ProtectedSpace[] = [];
 
-    query.forEach(document => {
-      spaces.push({
-        ...document.data(),
-        id: document.id,
-      } as ProtectedSpace);
-    });
+      query.forEach(document => {
+        spaces.push({
+          ...document.data(),
+          id: document.id,
+        } as ProtectedSpace);
+      });
 
-    onChangeCallback(spaces);
-  });
+      onChangeCallback(spaces);
+    },
+    error => onErrorCallback(error),
+  );
 };
 
 export default {
