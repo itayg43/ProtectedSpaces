@@ -1,17 +1,9 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Modal,
-} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View, Modal} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 
 import useLocation from '../hooks/useLocation';
-import protectedSpacesService from '../services/protectedSpacesService';
 import {useProtectedSpacesContext} from '../contexts/ProtectedSpacesContext';
 import type {ProtectedSpace} from '../utils/types';
 import ProtectedSpaceDetails from '../components/ProtectedSpaceDetails';
@@ -22,7 +14,7 @@ const DEFAULT_LONGITUDE_DELTA = 0.01;
 const ProtectedSpacesMapScreen = () => {
   const location = useLocation();
 
-  const {protectedSpaces, setProtectedSpaces} = useProtectedSpacesContext();
+  const {protectedSpaces} = useProtectedSpacesContext();
   const [selectedProtectedSpace, setSelectedProtectedSpace] =
     useState<ProtectedSpace | null>(null);
 
@@ -49,22 +41,10 @@ const ProtectedSpacesMapScreen = () => {
   };
 
   useEffect(() => {
-    if (!selectedProtectedSpace) {
-      return;
+    if (selectedProtectedSpace) {
+      handlePresentSelectedProtectedSpaceBottomSheetModal();
     }
-
-    handlePresentSelectedProtectedSpaceBottomSheetModal();
   }, [selectedProtectedSpace]);
-
-  useEffect(() => {
-    const protectedSpacesUnsubscribe =
-      protectedSpacesService.collectionSubscription(
-        spaces => setProtectedSpaces(spaces),
-        error => Alert.alert('Error', error.message),
-      );
-
-    return protectedSpacesUnsubscribe;
-  }, [setProtectedSpaces]);
 
   return (
     <BottomSheetModalProvider>
@@ -94,13 +74,15 @@ const ProtectedSpacesMapScreen = () => {
           ))}
         </MapView>
 
-        <TouchableOpacity
-          style={styles.addProtectedSpaceButtonContainer}
-          onPress={handleToggleShowAddProtectedSpaceModal}>
-          <View style={styles.addProtectedSpaceButton}>
-            <Text style={styles.addProtectedSpaceButtonText}>+</Text>
-          </View>
-        </TouchableOpacity>
+        {location && (
+          <TouchableOpacity
+            style={styles.addProtectedSpaceButtonContainer}
+            onPress={handleToggleShowAddProtectedSpaceModal}>
+            <View style={styles.addProtectedSpaceButton}>
+              <Text style={styles.addProtectedSpaceButtonText}>+</Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
         {showAddProtectedSpaceModal && (
           <Modal

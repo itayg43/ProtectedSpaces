@@ -4,18 +4,19 @@ import React, {
   useState,
   useMemo,
   PropsWithChildren,
+  useEffect,
 } from 'react';
+import {Alert} from 'react-native';
 
 import type {ProtectedSpace} from '../utils/types';
+import protectedSpacesService from '../services/protectedSpacesService';
 
 type ContextParams = {
   protectedSpaces: ProtectedSpace[];
-  setProtectedSpaces: React.Dispatch<React.SetStateAction<ProtectedSpace[]>>;
 };
 
 const ProtectedSpacesContext = createContext<ContextParams>({
   protectedSpaces: [],
-  setProtectedSpaces: () => {},
 });
 
 export const ProtectedSpacesProvider = ({children}: PropsWithChildren) => {
@@ -24,10 +25,19 @@ export const ProtectedSpacesProvider = ({children}: PropsWithChildren) => {
   const contextValue = useMemo(
     () => ({
       protectedSpaces,
-      setProtectedSpaces,
     }),
     [protectedSpaces],
   );
+
+  useEffect(() => {
+    const protectedSpacesUnsubscribe =
+      protectedSpacesService.collectionSubscription(
+        spaces => setProtectedSpaces(spaces),
+        error => Alert.alert('Error', error.message),
+      );
+
+    return protectedSpacesUnsubscribe;
+  }, []);
 
   return (
     <ProtectedSpacesContext.Provider value={contextValue}>
