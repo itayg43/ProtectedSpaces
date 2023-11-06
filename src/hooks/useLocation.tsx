@@ -1,9 +1,10 @@
 import {useEffect, useRef, useState} from 'react';
-import {Alert, Platform, Linking} from 'react-native';
-import RNPermissions, {PERMISSIONS} from 'react-native-permissions';
+import {Platform} from 'react-native';
+import {PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
 
 import type {Location} from '../utils/types';
+import usePermission from './usePermission';
 
 Geolocation.setRNConfiguration({
   skipPermissionRequests: true,
@@ -15,26 +16,10 @@ const LOCATION_PERMISSION =
     : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
 
 const useLocation = () => {
+  const permissionStatus = usePermission(LOCATION_PERMISSION);
+
   const locationSubscriptionRef = useRef<number | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
-
-  const handleRequestPermission = async () => {
-    try {
-      let status = await RNPermissions.check(LOCATION_PERMISSION);
-
-      if (status === 'denied') {
-        status = await RNPermissions.request(LOCATION_PERMISSION);
-      }
-
-      if (status === 'blocked') {
-        showPermissionBlockedAlert();
-      }
-
-      return status;
-    } catch (error) {
-      return 'denied';
-    }
-  };
 
   const handleLocationSubscription = () => {
     locationSubscriptionRef.current = Geolocation.watchPosition(
@@ -55,37 +40,16 @@ const useLocation = () => {
   };
 
   useEffect(() => {
-    (async () => {
-      const permissionsStatus = await handleRequestPermission();
+    if (permissionStatus !== 'granted') {
+      return;
+    }
 
-      if (permissionsStatus !== 'granted') {
-        return;
-      }
-
-      handleLocationSubscription();
-    })();
+    handleLocationSubscription();
 
     return handleLocationUnsubscribe;
-  }, []);
+  }, [permissionStatus]);
 
   return location;
 };
 
 export default useLocation;
-
-function showPermissionBlockedAlert() {
-  Alert.alert(
-    'Error',
-    'Please provide access to your location and reopen the app',
-    [
-      {
-        text: 'Cancel',
-        style: 'destructive',
-      },
-      {
-        text: 'OK',
-        onPress: async () => await Linking.openSettings(),
-      },
-    ],
-  );
-}
