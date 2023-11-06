@@ -25,7 +25,11 @@ const ProtectedSpacesMapScreen = () => {
     setSelectedProtectedSpace(space);
   };
 
-  const handleBottomSheetModalDismiss = () => {
+  const handlePresentBottomSheetModal = () => {
+    bottomSheetModalRef.current?.present();
+  };
+
+  const handleDismissBottomSheetModal = () => {
     setSelectedProtectedSpace(null);
   };
 
@@ -34,7 +38,7 @@ const ProtectedSpacesMapScreen = () => {
       return;
     }
 
-    bottomSheetModalRef.current?.present();
+    handlePresentBottomSheetModal();
   }, [selectedProtectedSpace]);
 
   useEffect(() => {
@@ -80,7 +84,7 @@ const ProtectedSpacesMapScreen = () => {
             ref={bottomSheetModalRef}
             index={0}
             snapPoints={['25%', '50%']}
-            onDismiss={handleBottomSheetModalDismiss}>
+            onDismiss={handleDismissBottomSheetModal}>
             <ProtectedSpaceDetails
               contentContainerStyles={styles.protectedSpaceDetailsContainer}
               protectedSpace={selectedProtectedSpace}
