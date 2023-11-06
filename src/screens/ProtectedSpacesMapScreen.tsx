@@ -1,5 +1,12 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {Alert, StyleSheet, View} from 'react-native';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Modal,
+} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 
@@ -19,17 +26,25 @@ const ProtectedSpacesMapScreen = () => {
   const [selectedProtectedSpace, setSelectedProtectedSpace] =
     useState<ProtectedSpace | null>(null);
 
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const selectedProtectedSpaceBottomSheetModalRef =
+    useRef<BottomSheetModal>(null);
 
-  const handleSpaceMarkerPress = (space: ProtectedSpace) => {
+  const [showAddProtectedSpaceModal, setShowAddProtectedSpaceModal] =
+    useState(false);
+
+  const handleToggleShowAddProtectedSpaceModal = () => {
+    setShowAddProtectedSpaceModal(currentState => !currentState);
+  };
+
+  const handleProtectedSpaceMarkerPress = (space: ProtectedSpace) => {
     setSelectedProtectedSpace(space);
   };
 
-  const handlePresentBottomSheetModal = () => {
-    bottomSheetModalRef.current?.present();
+  const handlePresentSelectedProtectedSpaceBottomSheetModal = () => {
+    selectedProtectedSpaceBottomSheetModalRef.current?.present();
   };
 
-  const handleDismissBottomSheetModal = () => {
+  const handleDismissSelectedProtectedSpaceBottomSheetModal = () => {
     setSelectedProtectedSpace(null);
   };
 
@@ -38,7 +53,7 @@ const ProtectedSpacesMapScreen = () => {
       return;
     }
 
-    handlePresentBottomSheetModal();
+    handlePresentSelectedProtectedSpaceBottomSheetModal();
   }, [selectedProtectedSpace]);
 
   useEffect(() => {
@@ -74,17 +89,38 @@ const ProtectedSpacesMapScreen = () => {
                 latitude: space.coordinate.latitude,
                 longitude: space.coordinate.longitude,
               }}
-              onPress={() => handleSpaceMarkerPress(space)}
+              onPress={() => handleProtectedSpaceMarkerPress(space)}
             />
           ))}
         </MapView>
 
+        <TouchableOpacity
+          style={styles.addProtectedSpaceButtonContainer}
+          onPress={handleToggleShowAddProtectedSpaceModal}>
+          <View style={styles.addProtectedSpaceButton}>
+            <Text style={styles.addProtectedSpaceButtonText}>+</Text>
+          </View>
+        </TouchableOpacity>
+
+        {showAddProtectedSpaceModal && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={showAddProtectedSpaceModal}>
+            <View style={styles.addProtectedSpaceModalContainer}>
+              <View style={styles.addProtectedSpaceModalContentContainer}>
+                <Text>Modal</Text>
+              </View>
+            </View>
+          </Modal>
+        )}
+
         {selectedProtectedSpace && (
           <BottomSheetModal
-            ref={bottomSheetModalRef}
+            ref={selectedProtectedSpaceBottomSheetModalRef}
             index={0}
             snapPoints={['25%', '50%']}
-            onDismiss={handleDismissBottomSheetModal}>
+            onDismiss={handleDismissSelectedProtectedSpaceBottomSheetModal}>
             <ProtectedSpaceDetails
               contentContainerStyles={styles.protectedSpaceDetailsContainer}
               protectedSpace={selectedProtectedSpace}
@@ -105,6 +141,43 @@ const styles = StyleSheet.create({
 
   map: {
     flex: 1,
+  },
+
+  addProtectedSpaceButtonContainer: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+  },
+  addProtectedSpaceButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 50,
+    height: 50,
+    backgroundColor: 'white',
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  addProtectedSpaceButtonText: {
+    fontSize: 20,
+  },
+
+  addProtectedSpaceModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addProtectedSpaceModalContentContainer: {
+    backgroundColor: 'white',
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 
   protectedSpaceDetailsContainer: {
