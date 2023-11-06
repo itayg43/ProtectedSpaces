@@ -2,8 +2,6 @@ import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
 export type AuthProvider = 'Apple' | 'Google';
 
-export type RequestStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
-
 export type Location = {
   latitude: number;
   longitude: number;
