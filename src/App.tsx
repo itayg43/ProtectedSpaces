@@ -1,20 +1,21 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 
+import authService from './services/authService';
 import LoginScreen from './screens/LoginScreen';
-import ProtectedSpacesMapScreen from './screens/ProtectedSpacesMapScreen';
-import {ProtectedSpacesProvider} from './contexts/ProtectedSpacesContext';
-import {useAuthContext} from './contexts/AuthContext';
+import ProtectedSpacesScreen from './screens/ProtectedSpacesScreen';
 
 const App = () => {
-  const {isUserSignedIn} = useAuthContext();
+  const [isUserSignedIn, setIsUserSignedIn] = useState(false);
 
-  return isUserSignedIn ? (
-    <ProtectedSpacesProvider>
-      <ProtectedSpacesMapScreen />
-    </ProtectedSpacesProvider>
-  ) : (
-    <LoginScreen />
-  );
+  useEffect(() => {
+    const unsubscribe = authService.stateSubscription(user =>
+      setIsUserSignedIn(!!user),
+    );
+
+    return unsubscribe;
+  }, []);
+
+  return isUserSignedIn ? <ProtectedSpacesScreen /> : <LoginScreen />;
 };
 
 export default App;

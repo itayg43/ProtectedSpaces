@@ -1,21 +1,16 @@
 import React, {useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {FAB} from 'react-native-paper';
-import MapView, {Marker} from 'react-native-maps';
 
 import useLocation from '../hooks/useLocation';
-import {useProtectedSpacesContext} from '../contexts/ProtectedSpacesContext';
 import type {ProtectedSpace} from '../utils/types';
 import AddProtectedSpaceModal from '../modals/AddProtectedSpaceModal';
 import ProtectedSpaceDetailsBottomSheetModal from '../modals/ProtectedSpaceDetailsBottomSheetModal';
+import ProtectedSpacesMap from '../components/ProtectedSpacesMap';
 
-const DEFAULT_LATITUDE_DELTA = 0.01;
-const DEFAULT_LONGITUDE_DELTA = 0.01;
-
-const ProtectedSpacesMapScreen = () => {
+const ProtectedSpacesScreen = () => {
   const location = useLocation();
 
-  const {protectedSpaces} = useProtectedSpacesContext();
   const [selectedSpace, setSelectedSpace] = useState<ProtectedSpace | null>(
     null,
   );
@@ -37,31 +32,10 @@ const ProtectedSpacesMapScreen = () => {
   return (
     <>
       <View style={styles.container}>
-        <MapView
-          style={styles.map}
-          region={
-            location
-              ? {
-                  latitude: location.latitude,
-                  longitude: location.longitude,
-                  latitudeDelta: DEFAULT_LATITUDE_DELTA,
-                  longitudeDelta: DEFAULT_LONGITUDE_DELTA,
-                }
-              : undefined
-          }
-          showsUserLocation>
-          {location &&
-            protectedSpaces.map(space => (
-              <Marker
-                key={space.id}
-                coordinate={{
-                  latitude: space.coordinate.latitude,
-                  longitude: space.coordinate.longitude,
-                }}
-                onPress={() => handleMarkerPress(space)}
-              />
-            ))}
-        </MapView>
+        <ProtectedSpacesMap
+          location={location}
+          onMarkerPress={handleMarkerPress}
+        />
 
         {location && (
           <FAB
@@ -73,7 +47,7 @@ const ProtectedSpacesMapScreen = () => {
         )}
       </View>
 
-      {/** modals */}
+      {/** Modals */}
 
       {showAddModal && (
         <AddProtectedSpaceModal
@@ -93,14 +67,10 @@ const ProtectedSpacesMapScreen = () => {
   );
 };
 
-export default ProtectedSpacesMapScreen;
+export default ProtectedSpacesScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-
-  map: {
     flex: 1,
   },
 
