@@ -1,5 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View, Modal} from 'react-native';
+import {StyleSheet, View} from 'react-native';
+import {FAB} from 'react-native-paper';
 import MapView, {Marker} from 'react-native-maps';
 import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 
@@ -7,6 +8,7 @@ import useLocation from '../hooks/useLocation';
 import {useProtectedSpacesContext} from '../contexts/ProtectedSpacesContext';
 import type {ProtectedSpace} from '../utils/types';
 import ProtectedSpaceDetails from '../components/ProtectedSpaceDetails';
+import AddProtectedSpaceModal from '../modals/AddProtectedSpaceModal';
 
 const DEFAULT_LATITUDE_DELTA = 0.01;
 const DEFAULT_LONGITUDE_DELTA = 0.01;
@@ -62,39 +64,33 @@ const ProtectedSpacesMapScreen = () => {
               : undefined
           }
           showsUserLocation>
-          {protectedSpaces.map(space => (
-            <Marker
-              key={space.id}
-              coordinate={{
-                latitude: space.coordinate.latitude,
-                longitude: space.coordinate.longitude,
-              }}
-              onPress={() => handleProtectedSpaceMarkerPress(space)}
-            />
-          ))}
+          {location &&
+            protectedSpaces.map(space => (
+              <Marker
+                key={space.id}
+                coordinate={{
+                  latitude: space.coordinate.latitude,
+                  longitude: space.coordinate.longitude,
+                }}
+                onPress={() => handleProtectedSpaceMarkerPress(space)}
+              />
+            ))}
         </MapView>
 
         {location && (
-          <TouchableOpacity
-            style={styles.addProtectedSpaceButtonContainer}
-            onPress={handleToggleShowAddProtectedSpaceModal}>
-            <View style={styles.addProtectedSpaceButton}>
-              <Text style={styles.addProtectedSpaceButtonText}>+</Text>
-            </View>
-          </TouchableOpacity>
+          <FAB
+            style={styles.addProtectedSpaceFab}
+            icon="plus"
+            size="medium"
+            onPress={handleToggleShowAddProtectedSpaceModal}
+          />
         )}
 
         {showAddProtectedSpaceModal && (
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={showAddProtectedSpaceModal}>
-            <View style={styles.addProtectedSpaceModalContainer}>
-              <View style={styles.addProtectedSpaceModalContentContainer}>
-                <Text>Modal</Text>
-              </View>
-            </View>
-          </Modal>
+          <AddProtectedSpaceModal
+            isVisible={showAddProtectedSpaceModal}
+            onDismiss={handleToggleShowAddProtectedSpaceModal}
+          />
         )}
 
         {selectedProtectedSpace && (
@@ -125,41 +121,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  addProtectedSpaceButtonContainer: {
+  addProtectedSpaceFab: {
     position: 'absolute',
-    bottom: 30,
-    right: 30,
-  },
-  addProtectedSpaceButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 50,
-    height: 50,
-    backgroundColor: 'white',
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  addProtectedSpaceButtonText: {
-    fontSize: 20,
-  },
-
-  addProtectedSpaceModalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addProtectedSpaceModalContentContainer: {
-    backgroundColor: 'white',
-    padding: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    bottom: 35,
+    right: 35,
   },
 
   protectedSpaceDetailsContainer: {
