@@ -4,6 +4,7 @@ import {AppRegistry, StyleSheet} from 'react-native';
 import {name as appName} from './app.json';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {PaperProvider} from 'react-native-paper';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 
 import App from './src/App';
 import {AuthProvider} from './src/contexts/AuthContext';
@@ -13,7 +14,9 @@ const RootApp = () => {
     <GestureHandlerRootView style={styles.rootContainer}>
       <AuthProvider>
         <PaperProvider>
-          <App />
+          <BottomSheetModalProvider>
+            <App />
+          </BottomSheetModalProvider>
         </PaperProvider>
       </AuthProvider>
     </GestureHandlerRootView>
