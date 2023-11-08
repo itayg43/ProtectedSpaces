@@ -11,35 +11,28 @@ Geolocation.setRNConfiguration({
 const useLocation = () => {
   const permissionStatus = usePermission('locationWhenInUse');
 
-  const locationSubscriptionRef = useRef<number | null>(null);
+  const subscriptionRef = useRef<number | null>(null);
+
   const [location, setLocation] = useState<Location | null>(null);
 
-  const handleLocationSubscription = () => {
-    locationSubscriptionRef.current = Geolocation.watchPosition(
-      position => {
-        setLocation(position.coords);
-      },
-      _ => {},
-      {
-        enableHighAccuracy: true,
-      },
-    );
-  };
-
-  const handleLocationUnsubscribe = () => {
-    if (locationSubscriptionRef.current) {
-      Geolocation.clearWatch(locationSubscriptionRef.current);
-    }
-  };
-
   useEffect(() => {
-    if (permissionStatus !== 'granted') {
-      return;
+    if (permissionStatus === 'granted') {
+      subscriptionRef.current = Geolocation.watchPosition(
+        position => {
+          setLocation(position.coords);
+        },
+        _ => {},
+        {
+          enableHighAccuracy: true,
+        },
+      );
     }
 
-    handleLocationSubscription();
-
-    return handleLocationUnsubscribe;
+    return () => {
+      if (subscriptionRef.current) {
+        Geolocation.clearWatch(subscriptionRef.current);
+      }
+    };
   }, [permissionStatus]);
 
   return location;
