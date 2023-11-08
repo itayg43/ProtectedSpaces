@@ -11,22 +11,19 @@ import ProtectedSpacesMap from '../components/ProtectedSpacesMap';
 const ProtectedSpacesScreen = () => {
   const location = useLocation();
 
-  const [selectedSpace, setSelectedSpace] = useState<ProtectedSpace | null>(
-    null,
-  );
-
+  const [space, setSpace] = useState<ProtectedSpace | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
   const handleToggleShowAddModal = () => {
-    setShowAddModal(currentState => !currentState);
+    setShowAddModal(currState => !currState);
   };
 
-  const handleMarkerPress = (space: ProtectedSpace) => {
-    setSelectedSpace(space);
+  const handleMarkerPress = (selectedSpace: ProtectedSpace) => {
+    setSpace(selectedSpace);
   };
 
   const handleDismissDetailsModal = () => {
-    setSelectedSpace(null);
+    setSpace(null);
   };
 
   return (
@@ -56,11 +53,11 @@ const ProtectedSpacesScreen = () => {
         />
       )}
 
-      {selectedSpace && (
+      {space && (
         <ProtectedSpaceDetailsBottomSheetModal
           isVisible
           onDismiss={handleDismissDetailsModal}
-          protectedSpace={selectedSpace}
+          protectedSpace={space}
         />
       )}
     </>
