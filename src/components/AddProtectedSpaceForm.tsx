@@ -1,18 +1,15 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
-import {Button, SegmentedButtons} from 'react-native-paper';
+import {ScrollView, StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
+import {Button, SegmentedButtons, TextInput} from 'react-native-paper';
 import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 
+import {GOOGLE_CLOUD_API_KEY} from '@env';
 import FormTextInput from './FormTextInput';
 
-type ProtectedSpaceType = {
-  label: string;
-  value: string;
-};
-
-const PROTECTED_SPACE_TYPES: ProtectedSpaceType[] = [
+const PROTECTED_SPACE_TYPES = [
   {
     label: 'Shelter',
     value: 'shelter',
@@ -24,12 +21,14 @@ const PROTECTED_SPACE_TYPES: ProtectedSpaceType[] = [
 ];
 
 const addProtectedSpaceFormSchema = z.object({
-  type: z.string({
-    required_error: 'Required',
-  }),
+  type: z.string(),
 
-  address: z.string({
-    required_error: 'Required',
+  address: z.object({
+    value: z.string(),
+    coordinate: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+    }),
   }),
 
   description: z.string({
@@ -37,14 +36,21 @@ const addProtectedSpaceFormSchema = z.object({
   }),
 });
 
-type AddProtectedSpaceFormSchema = z.infer<typeof addProtectedSpaceFormSchema>;
+export type AddProtectedSpaceFormData = z.infer<
+  typeof addProtectedSpaceFormSchema
+>;
 
 type Props = {
-  onSubmit: (addProtectedSpaceFormData: AddProtectedSpaceFormSchema) => void;
+  contentContainerStyle?: StyleProp<ViewStyle>;
+  onSubmit: (formData: AddProtectedSpaceFormData) => void;
 };
 
-const AddProtectedSpaceForm = ({onSubmit}: Props) => {
-  const {control, handleSubmit} = useForm<AddProtectedSpaceFormSchema>({
+const AddProtectedSpaceForm = ({contentContainerStyle, onSubmit}: Props) => {
+  const {
+    control,
+    handleSubmit,
+    formState: {isSubmitting},
+  } = useForm<AddProtectedSpaceFormData>({
     resolver: zodResolver(addProtectedSpaceFormSchema),
     defaultValues: {
       type: PROTECTED_SPACE_TYPES[0].value,
@@ -52,7 +58,7 @@ const AddProtectedSpaceForm = ({onSubmit}: Props) => {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[contentContainerStyle, styles.container]}>
       <Controller
         name="type"
         control={control}
@@ -65,6 +71,36 @@ const AddProtectedSpaceForm = ({onSubmit}: Props) => {
         )}
       />
 
+      <ScrollView contentContainerStyle={styles.addressContainer} horizontal>
+        <Controller
+          name="address"
+          control={control}
+          render={({field: {onChange}}) => (
+            <GooglePlacesAutocomplete
+              placeholder="Address"
+              fetchDetails={true}
+              onPress={(_, details) => {
+                onChange({
+                  value: details?.name,
+                  coordinate: {
+                    latitude: details?.geometry.location.lat,
+                    longitude: details?.geometry.location.lng,
+                  },
+                });
+              }}
+              query={{
+                key: GOOGLE_CLOUD_API_KEY,
+                components: 'country:il',
+              }}
+              debounce={300}
+              textInputProps={{
+                InputComp: TextInput,
+              }}
+            />
+          )}
+        />
+      </ScrollView>
+
       <FormTextInput
         control={control}
         name="description"
@@ -72,7 +108,10 @@ const AddProtectedSpaceForm = ({onSubmit}: Props) => {
         multiline
       />
 
-      <Button mode="contained" onPress={handleSubmit(onSubmit)}>
+      <Button
+        mode="contained"
+        onPress={handleSubmit(onSubmit)}
+        loading={isSubmitting}>
         Submit
       </Button>
     </View>
@@ -84,5 +123,8 @@ export default AddProtectedSpaceForm;
 const styles = StyleSheet.create({
   container: {
     rowGap: 10,
+  },
+  addressContainer: {
+    flex: 1,
   },
 });

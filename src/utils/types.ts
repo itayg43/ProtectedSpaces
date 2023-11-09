@@ -12,13 +12,13 @@ export type Location = {
   speed: number | null;
 };
 
-export type ProtectedSpaceFormData = {
+export type ProtectedSpace = {
+  id: string;
+  type: string;
   address: string;
   description: string;
   coordinate: FirebaseFirestoreTypes.GeoPoint;
+  createdAt: FirebaseFirestoreTypes.Timestamp;
 };
 
-export type ProtectedSpace = {
-  id: string;
-  createdAt: FirebaseFirestoreTypes.Timestamp;
-} & ProtectedSpaceFormData;
+export type RequestStatus = 'idle' | 'loading' | 'succeeded' | 'failed';

@@ -27,7 +27,7 @@ const ProtectedSpaceDetailsBottomSheetModal = ({
   return (
     <BottomSheetModal
       ref={bottomSheetModalRef}
-      index={1}
+      index={0}
       snapPoints={['25%', '50%']}
       onDismiss={onDismiss}>
       <ProtectedSpaceDetails

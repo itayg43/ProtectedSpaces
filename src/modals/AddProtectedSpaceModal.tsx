@@ -2,7 +2,10 @@ import React from 'react';
 import {StyleSheet} from 'react-native';
 import {Modal, IconButton} from 'react-native-paper';
 
-import AddProtectedSpaceForm from '../components/AddProtectedSpaceForm';
+import AddProtectedSpaceForm, {
+  AddProtectedSpaceFormData,
+} from '../components/AddProtectedSpaceForm';
+import protectedSpacesService from '../services/protectedSpacesService';
 
 type Props = {
   isVisible: boolean;
@@ -10,7 +13,14 @@ type Props = {
 };
 
 const AddProtectedSpaceModal = ({isVisible, onDismiss}: Props) => {
-  const handleAddProtectedSpace = () => {};
+  const handleAddProtectedSpace = async (
+    formData: AddProtectedSpaceFormData,
+  ) => {
+    try {
+      await protectedSpacesService.add(formData);
+      onDismiss();
+    } catch (error) {}
+  };
 
   return (
     <Modal

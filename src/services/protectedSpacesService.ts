@@ -2,14 +2,21 @@ import firestore, {
   FirebaseFirestoreTypes,
 } from '@react-native-firebase/firestore';
 
-import type {ProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
+import type {ProtectedSpace} from '../utils/types';
 import {firestoreClient} from '../clients/firebaseClients';
+import {AddProtectedSpaceFormData} from '../components/AddProtectedSpaceForm';
 
 const protectedSpacesCollection = firestoreClient.collection('ProtectedSpaces');
 
-const add = async (spaceFormData: ProtectedSpaceFormData) => {
+const add = async (formData: AddProtectedSpaceFormData) => {
   await protectedSpacesCollection.add({
-    ...spaceFormData,
+    type: formData.type,
+    address: formData.address.value,
+    description: formData.description,
+    coordinate: new firestore.GeoPoint(
+      formData.address.coordinate.latitude,
+      formData.address.coordinate.longitude,
+    ),
     createdAt: firestore.FieldValue.serverTimestamp(),
   });
 };
