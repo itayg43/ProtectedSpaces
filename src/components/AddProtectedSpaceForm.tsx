@@ -1,44 +1,15 @@
 import React from 'react';
-import {ScrollView, StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
-import {Button, SegmentedButtons, TextInput} from 'react-native-paper';
-import {useForm, Controller} from 'react-hook-form';
+import {StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
+import {Button} from 'react-native-paper';
+import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 
-import {GOOGLE_CLOUD_API_KEY} from '@env';
 import FormTextInput from './FormTextInput';
-
-const PROTECTED_SPACE_TYPES = [
-  {
-    label: 'Shelter',
-    value: 'shelter',
-  },
-  {
-    label: 'Stairway',
-    value: 'stairway',
-  },
-];
-
-const addProtectedSpaceFormSchema = z.object({
-  type: z.string(),
-
-  address: z.object({
-    value: z.string(),
-    coordinate: z.object({
-      latitude: z.number(),
-      longitude: z.number(),
-    }),
-  }),
-
-  description: z.string({
-    required_error: 'Required',
-  }),
-});
-
-export type AddProtectedSpaceFormData = z.infer<
-  typeof addProtectedSpaceFormSchema
->;
+import FormSegmentedButtons from './FormSegmentedButtons';
+import FormGooglePlacesAutocomplete from './FormGooglePlacesAutocomplete';
+import type {AddProtectedSpaceFormData} from '../utils/types';
+import {addProtectedSpaceValidationSchema} from '../utils/validationSchemas';
+import {PROTECTED_SPACE_TYPE_OPTIONS} from '../utils/constants';
 
 type Props = {
   contentContainerStyle?: StyleProp<ViewStyle>;
@@ -46,63 +17,23 @@ type Props = {
 };
 
 const AddProtectedSpaceForm = ({contentContainerStyle, onSubmit}: Props) => {
-  const {
-    control,
-    handleSubmit,
-    formState: {isSubmitting, isValid},
-  } = useForm<AddProtectedSpaceFormData>({
-    resolver: zodResolver(addProtectedSpaceFormSchema),
-    defaultValues: {
-      type: PROTECTED_SPACE_TYPES[0].value,
-    },
-  });
+  const {control, handleSubmit, formState} = useForm<AddProtectedSpaceFormData>(
+    {resolver: zodResolver(addProtectedSpaceValidationSchema)},
+  );
 
   return (
     <View style={[contentContainerStyle, styles.container]}>
-      <Controller
-        name="type"
+      <FormSegmentedButtons
         control={control}
-        render={({field: {value, onChange}}) => (
-          <SegmentedButtons
-            value={value}
-            onValueChange={onChange}
-            buttons={PROTECTED_SPACE_TYPES}
-          />
-        )}
+        name="type"
+        options={PROTECTED_SPACE_TYPE_OPTIONS}
       />
 
-      <ScrollView
-        contentContainerStyle={styles.addressContainer}
-        horizontal
-        keyboardShouldPersistTaps="handled">
-        <Controller
-          name="address"
-          control={control}
-          render={({field: {onChange}}) => (
-            <GooglePlacesAutocomplete
-              placeholder="Address"
-              fetchDetails={true}
-              onPress={(_, details) => {
-                onChange({
-                  value: details?.name,
-                  coordinate: {
-                    latitude: details?.geometry.location.lat,
-                    longitude: details?.geometry.location.lng,
-                  },
-                });
-              }}
-              query={{
-                key: GOOGLE_CLOUD_API_KEY,
-                components: 'country:il',
-              }}
-              debounce={300}
-              textInputProps={{
-                InputComp: TextInput,
-              }}
-            />
-          )}
-        />
-      </ScrollView>
+      <FormGooglePlacesAutocomplete
+        control={control}
+        name="address"
+        placeholder="Address"
+      />
 
       <FormTextInput
         control={control}
@@ -114,8 +45,8 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSubmit}: Props) => {
       <Button
         mode="contained"
         onPress={handleSubmit(onSubmit)}
-        loading={isSubmitting}
-        disabled={!isValid}>
+        loading={formState.isSubmitting}
+        disabled={!formState.isValid}>
         Submit
       </Button>
     </View>
@@ -130,8 +61,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 15,
     borderRadius: 10,
-  },
-  addressContainer: {
-    flex: 1,
   },
 });

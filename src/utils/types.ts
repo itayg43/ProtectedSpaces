@@ -1,4 +1,7 @@
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import * as z from 'zod';
+
+import {addProtectedSpaceValidationSchema} from './validationSchemas';
 
 export type AuthProvider = 'Apple' | 'Google';
 
@@ -22,3 +25,7 @@ export type ProtectedSpace = {
 };
 
 export type RequestStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
+
+export type AddProtectedSpaceFormData = z.infer<
+  typeof addProtectedSpaceValidationSchema
+>;
