@@ -49,7 +49,7 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSubmit}: Props) => {
   const {
     control,
     handleSubmit,
-    formState: {isSubmitting},
+    formState: {isSubmitting, isValid},
   } = useForm<AddProtectedSpaceFormData>({
     resolver: zodResolver(addProtectedSpaceFormSchema),
     defaultValues: {
@@ -114,7 +114,8 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSubmit}: Props) => {
       <Button
         mode="contained"
         onPress={handleSubmit(onSubmit)}
-        loading={isSubmitting}>
+        loading={isSubmitting}
+        disabled={!isValid}>
         Submit
       </Button>
     </View>
@@ -126,6 +127,9 @@ export default AddProtectedSpaceForm;
 const styles = StyleSheet.create({
   container: {
     rowGap: 10,
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
   },
   addressContainer: {
     flex: 1,

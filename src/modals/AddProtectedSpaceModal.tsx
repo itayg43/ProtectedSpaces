@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
+import {Keyboard, StyleSheet} from 'react-native';
 import {Modal, IconButton} from 'react-native-paper';
 
 import AddProtectedSpaceForm, {
@@ -17,17 +17,14 @@ const AddProtectedSpaceModal = ({isVisible, onDismiss}: Props) => {
     formData: AddProtectedSpaceFormData,
   ) => {
     try {
+      Keyboard.dismiss();
       await protectedSpacesService.add(formData);
       onDismiss();
     } catch (error) {}
   };
 
   return (
-    <Modal
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      visible={isVisible}
-      dismissable={false}>
+    <Modal style={styles.container} visible={isVisible} dismissable={false}>
       <IconButton
         style={styles.closeIconButton}
         mode="contained"
@@ -48,12 +45,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 10,
   },
-  contentContainer: {
-    padding: 10,
-    backgroundColor: 'white',
-    borderRadius: 4,
-  },
   closeIconButton: {
-    alignSelf: 'flex-end',
+    alignSelf: 'center',
   },
 });

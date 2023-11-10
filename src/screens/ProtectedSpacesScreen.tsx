@@ -1,5 +1,12 @@
 import React, {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import {FAB} from 'react-native-paper';
 
 import useLocation from '../hooks/useLocation';
@@ -27,40 +34,42 @@ const ProtectedSpacesScreen = () => {
   };
 
   return (
-    <>
-      <View style={styles.container}>
-        <ProtectedSpacesMap
-          location={location}
-          onMarkerPress={handleMarkerPress}
-        />
-
-        {location && (
-          <FAB
-            style={styles.fab}
-            icon="plus"
-            size="medium"
-            onPress={handleToggleShowAddModal}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{flex: 1}}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <ProtectedSpacesMap
+            location={location}
+            onMarkerPress={handleMarkerPress}
           />
-        )}
-      </View>
 
-      {/** Modals */}
+          {location && (
+            <FAB
+              style={styles.fab}
+              icon="plus"
+              size="medium"
+              onPress={handleToggleShowAddModal}
+            />
+          )}
 
-      {showAddModal && (
-        <AddProtectedSpaceModal
-          isVisible={showAddModal}
-          onDismiss={handleToggleShowAddModal}
-        />
-      )}
+          {showAddModal && (
+            <AddProtectedSpaceModal
+              isVisible={showAddModal}
+              onDismiss={handleToggleShowAddModal}
+            />
+          )}
 
-      {space && (
-        <ProtectedSpaceDetailsBottomSheetModal
-          isVisible
-          onDismiss={handleDismissDetailsModal}
-          protectedSpace={space}
-        />
-      )}
-    </>
+          {space && (
+            <ProtectedSpaceDetailsBottomSheetModal
+              isVisible
+              onDismiss={handleDismissDetailsModal}
+              protectedSpace={space}
+            />
+          )}
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
