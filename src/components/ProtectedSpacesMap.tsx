@@ -4,9 +4,7 @@ import MapView, {Marker} from 'react-native-maps';
 
 import protectedSpacesService from '../services/protectedSpacesService';
 import type {Location, ProtectedSpace} from '../utils/types';
-
-const DEFAULT_LATITUDE_DELTA = 0.01;
-const DEFAULT_LONGITUDE_DELTA = 0.01;
+import {DEFAULT_MAP_DELTAS} from '../utils/constants';
 
 type Props = {
   location: Location | null;
@@ -33,8 +31,8 @@ const ProtectedSpacesMap = ({location, onMarkerPress}: Props) => {
           ? {
               latitude: location.latitude,
               longitude: location.longitude,
-              latitudeDelta: DEFAULT_LATITUDE_DELTA,
-              longitudeDelta: DEFAULT_LONGITUDE_DELTA,
+              latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
+              longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
             }
           : undefined
       }
