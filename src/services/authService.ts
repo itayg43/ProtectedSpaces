@@ -1,12 +1,19 @@
+import {Platform} from 'react-native';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
-import {GOOGLE_SIGN_IN_WEB_CLIENT_ID} from '@env';
+import {
+  IOS_GOOGLE_SIGN_IN_WEB_CLIENT_ID,
+  ANDROID_GOOGLE_SIGN_IN_WEB_CLIENT_ID,
+} from '@env';
 import type {AuthProvider} from '../utils/types';
 import {authClient} from '../clients/firebaseClients';
 
 GoogleSignin.configure({
-  webClientId: GOOGLE_SIGN_IN_WEB_CLIENT_ID,
+  webClientId:
+    Platform.OS === 'ios'
+      ? IOS_GOOGLE_SIGN_IN_WEB_CLIENT_ID
+      : ANDROID_GOOGLE_SIGN_IN_WEB_CLIENT_ID,
 });
 
 const signIn = async (provider: AuthProvider) => {

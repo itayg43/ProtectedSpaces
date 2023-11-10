@@ -71,7 +71,10 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSubmit}: Props) => {
         )}
       />
 
-      <ScrollView contentContainerStyle={styles.addressContainer} horizontal>
+      <ScrollView
+        contentContainerStyle={styles.addressContainer}
+        horizontal
+        keyboardShouldPersistTaps="handled">
         <Controller
           name="address"
           control={control}

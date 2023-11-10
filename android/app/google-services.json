@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "895570054208",
+    "project_id": "protectedspaces-1e08e",
+    "storage_bucket": "protectedspaces-1e08e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:895570054208:android:94b90b3373ac2135c5e3a5",
+        "android_client_info": {
+          "package_name": "com.protectedspace"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "895570054208-lfu8m0rbiiieojn6mafbap0rk5fafo4r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.protectedspace",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "895570054208-8ob9jgb7h46n0hblf5a30s2tjs3dddqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcQGKlim2P4EL9LjYAyp2lm9fxUGmVV7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "895570054208-8ob9jgb7h46n0hblf5a30s2tjs3dddqq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "895570054208-902hue55r6c4u4a6fo0t434nm231uq28.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.ProtectedSpace"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
