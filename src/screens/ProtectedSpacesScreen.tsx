@@ -1,12 +1,5 @@
 import React, {useState} from 'react';
-import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import {FAB} from 'react-native-paper';
 
 import useLocation from '../hooks/useLocation';
@@ -14,6 +7,7 @@ import type {ProtectedSpace} from '../utils/types';
 import AddProtectedSpaceModal from '../modals/AddProtectedSpaceModal';
 import ProtectedSpaceDetailsBottomSheetModal from '../modals/ProtectedSpaceDetailsBottomSheetModal';
 import ProtectedSpacesMap from '../components/ProtectedSpacesMap';
+import KeyboardAvoidingView from '../components/KeyboardAvoidingView';
 
 const ProtectedSpacesScreen = () => {
   const location = useLocation();
@@ -34,41 +28,37 @@ const ProtectedSpacesScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{flex: 1}}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          <ProtectedSpacesMap
-            location={location}
-            onMarkerPress={handleMarkerPress}
+    <KeyboardAvoidingView>
+      <View style={styles.container}>
+        <ProtectedSpacesMap
+          location={location}
+          onMarkerPress={handleMarkerPress}
+        />
+
+        {location && (
+          <FAB
+            style={styles.fab}
+            icon="plus"
+            size="medium"
+            onPress={handleToggleShowAddModal}
           />
+        )}
 
-          {location && (
-            <FAB
-              style={styles.fab}
-              icon="plus"
-              size="medium"
-              onPress={handleToggleShowAddModal}
-            />
-          )}
+        {showAddModal && (
+          <AddProtectedSpaceModal
+            isVisible={showAddModal}
+            onDismiss={handleToggleShowAddModal}
+          />
+        )}
 
-          {showAddModal && (
-            <AddProtectedSpaceModal
-              isVisible={showAddModal}
-              onDismiss={handleToggleShowAddModal}
-            />
-          )}
-
-          {space && (
-            <ProtectedSpaceDetailsBottomSheetModal
-              isVisible
-              onDismiss={handleDismissDetailsModal}
-              protectedSpace={space}
-            />
-          )}
-        </View>
-      </TouchableWithoutFeedback>
+        {space && (
+          <ProtectedSpaceDetailsBottomSheetModal
+            isVisible
+            onDismiss={handleDismissDetailsModal}
+            protectedSpace={space}
+          />
+        )}
+      </View>
     </KeyboardAvoidingView>
   );
 };
