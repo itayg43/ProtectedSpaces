@@ -24,7 +24,7 @@ export type ProtectedSpace = {
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
 
-export type RequestStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
+export type ProtectedSpaceWithoutId = Omit<ProtectedSpace, 'id'>;
 
 export type AddProtectedSpaceFormData = z.infer<
   typeof addProtectedSpaceValidationSchema

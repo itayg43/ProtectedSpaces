@@ -2,10 +2,9 @@ import React from 'react';
 import {Keyboard, StyleSheet} from 'react-native';
 import {Modal, IconButton} from 'react-native-paper';
 
-import AddProtectedSpaceForm, {
-  AddProtectedSpaceFormData,
-} from '../components/AddProtectedSpaceForm';
+import AddProtectedSpaceForm from '../components/AddProtectedSpaceForm';
 import protectedSpacesService from '../services/protectedSpacesService';
+import type {AddProtectedSpaceFormData} from '../utils/types';
 
 type Props = {
   isVisible: boolean;
