@@ -16,7 +16,7 @@ const ProtectedSpaceDetails = ({
     <View style={[contentContainerStyles, styles.container]}>
       <Text style={styles.address}>{protectedSpace.address}</Text>
 
-      <Text>{protectedSpace.description}</Text>
+      <Text style={styles.description}>{protectedSpace.description}</Text>
     </View>
   );
 };
@@ -31,5 +31,10 @@ const styles = StyleSheet.create({
   address: {
     fontWeight: 'bold',
     fontSize: 16,
+    color: 'black',
+  },
+
+  description: {
+    color: 'black',
   },
 });
