@@ -6,6 +6,7 @@ import usePermission from './usePermission';
 
 Geolocation.setRNConfiguration({
   skipPermissionRequests: true,
+  locationProvider: 'playServices', // android only
 });
 
 const useLocation = () => {
