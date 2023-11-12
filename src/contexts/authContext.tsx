@@ -14,12 +14,12 @@ import {Alert} from 'react-native';
 
 type AuthContextParams = {
   isUserSignedIn: boolean;
-  signIn: (provider: AuthProvider) => void;
+  signIn: (provider: AuthProvider) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextParams>({
   isUserSignedIn: false,
-  signIn: () => {},
+  signIn: async () => {},
 });
 
 export const AuthContextProvider = ({children}: PropsWithChildren) => {
