@@ -7,10 +7,10 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import {Alert} from 'react-native';
 
 import authService from '../services/authService';
 import type {AuthProvider} from '../utils/types';
-import {Alert} from 'react-native';
 
 type AuthContextParams = {
   isUserSignedIn: boolean;
