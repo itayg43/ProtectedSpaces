@@ -4,14 +4,17 @@ import LoginScreen from './screens/LoginScreen';
 import ProtectedSpacesScreen from './screens/ProtectedSpacesScreen';
 import {useAuthContext} from './contexts/authContext';
 import {ProtectedSpacesContextProvider} from './contexts/protectedSpacesContext';
+import {LocationContextProvider} from './contexts/locationContext';
 
 const App = () => {
   const {isUserSignedIn} = useAuthContext();
 
   return isUserSignedIn ? (
-    <ProtectedSpacesContextProvider>
-      <ProtectedSpacesScreen />
-    </ProtectedSpacesContextProvider>
+    <LocationContextProvider>
+      <ProtectedSpacesContextProvider>
+        <ProtectedSpacesScreen />
+      </ProtectedSpacesContextProvider>
+    </LocationContextProvider>
   ) : (
     <LoginScreen />
   );

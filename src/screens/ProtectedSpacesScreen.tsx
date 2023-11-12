@@ -2,15 +2,15 @@ import React, {useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {FAB} from 'react-native-paper';
 
-import useLocation from '../hooks/useLocation';
 import type {ProtectedSpace} from '../utils/types';
 import AddProtectedSpaceModal from '../modals/AddProtectedSpaceModal';
 import ProtectedSpaceDetailsBottomSheetModal from '../modals/ProtectedSpaceDetailsBottomSheetModal';
 import ProtectedSpacesMap from '../components/ProtectedSpacesMap';
 import KeyboardAvoidingView from '../components/KeyboardAvoidingView';
+import {useLocationContext} from '../contexts/locationContext';
 
 const ProtectedSpacesScreen = () => {
-  const location = useLocation();
+  const location = useLocationContext();
 
   const [space, setSpace] = useState<ProtectedSpace | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -30,10 +30,7 @@ const ProtectedSpacesScreen = () => {
   return (
     <KeyboardAvoidingView>
       <View style={styles.container}>
-        <ProtectedSpacesMap
-          location={location}
-          onMarkerPress={handleMarkerPress}
-        />
+        <ProtectedSpacesMap onMarkerPress={handleMarkerPress} />
 
         {location && (
           <FAB

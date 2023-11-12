@@ -2,16 +2,17 @@ import React from 'react';
 import {StyleSheet} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 
-import type {Location, ProtectedSpace} from '../utils/types';
+import type {ProtectedSpace} from '../utils/types';
 import {DEFAULT_MAP_DELTAS} from '../utils/constants';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
+import {useLocationContext} from '../contexts/locationContext';
 
 type Props = {
-  location: Location | null;
   onMarkerPress: (protectedSpace: ProtectedSpace) => void;
 };
 
-const ProtectedSpacesMap = ({location, onMarkerPress}: Props) => {
+const ProtectedSpacesMap = ({onMarkerPress}: Props) => {
+  const location = useLocationContext();
   const {protectedSpaces} = useProtectedSpacesContext();
 
   return (
