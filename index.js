@@ -7,13 +7,16 @@ import {PaperProvider} from 'react-native-paper';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 
 import App from './src/App';
+import {AuthContextProvider} from './src/contexts/authContext';
 
 const RootApp = () => {
   return (
     <GestureHandlerRootView style={styles.rootContainer}>
       <PaperProvider>
         <BottomSheetModalProvider>
-          <App />
+          <AuthContextProvider>
+            <App />
+          </AuthContextProvider>
         </BottomSheetModalProvider>
       </PaperProvider>
     </GestureHandlerRootView>
