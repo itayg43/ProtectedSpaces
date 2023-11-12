@@ -15,11 +15,13 @@ import type {AuthProvider} from '../utils/types';
 type AuthContextParams = {
   isUserSignedIn: boolean;
   signIn: (provider: AuthProvider) => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextParams>({
   isUserSignedIn: false,
   signIn: async () => {},
+  signOut: async () => {},
 });
 
 export const AuthContextProvider = ({children}: PropsWithChildren) => {
@@ -34,12 +36,22 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     }
   }, []);
 
+  const signOut = useCallback(async () => {
+    try {
+      await authService.signOut();
+    } catch (error) {
+      // console.log(error);
+      Alert.alert('Error', "We couldn't sign out your account");
+    }
+  }, []);
+
   const contextValues = useMemo(
     () => ({
       isUserSignedIn,
       signIn,
+      signOut,
     }),
-    [isUserSignedIn, signIn],
+    [isUserSignedIn, signIn, signOut],
   );
 
   useEffect(() => {
