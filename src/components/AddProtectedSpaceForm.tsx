@@ -18,6 +18,7 @@ import type {AddProtectedSpaceFormData} from '../utils/types';
 import {addProtectedSpaceValidationSchema} from '../utils/validationSchemas';
 import {PROTECTED_SPACE_TYPE_OPTIONS} from '../utils/constants';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
+import log from '../utils/log';
 
 type Props = {
   contentContainerStyle?: StyleProp<ViewStyle>;
@@ -41,6 +42,7 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
       await add(formData);
       onSuccess();
     } catch (error: any) {
+      log.error(error);
       Alert.alert('Error', error.message);
     }
   };

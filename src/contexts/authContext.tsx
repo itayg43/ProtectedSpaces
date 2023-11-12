@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import {Alert} from 'react-native';
 
+import log from '../utils/log';
 import authService from '../services/authService';
 import type {AuthProvider} from '../utils/types';
 
@@ -31,7 +32,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     try {
       await authService.signIn(provider);
     } catch (error) {
-      // console.log(error);
+      log.error(error);
       Alert.alert('Error', "We couldn't sign in to your account");
     }
   }, []);
@@ -40,7 +41,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     try {
       await authService.signOut();
     } catch (error) {
-      // console.log(error);
+      log.error(error);
       Alert.alert('Error', "We couldn't sign out your account");
     }
   }, []);

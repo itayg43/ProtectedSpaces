@@ -6,6 +6,8 @@ import RNPermissions, {
   PermissionStatus,
 } from 'react-native-permissions';
 
+import log from '../utils/log';
+
 const isIOS = Platform.OS === 'ios';
 
 type PermissionType = 'locationWhenInUse';
@@ -40,6 +42,7 @@ const usePermission = (permissionType: PermissionType) => {
 
         setPermissionStatus(status);
       } catch (error) {
+        log.error(error);
         setPermissionStatus('denied');
       }
     })();

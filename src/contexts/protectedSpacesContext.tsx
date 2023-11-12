@@ -10,6 +10,7 @@ import React, {
 
 import type {AddProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
 import protectedSpacesService from '../services/protectedSpacesService';
+import log from '../utils/log';
 
 type ProtectedSpacesContextParams = {
   protectedSpaces: ProtectedSpace[];
@@ -30,7 +31,7 @@ export const ProtectedSpacesContextProvider = ({
     try {
       await protectedSpacesService.add(formData);
     } catch (error) {
-      // console.log(error);
+      log.error(error);
       throw new Error("We couldn't add the protected space");
     }
   }, []);
@@ -46,7 +47,7 @@ export const ProtectedSpacesContextProvider = ({
   useEffect(() => {
     const unsubscribe = protectedSpacesService.collectionSubscription(
       spaces => setProtectedSpaces(spaces),
-      _ => {},
+      error => log.error(error),
     );
 
     return unsubscribe;
