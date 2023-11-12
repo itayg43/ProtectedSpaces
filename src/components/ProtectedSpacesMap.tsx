@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, Alert} from 'react-native';
+import React from 'react';
+import {StyleSheet} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 
-import protectedSpacesService from '../services/protectedSpacesService';
 import type {Location, ProtectedSpace} from '../utils/types';
 import {DEFAULT_MAP_DELTAS} from '../utils/constants';
+import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 
 type Props = {
   location: Location | null;
@@ -12,16 +12,7 @@ type Props = {
 };
 
 const ProtectedSpacesMap = ({location, onMarkerPress}: Props) => {
-  const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
-
-  useEffect(() => {
-    const unsubscribe = protectedSpacesService.collectionSubscription(
-      spaces => setProtectedSpaces(spaces),
-      error => Alert.alert('Error', error.message),
-    );
-
-    return unsubscribe;
-  }, []);
+  const {protectedSpaces} = useProtectedSpacesContext();
 
   return (
     <MapView
