@@ -1,5 +1,12 @@
 import React from 'react';
-import {StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
+import {
+  Alert,
+  Keyboard,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
 import {Button} from 'react-native-paper';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -10,16 +17,33 @@ import FormGooglePlacesAutocomplete from './FormGooglePlacesAutocomplete';
 import type {AddProtectedSpaceFormData} from '../utils/types';
 import {addProtectedSpaceValidationSchema} from '../utils/validationSchemas';
 import {PROTECTED_SPACE_TYPE_OPTIONS} from '../utils/constants';
+import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 
 type Props = {
   contentContainerStyle?: StyleProp<ViewStyle>;
-  onSubmit: (formData: AddProtectedSpaceFormData) => void;
+  onSuccess: () => void;
 };
 
-const AddProtectedSpaceForm = ({contentContainerStyle, onSubmit}: Props) => {
-  const {control, handleSubmit, formState} = useForm<AddProtectedSpaceFormData>(
-    {resolver: zodResolver(addProtectedSpaceValidationSchema)},
-  );
+const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
+  const {
+    control,
+    handleSubmit: onSubmit,
+    formState,
+  } = useForm<AddProtectedSpaceFormData>({
+    resolver: zodResolver(addProtectedSpaceValidationSchema),
+  });
+
+  const {add} = useProtectedSpacesContext();
+
+  const handleSubmit = async (formData: AddProtectedSpaceFormData) => {
+    try {
+      Keyboard.dismiss();
+      await add(formData);
+      onSuccess();
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
+  };
 
   return (
     <View style={[contentContainerStyle, styles.container]}>
@@ -44,7 +68,7 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSubmit}: Props) => {
 
       <Button
         mode="contained"
-        onPress={handleSubmit(onSubmit)}
+        onPress={onSubmit(handleSubmit)}
         loading={formState.isSubmitting}
         disabled={!formState.isValid}>
         Submit

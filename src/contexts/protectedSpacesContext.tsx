@@ -1,21 +1,24 @@
 import React, {
   PropsWithChildren,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 
-import type {ProtectedSpace} from '../utils/types';
+import type {AddProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
 import protectedSpacesService from '../services/protectedSpacesService';
 
 type ProtectedSpacesContextParams = {
   protectedSpaces: ProtectedSpace[];
+  add: (formData: AddProtectedSpaceFormData) => Promise<void>;
 };
 
 const ProtectedSpacesContext = createContext<ProtectedSpacesContextParams>({
   protectedSpaces: [],
+  add: async () => {},
 });
 
 export const ProtectedSpacesContextProvider = ({
@@ -23,11 +26,21 @@ export const ProtectedSpacesContextProvider = ({
 }: PropsWithChildren) => {
   const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
 
+  const add = useCallback(async (formData: AddProtectedSpaceFormData) => {
+    try {
+      await protectedSpacesService.add(formData);
+    } catch (error) {
+      // console.log(error);
+      throw new Error("We couldn't add the protected space");
+    }
+  }, []);
+
   const contextValues = useMemo(
     () => ({
       protectedSpaces,
+      add,
     }),
-    [protectedSpaces],
+    [protectedSpaces, add],
   );
 
   useEffect(() => {

@@ -1,10 +1,8 @@
 import React from 'react';
-import {Keyboard, StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {Modal, IconButton} from 'react-native-paper';
 
 import AddProtectedSpaceForm from '../components/AddProtectedSpaceForm';
-import protectedSpacesService from '../services/protectedSpacesService';
-import type {AddProtectedSpaceFormData} from '../utils/types';
 
 type Props = {
   isVisible: boolean;
@@ -12,16 +10,6 @@ type Props = {
 };
 
 const AddProtectedSpaceModal = ({isVisible, onDismiss}: Props) => {
-  const handleAddProtectedSpace = async (
-    formData: AddProtectedSpaceFormData,
-  ) => {
-    try {
-      Keyboard.dismiss();
-      await protectedSpacesService.add(formData);
-      onDismiss();
-    } catch (error) {}
-  };
-
   return (
     <Modal style={styles.container} visible={isVisible} dismissable={false}>
       <IconButton
@@ -33,7 +21,7 @@ const AddProtectedSpaceModal = ({isVisible, onDismiss}: Props) => {
         onPress={onDismiss}
       />
 
-      <AddProtectedSpaceForm onSubmit={handleAddProtectedSpace} />
+      <AddProtectedSpaceForm onSuccess={onDismiss} />
     </Modal>
   );
 };
