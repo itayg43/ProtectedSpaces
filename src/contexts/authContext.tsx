@@ -1,6 +1,7 @@
 import React, {
   PropsWithChildren,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -8,23 +9,37 @@ import React, {
 } from 'react';
 
 import authService from '../services/authService';
+import type {AuthProvider} from '../utils/types';
+import {Alert} from 'react-native';
 
 type AuthContextParams = {
   isUserSignedIn: boolean;
+  signIn: (provider: AuthProvider) => void;
 };
 
 const AuthContext = createContext<AuthContextParams>({
   isUserSignedIn: false,
+  signIn: () => {},
 });
 
 export const AuthContextProvider = ({children}: PropsWithChildren) => {
   const [isUserSignedIn, setIsUserSignedIn] = useState(false);
 
+  const signIn = useCallback(async (provider: AuthProvider) => {
+    try {
+      await authService.signIn(provider);
+    } catch (error) {
+      // console.log(error);
+      Alert.alert('Error', "We couldn't sign in to your account");
+    }
+  }, []);
+
   const contextValues = useMemo(
     () => ({
       isUserSignedIn,
+      signIn,
     }),
-    [isUserSignedIn],
+    [isUserSignedIn, signIn],
   );
 
   useEffect(() => {

@@ -1,29 +1,19 @@
 import React from 'react';
-import {Alert, StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {GoogleSigninButton} from '@react-native-google-signin/google-signin';
 
-import authService from '../services/authService';
-import type {AuthProvider} from '../utils/types';
 import SafeView from '../components/SafeView';
+import {useAuthContext} from '../contexts/authContext';
 
 const LoginScreen = () => {
-  const handleSignIn = async (authProvider: AuthProvider) => {
-    try {
-      await authService.signIn(authProvider);
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        'Something went wrong, please try again in a few minutes or contact support',
-      );
-    }
-  };
+  const {signIn} = useAuthContext();
 
   return (
     <SafeView contentContainerStyle={styles.container}>
       <GoogleSigninButton
         size={GoogleSigninButton.Size.Wide}
         color={GoogleSigninButton.Color.Dark}
-        onPress={() => handleSignIn('Google')}
+        onPress={() => signIn('Google')}
       />
     </SafeView>
   );
