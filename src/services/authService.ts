@@ -24,10 +24,6 @@ const signOut = async () => {
   await authClient.signOut();
 };
 
-const getCurrentUser = () => {
-  return authClient.currentUser;
-};
-
 const stateSubscription = (
   onChangeCallback: (user: FirebaseAuthTypes.User | null) => void,
 ) => {
@@ -35,7 +31,6 @@ const stateSubscription = (
 };
 
 export default {
-  getCurrentUser,
   signIn,
   signOut,
   stateSubscription,

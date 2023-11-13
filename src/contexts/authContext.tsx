@@ -8,27 +8,28 @@ import React, {
   useState,
 } from 'react';
 import {Alert} from 'react-native';
+import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 import log from '../utils/log';
 import authService from '../services/authService';
 import type {AuthProvider} from '../utils/types';
 
 type AuthContextParams = {
-  isUserSignedIn: boolean;
-  signIn: (provider: AuthProvider) => Promise<void>;
-  signOut: () => Promise<void>;
+  user: FirebaseAuthTypes.User | null;
+  handleSignIn: (provider: AuthProvider) => Promise<void>;
+  handleSignOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextParams>({
-  isUserSignedIn: false,
-  signIn: async () => {},
-  signOut: async () => {},
+  user: null,
+  handleSignIn: async () => {},
+  handleSignOut: async () => {},
 });
 
 export const AuthContextProvider = ({children}: PropsWithChildren) => {
-  const [isUserSignedIn, setIsUserSignedIn] = useState(false);
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
-  const signIn = useCallback(async (provider: AuthProvider) => {
+  const handleSignIn = useCallback(async (provider: AuthProvider) => {
     try {
       await authService.signIn(provider);
     } catch (error) {
@@ -37,7 +38,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     }
   }, []);
 
-  const signOut = useCallback(async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       await authService.signOut();
     } catch (error) {
@@ -48,17 +49,15 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
-      isUserSignedIn,
-      signIn,
-      signOut,
+      user,
+      handleSignIn,
+      handleSignOut,
     }),
-    [isUserSignedIn, signIn, signOut],
+    [user, handleSignIn, handleSignOut],
   );
 
   useEffect(() => {
-    const unsubscribe = authService.stateSubscription(user =>
-      setIsUserSignedIn(!!user),
-    );
+    const unsubscribe = authService.stateSubscription(setUser);
 
     return unsubscribe;
   }, []);

@@ -7,9 +7,9 @@ import {ProtectedSpacesContextProvider} from './contexts/protectedSpacesContext'
 import {LocationContextProvider} from './contexts/locationContext';
 
 const App = () => {
-  const {isUserSignedIn} = useAuthContext();
+  const {user} = useAuthContext();
 
-  return isUserSignedIn ? (
+  return user ? (
     <LocationContextProvider>
       <ProtectedSpacesContextProvider>
         <ProtectedSpacesScreen />

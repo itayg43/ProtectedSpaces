@@ -7,10 +7,14 @@ import type {
 } from '../utils/types';
 import {firestoreClient} from '../clients/firebaseClients';
 import storageService from './storageService';
+import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 const protectedSpacesCollection = firestoreClient.collection('ProtectedSpaces');
 
-const add = async (formData: AddProtectedSpaceFormData) => {
+const add = async (
+  user: FirebaseAuthTypes.User | null,
+  formData: AddProtectedSpaceFormData,
+) => {
   await storageService.uploadImage(formData.image);
 
   const spaceWithoutId: ProtectedSpaceWithoutId = {
@@ -28,6 +32,10 @@ const add = async (formData: AddProtectedSpaceFormData) => {
       formData.address.coordinate.longitude,
     ),
     createdAt: firestore.Timestamp.now(),
+    createdBy: {
+      name: user?.displayName ?? '',
+      photoUrl: user?.photoURL ?? '',
+    },
   };
 
   await protectedSpacesCollection.add(spaceWithoutId);

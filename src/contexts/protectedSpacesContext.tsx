@@ -11,6 +11,7 @@ import React, {
 import type {AddProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
 import protectedSpacesService from '../services/protectedSpacesService';
 import log from '../utils/log';
+import {useAuthContext} from './authContext';
 
 type ProtectedSpacesContextParams = {
   protectedSpaces: ProtectedSpace[];
@@ -27,18 +28,19 @@ const ProtectedSpacesContext = createContext<ProtectedSpacesContextParams>({
 export const ProtectedSpacesContextProvider = ({
   children,
 }: PropsWithChildren) => {
+  const {user} = useAuthContext();
   const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
 
   const handleAddProtectedSpace = useCallback(
     async (formData: AddProtectedSpaceFormData) => {
       try {
-        await protectedSpacesService.add(formData);
+        await protectedSpacesService.add(user, formData);
       } catch (error) {
         log.error(error);
         throw new Error("We couldn't add the protected space");
       }
     },
-    [],
+    [user],
   );
 
   const contextValues = useMemo(

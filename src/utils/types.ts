@@ -26,6 +26,10 @@ export type ProtectedSpace = {
   };
   googleMapsLinkUrl: string;
   description: string;
+  createdBy: {
+    name: string;
+    photoUrl: string;
+  };
   coordinate: FirebaseFirestoreTypes.GeoPoint;
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
