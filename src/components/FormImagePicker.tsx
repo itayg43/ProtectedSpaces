@@ -1,6 +1,12 @@
 import React from 'react';
-import {StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
-import {Button} from 'react-native-paper';
+import {
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
+import {IconButton} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useController} from 'react-hook-form';
@@ -19,7 +25,7 @@ const FormImagePicker = ({contentContainerStyle, control, name}: Props) => {
   const handlePickImage = async () => {
     const {assets} = await launchImageLibrary({
       mediaType: 'photo',
-      quality: 0.3,
+      quality: 0.2,
     });
 
     if (assets) {
@@ -32,11 +38,15 @@ const FormImagePicker = ({contentContainerStyle, control, name}: Props) => {
 
   return (
     <View style={[contentContainerStyle]}>
-      <Button mode="contained" onPress={handlePickImage}>
-        {value ? 'Change Image' : 'Pick Image'}
-      </Button>
-
-      {value && <FastImage style={styles.image} source={{uri: value.uri}} />}
+      <TouchableOpacity
+        style={styles.buttonContainer}
+        onPress={handlePickImage}>
+        {!value ? (
+          <IconButton mode="contained" icon="plus" size={22} />
+        ) : (
+          <FastImage style={styles.image} source={{uri: value.uri}} />
+        )}
+      </TouchableOpacity>
     </View>
   );
 };
@@ -44,11 +54,19 @@ const FormImagePicker = ({contentContainerStyle, control, name}: Props) => {
 export default FormImagePicker;
 
 const styles = StyleSheet.create({
-  image: {
+  buttonContainer: {
     width: 100,
     height: 100,
     borderRadius: 10,
-    marginTop: 10,
+    backgroundColor: '#eee',
+    justifyContent: 'center',
+    alignItems: 'center',
     alignSelf: 'center',
+    overflow: 'hidden',
+  },
+
+  image: {
+    width: '100%',
+    height: '100%',
   },
 });
