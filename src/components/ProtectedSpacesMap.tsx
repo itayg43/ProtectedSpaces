@@ -3,7 +3,7 @@ import {StyleSheet} from 'react-native';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
 import type {ProtectedSpace} from '../utils/types';
-import {DEFAULT_MAP_DELTAS} from '../utils/constants';
+import {DEFAULT_MAP_REGION, DEFAULT_MAP_DELTAS} from '../utils/constants';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 import {useLocationContext} from '../contexts/locationContext';
 
@@ -27,7 +27,7 @@ const ProtectedSpacesMap = ({onMarkerPress}: Props) => {
               latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
               longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
             }
-          : undefined
+          : DEFAULT_MAP_REGION
       }
       showsUserLocation>
       {location &&
