@@ -29,8 +29,7 @@ const ProtectedSpacesMap = ({onMarkerPress}: Props) => {
             }
           : undefined
       }
-      showsUserLocation
-      loadingEnabled>
+      showsUserLocation>
       {location &&
         protectedSpaces.map(space => (
           <Marker

@@ -5,9 +5,14 @@ import ProtectedSpacesScreen from './screens/ProtectedSpacesScreen';
 import {useAuthContext} from './contexts/authContext';
 import {ProtectedSpacesContextProvider} from './contexts/protectedSpacesContext';
 import {LocationContextProvider} from './contexts/locationContext';
+import LoadingView from './components/LoadingView';
 
 const App = () => {
-  const {user} = useAuthContext();
+  const {isInitializing, user} = useAuthContext();
+
+  if (isInitializing) {
+    return <LoadingView />;
+  }
 
   return user ? (
     <LocationContextProvider>

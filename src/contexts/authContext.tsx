@@ -15,18 +15,21 @@ import authService from '../services/authService';
 import type {AuthProvider} from '../utils/types';
 
 type AuthContextParams = {
+  isInitializing: boolean;
   user: FirebaseAuthTypes.User | null;
   handleSignIn: (provider: AuthProvider) => Promise<void>;
   handleSignOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextParams>({
+  isInitializing: true,
   user: null,
   handleSignIn: async () => {},
   handleSignOut: async () => {},
 });
 
 export const AuthContextProvider = ({children}: PropsWithChildren) => {
+  const [isInitializing, setIsInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
   const handleSignIn = useCallback(async (provider: AuthProvider) => {
@@ -49,18 +52,29 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
+      isInitializing,
       user,
       handleSignIn,
       handleSignOut,
     }),
-    [user, handleSignIn, handleSignOut],
+    [isInitializing, user, handleSignIn, handleSignOut],
+  );
+
+  const handleAuthStateChange = useCallback(
+    (u: FirebaseAuthTypes.User | null) => {
+      setUser(u);
+      if (isInitializing) {
+        setIsInitializing(false);
+      }
+    },
+    [isInitializing],
   );
 
   useEffect(() => {
-    const unsubscribe = authService.stateSubscription(setUser);
+    const unsubscribe = authService.stateSubscription(handleAuthStateChange);
 
     return unsubscribe;
-  }, []);
+  }, [handleAuthStateChange]);
 
   return (
     <AuthContext.Provider value={contextValues}>

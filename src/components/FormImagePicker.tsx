@@ -25,7 +25,7 @@ const FormImagePicker = ({contentContainerStyle, control, name}: Props) => {
   const handlePickImage = async () => {
     const {assets} = await launchImageLibrary({
       mediaType: 'photo',
-      quality: 0.2,
+      quality: 0.1,
     });
 
     if (assets) {
