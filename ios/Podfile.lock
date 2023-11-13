@@ -706,6 +706,30 @@ PODS:
     - GTMSessionFetcher/Core (< 4.0, >= 2.1)
   - fmt (6.2.1)
   - glog (0.3.5)
+  - Google-Maps-iOS-Utils (4.1.0):
+    - Google-Maps-iOS-Utils/Clustering (= 4.1.0)
+    - Google-Maps-iOS-Utils/Geometry (= 4.1.0)
+    - Google-Maps-iOS-Utils/GeometryUtils (= 4.1.0)
+    - Google-Maps-iOS-Utils/Heatmap (= 4.1.0)
+    - Google-Maps-iOS-Utils/QuadTree (= 4.1.0)
+    - GoogleMaps
+  - Google-Maps-iOS-Utils/Clustering (4.1.0):
+    - Google-Maps-iOS-Utils/QuadTree
+    - GoogleMaps
+  - Google-Maps-iOS-Utils/Geometry (4.1.0):
+    - GoogleMaps
+  - Google-Maps-iOS-Utils/GeometryUtils (4.1.0):
+    - GoogleMaps
+  - Google-Maps-iOS-Utils/Heatmap (4.1.0):
+    - Google-Maps-iOS-Utils/QuadTree
+    - GoogleMaps
+  - Google-Maps-iOS-Utils/QuadTree (4.1.0):
+    - GoogleMaps
+  - GoogleMaps (7.4.0):
+    - GoogleMaps/Maps (= 7.4.0)
+  - GoogleMaps/Base (7.4.0)
+  - GoogleMaps/Maps (7.4.0):
+    - GoogleMaps/Base
   - GoogleSignIn (7.0.0):
     - AppAuth (~> 1.5)
     - GTMAppAuth (< 3.0, >= 1.3)
@@ -1115,6 +1139,10 @@ PODS:
     - glog
   - react-native-geolocation (3.1.0):
     - React-Core
+  - react-native-google-maps (1.8.0):
+    - Google-Maps-iOS-Utils (= 4.1.0)
+    - GoogleMaps (= 7.4.0)
+    - React-Core
   - react-native-image-picker (5.0.2):
     - React-Core
   - react-native-maps (1.8.0):
@@ -1304,6 +1332,7 @@ DEPENDENCIES:
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+  - Google-Maps-iOS-Utils (from `https://github.com/Simon-TechForm/google-maps-ios-utils.git`, branch `feat/support-apple-silicon`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - libevent (~> 2.1.12)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -1323,6 +1352,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
+  - react-native-google-maps (from `../node_modules/react-native-maps`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -1371,6 +1401,7 @@ SPEC REPOS:
     - FirebaseSharedSwift
     - FirebaseStorage
     - fmt
+    - GoogleMaps
     - GoogleSignIn
     - GoogleUtilities
     - "gRPC-C++"
@@ -1398,6 +1429,9 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/React/FBReactNativeSpec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
+  Google-Maps-iOS-Utils:
+    :branch: feat/support-apple-silicon
+    :git: https://github.com/Simon-TechForm/google-maps-ios-utils.git
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2023-08-07-RNv0.72.4-813b2def12bc9df02654b3e3653ae4a68d0572e0
@@ -1433,6 +1467,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
+  react-native-google-maps:
+    :path: "../node_modules/react-native-maps"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-maps:
@@ -1494,6 +1530,11 @@ EXTERNAL SOURCES:
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
+CHECKOUT OPTIONS:
+  Google-Maps-iOS-Utils:
+    :commit: 35d05d1eeb65682c1b271f4f3760d814fd946aa1
+    :git: https://github.com/Simon-TechForm/google-maps-ios-utils.git
+
 SPEC CHECKSUMS:
   abseil: 926fb7a82dc6d2b8e1f2ed7f3a718bce691d1e46
   AppAuth: 3bb1d1cd9340bd09f5ed189fb00b1cc28e1e8570
@@ -1515,6 +1556,8 @@ SPEC CHECKSUMS:
   FirebaseStorage: 4af6f9ea67b6a8e4e3cbd75e006b4776a50e8b12
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
+  Google-Maps-iOS-Utils: d3fdfd57db799771418f06189e33981597553aa8
+  GoogleMaps: 032f676450ba0779bd8ce16840690915f84e57ac
   GoogleSignIn: b232380cf495a429b8095d3178a8d5855b42e842
   GoogleUtilities: 202e7a9f5128accd11160fb9c19612de1911aa19
   "gRPC-C++": 2df8cba576898bdacd29f0266d5236fa0e26ba6a
@@ -1543,6 +1586,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 194e32c6aab382d88713ad3dd0025c5f5c4ee072
   React-logger: cebf22b6cf43434e471dc561e5911b40ac01d289
   react-native-geolocation: ef66fb798d96284c6043f0b16c15d9d1d4955db4
+  react-native-google-maps: 356b9d01da0920be13e4c4dc83673b30e8a22c16
   react-native-image-picker: a5dddebb4d2955ac4712a4ed66b00a85f62a63ac
   react-native-maps: f699e0753c22c4d5c3a44d03895b193a4dbca6c2
   react-native-safe-area-context: 2cd91d532de12acdb0a9cbc8d43ac72a8e4c897c
@@ -1578,6 +1622,6 @@ SPEC CHECKSUMS:
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: b76f1acfda8212aa16b7e26bcce3983230c82603
 
-PODFILE CHECKSUM: 9795fe63675a6f28d62ab37edb6dbc24e3669f79
+PODFILE CHECKSUM: 83cb0dc154ace51e64c015a435cb4edca32182c7
 
 COCOAPODS: 1.12.1

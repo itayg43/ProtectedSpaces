@@ -1,6 +1,6 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
 import type {ProtectedSpace} from '../utils/types';
 import {DEFAULT_MAP_DELTAS} from '../utils/constants';
@@ -18,6 +18,7 @@ const ProtectedSpacesMap = ({onMarkerPress}: Props) => {
   return (
     <MapView
       style={styles.container}
+      provider={PROVIDER_GOOGLE}
       region={
         location
           ? {
