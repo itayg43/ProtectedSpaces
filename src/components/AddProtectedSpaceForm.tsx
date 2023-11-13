@@ -19,6 +19,7 @@ import {addProtectedSpaceValidationSchema} from '../utils/validationSchemas';
 import {PROTECTED_SPACE_TYPE_OPTIONS} from '../utils/constants';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 import log from '../utils/log';
+import FormImagePicker from './FormImagePicker';
 
 type Props = {
   contentContainerStyle?: StyleProp<ViewStyle>;
@@ -26,6 +27,8 @@ type Props = {
 };
 
 const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
+  const {handleAddProtectedSpace} = useProtectedSpacesContext();
+
   const {
     control,
     handleSubmit: onSubmit,
@@ -34,12 +37,10 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
     resolver: zodResolver(addProtectedSpaceValidationSchema),
   });
 
-  const {add} = useProtectedSpacesContext();
-
   const handleSubmit = async (formData: AddProtectedSpaceFormData) => {
     try {
       Keyboard.dismiss();
-      await add(formData);
+      await handleAddProtectedSpace(formData);
       onSuccess();
     } catch (error: any) {
       log.error(error);
@@ -49,6 +50,8 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
 
   return (
     <View style={[contentContainerStyle, styles.container]}>
+      <FormImagePicker control={control} name="image" />
+
       <FormSegmentedButtons
         control={control}
         name="type"

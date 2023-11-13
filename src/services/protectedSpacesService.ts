@@ -6,11 +6,15 @@ import type {
   ProtectedSpaceWithoutId,
 } from '../utils/types';
 import {firestoreClient} from '../clients/firebaseClients';
+import storageService from './storageService';
 
 const protectedSpacesCollection = firestoreClient.collection('ProtectedSpaces');
 
 const add = async (formData: AddProtectedSpaceFormData) => {
+  await storageService.uploadImage(formData.image);
+
   const spaceWithoutId: ProtectedSpaceWithoutId = {
+    imageUrl: await storageService.getImageUrl(formData.image.name),
     type: formData.type,
     address: formData.address.value,
     description: formData.description,

@@ -14,12 +14,14 @@ import log from '../utils/log';
 
 type ProtectedSpacesContextParams = {
   protectedSpaces: ProtectedSpace[];
-  add: (formData: AddProtectedSpaceFormData) => Promise<void>;
+  handleAddProtectedSpace: (
+    formData: AddProtectedSpaceFormData,
+  ) => Promise<void>;
 };
 
 const ProtectedSpacesContext = createContext<ProtectedSpacesContextParams>({
   protectedSpaces: [],
-  add: async () => {},
+  handleAddProtectedSpace: async () => {},
 });
 
 export const ProtectedSpacesContextProvider = ({
@@ -27,21 +29,24 @@ export const ProtectedSpacesContextProvider = ({
 }: PropsWithChildren) => {
   const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
 
-  const add = useCallback(async (formData: AddProtectedSpaceFormData) => {
-    try {
-      await protectedSpacesService.add(formData);
-    } catch (error) {
-      log.error(error);
-      throw new Error("We couldn't add the protected space");
-    }
-  }, []);
+  const handleAddProtectedSpace = useCallback(
+    async (formData: AddProtectedSpaceFormData) => {
+      try {
+        await protectedSpacesService.add(formData);
+      } catch (error) {
+        log.error(error);
+        throw new Error("We couldn't add the protected space");
+      }
+    },
+    [],
+  );
 
   const contextValues = useMemo(
     () => ({
       protectedSpaces,
-      add,
+      handleAddProtectedSpace,
     }),
-    [protectedSpaces, add],
+    [protectedSpaces, handleAddProtectedSpace],
   );
 
   useEffect(() => {

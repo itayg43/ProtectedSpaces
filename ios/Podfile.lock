@@ -658,6 +658,9 @@ PODS:
   - Firebase/Firestore (10.17.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 10.17.0)
+  - Firebase/Storage (10.17.0):
+    - Firebase/CoreOnly
+    - FirebaseStorage (~> 10.17.0)
   - FirebaseAppCheckInterop (10.17.0)
   - FirebaseAuth (10.17.0):
     - FirebaseAppCheckInterop (~> 10.17)
@@ -666,6 +669,7 @@ PODS:
     - GoogleUtilities/Environment (~> 7.8)
     - GTMSessionFetcher/Core (< 4.0, >= 2.1)
     - RecaptchaInterop (~> 100.0)
+  - FirebaseAuthInterop (10.17.0)
   - FirebaseCore (10.17.0):
     - FirebaseCoreInternal (~> 10.0)
     - GoogleUtilities/Environment (~> 7.8)
@@ -694,6 +698,12 @@ PODS:
     - leveldb-library (~> 1.22)
     - nanopb (< 2.30910.0, >= 2.30908.0)
   - FirebaseSharedSwift (10.17.0)
+  - FirebaseStorage (10.17.0):
+    - FirebaseAppCheckInterop (~> 10.0)
+    - FirebaseAuthInterop (~> 10.0)
+    - FirebaseCore (~> 10.0)
+    - FirebaseCoreExtension (~> 10.0)
+    - GTMSessionFetcher/Core (< 4.0, >= 2.1)
   - fmt (6.2.1)
   - glog (0.3.5)
   - GoogleSignIn (7.0.0):
@@ -1105,6 +1115,8 @@ PODS:
     - glog
   - react-native-geolocation (3.1.0):
     - React-Core
+  - react-native-image-picker (5.0.2):
+    - React-Core
   - react-native-maps (1.8.0):
     - React-Core
   - react-native-safe-area-context (4.7.4):
@@ -1236,6 +1248,10 @@ PODS:
     - nanopb (< 2.30910.0, >= 2.30908.0)
     - React-Core
     - RNFBApp
+  - RNFBStorage (18.6.1):
+    - Firebase/Storage (= 10.17.0)
+    - React-Core
+    - RNFBApp
   - RNGestureHandler (2.13.4):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
@@ -1307,6 +1323,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
+  - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -1330,6 +1347,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
+  - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNPermissions (from `../node_modules/react-native-permissions`)
@@ -1344,12 +1362,14 @@ SPEC REPOS:
     - Firebase
     - FirebaseAppCheckInterop
     - FirebaseAuth
+    - FirebaseAuthInterop
     - FirebaseCore
     - FirebaseCoreExtension
     - FirebaseCoreInternal
     - FirebaseFirestore
     - FirebaseFirestoreInternal
     - FirebaseSharedSwift
+    - FirebaseStorage
     - fmt
     - GoogleSignIn
     - GoogleUtilities
@@ -1413,6 +1433,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
+  react-native-image-picker:
+    :path: "../node_modules/react-native-image-picker"
   react-native-maps:
     :path: "../node_modules/react-native-maps"
   react-native-safe-area-context:
@@ -1459,6 +1481,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/auth"
   RNFBFirestore:
     :path: "../node_modules/@react-native-firebase/firestore"
+  RNFBStorage:
+    :path: "../node_modules/@react-native-firebase/storage"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
@@ -1481,12 +1505,14 @@ SPEC CHECKSUMS:
   Firebase: f4ac0b02927af9253ae094d23deecf0890da7374
   FirebaseAppCheckInterop: 534d033d8d0436b4ab066a8205013d271e18a2b9
   FirebaseAuth: 8d285d9f6e39cc8e23be53a4edd83a923ea629d8
+  FirebaseAuthInterop: 86bc376e41419f2dc05c16aa42fe8301171a93aa
   FirebaseCore: 534544dd98cabcf4bf8598d88ec683b02319a528
   FirebaseCoreExtension: 47720bb330d7041047c0935a34a3a4b92f818074
   FirebaseCoreInternal: 2cf9202e226e3f78d2bf6d56c472686b935bfb7f
   FirebaseFirestore: 67e8c2dc613a86f056cc0037569f2aaee7dbf5fe
   FirebaseFirestoreInternal: f902222ee92a48e30693bf347f6a8f365c800e79
   FirebaseSharedSwift: e8fe8d63d434266a1b2c7f02807d5b64462e1851
+  FirebaseStorage: 4af6f9ea67b6a8e4e3cbd75e006b4776a50e8b12
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   GoogleSignIn: b232380cf495a429b8095d3178a8d5855b42e842
@@ -1517,6 +1543,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 194e32c6aab382d88713ad3dd0025c5f5c4ee072
   React-logger: cebf22b6cf43434e471dc561e5911b40ac01d289
   react-native-geolocation: ef66fb798d96284c6043f0b16c15d9d1d4955db4
+  react-native-image-picker: a5dddebb4d2955ac4712a4ed66b00a85f62a63ac
   react-native-maps: f699e0753c22c4d5c3a44d03895b193a4dbca6c2
   react-native-safe-area-context: 2cd91d532de12acdb0a9cbc8d43ac72a8e4c897c
   React-NativeModulesApple: 1802a680a4cd891d2ab97780771bcb2ff11fdc0b
@@ -1541,6 +1568,7 @@ SPEC CHECKSUMS:
   RNFBApp: b43d4829366a5065e17f9af3b03a0c4890eaeb85
   RNFBAuth: 944424c5ba04e250d35eccd3ee2033d6fd7150d7
   RNFBFirestore: 3eb1021700bc0842bd9425c239920ae70964b9ce
+  RNFBStorage: 459ee1cb0c0a94ed496b00eb07e1af67f38389f3
   RNGestureHandler: 6594263b1a123e43c23ff72c8d99080187e74bf9
   RNGoogleSignin: a6a612cce56a45ab701c5c5c6e36f5390522d100
   RNPermissions: c40acbe0177089eb0354986216e2603af2b54d2e

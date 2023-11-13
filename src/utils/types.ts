@@ -17,6 +17,7 @@ export type Location = {
 
 export type ProtectedSpace = {
   id: string;
+  imageUrl: string;
   type: string;
   address: string;
   description: string;
@@ -29,3 +30,8 @@ export type ProtectedSpaceWithoutId = Omit<ProtectedSpace, 'id'>;
 export type AddProtectedSpaceFormData = z.infer<
   typeof addProtectedSpaceValidationSchema
 >;
+
+export type ImageAsset = {
+  name: string;
+  uri: string;
+};
