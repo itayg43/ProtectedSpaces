@@ -16,7 +16,12 @@ const add = async (formData: AddProtectedSpaceFormData) => {
   const spaceWithoutId: ProtectedSpaceWithoutId = {
     imageUrl: await storageService.getImageUrl(formData.image.name),
     type: formData.type,
-    address: formData.address.value,
+    address: {
+      city: formData.address.city,
+      street: formData.address.street,
+      buildingNumber: formData.address.buildingNumber,
+    },
+    googleMapsLinkUrl: formData.address.googleMapsLinkUrl,
     description: formData.description,
     coordinate: new firestore.GeoPoint(
       formData.address.coordinate.latitude,

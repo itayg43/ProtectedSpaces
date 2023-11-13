@@ -34,7 +34,10 @@ const FormGooglePlacesAutocomplete = ({
           fetchDetails={true}
           onPress={(_, details) => {
             onChange({
-              value: details?.name,
+              city: details?.address_components[2].short_name,
+              street: details?.address_components[1].short_name,
+              buildingNumber: details?.address_components[0].short_name,
+              googleMapsLinkUrl: details?.url,
               coordinate: {
                 latitude: details?.geometry.location.lat,
                 longitude: details?.geometry.location.lng,

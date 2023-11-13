@@ -19,7 +19,12 @@ export type ProtectedSpace = {
   id: string;
   imageUrl: string;
   type: string;
-  address: string;
+  address: {
+    city: string;
+    street: string;
+    buildingNumber: string;
+  };
+  googleMapsLinkUrl: string;
   description: string;
   coordinate: FirebaseFirestoreTypes.GeoPoint;
   createdAt: FirebaseFirestoreTypes.Timestamp;

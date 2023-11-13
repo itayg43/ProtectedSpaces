@@ -11,7 +11,10 @@ export const addProtectedSpaceValidationSchema = z.object({
   type: z.nativeEnum(ProtectedSpaceType),
 
   address: z.object({
-    value: z.string(),
+    city: z.string(),
+    street: z.string(),
+    buildingNumber: z.string(),
+    googleMapsLinkUrl: z.string(),
     coordinate: z.object({
       latitude: z.number(),
       longitude: z.number(),

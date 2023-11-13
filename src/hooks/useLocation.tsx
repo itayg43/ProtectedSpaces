@@ -3,7 +3,6 @@ import Geolocation from '@react-native-community/geolocation';
 
 import type {Location} from '../utils/types';
 import usePermission from './usePermission';
-import log from '../utils/log';
 
 Geolocation.setRNConfiguration({
   skipPermissionRequests: true,
@@ -21,7 +20,7 @@ const useLocation = () => {
     if (permissionStatus === 'granted') {
       subscriptionRef.current = Geolocation.watchPosition(
         position => setLocation(position.coords),
-        error => log.error(error),
+        _ => {},
         {
           enableHighAccuracy: true,
         },

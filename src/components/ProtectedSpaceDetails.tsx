@@ -1,9 +1,17 @@
 import React from 'react';
-import {StyleSheet, View, Text, StyleProp, ViewStyle} from 'react-native';
-import {Divider} from 'react-native-paper';
+import {
+  StyleSheet,
+  View,
+  Text,
+  StyleProp,
+  ViewStyle,
+  Linking,
+} from 'react-native';
+import {Divider, IconButton} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 
 import type {ProtectedSpace} from '../utils/types';
+import log from '../utils/log';
 
 type Props = {
   contentContainerStyles?: StyleProp<ViewStyle>;
@@ -12,21 +20,43 @@ type Props = {
 
 const ProtectedSpaceDetails = ({
   contentContainerStyles,
-  protectedSpace,
+  protectedSpace: space,
 }: Props) => {
+  const handleOpenGoogleMapsLink = async () => {
+    try {
+      await Linking.openURL(space.googleMapsLinkUrl);
+    } catch (error) {
+      log.error(error);
+    }
+  };
+
   return (
     <View style={[contentContainerStyles, styles.container]}>
-      <View style={styles.detailsContainer}>
-        <Text style={styles.address}>{protectedSpace.address}</Text>
+      {/** address & link */}
+      <View style={styles.addressAndLinkContainer}>
+        {/** address */}
+        <Text style={styles.address} numberOfLines={1}>
+          {`${space.address.street} ${space.address.buildingNumber}, ${space.address.city}`}
+        </Text>
 
-        <Text style={styles.description}>{protectedSpace.description}</Text>
+        {/** link */}
+        <IconButton
+          mode="contained"
+          icon="google-maps"
+          size={22}
+          onPress={handleOpenGoogleMapsLink}
+        />
       </View>
 
-      <Divider />
+      <Divider style={styles.divider} />
 
+      {/** description */}
+      <Text style={styles.description}>{space.description}</Text>
+
+      {/** image */}
       <FastImage
         style={styles.image}
-        source={{uri: protectedSpace.imageUrl, priority: 'high'}}
+        source={{uri: space.imageUrl, priority: 'high'}}
       />
     </View>
   );
@@ -37,7 +67,22 @@ export default ProtectedSpaceDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    rowGap: 10,
+  },
+
+  addressAndLinkContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  address: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: 'black',
+  },
+
+  description: {
+    color: 'black',
+    marginBottom: 20,
   },
 
   image: {
@@ -46,15 +91,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
 
-  detailsContainer: {
-    rowGap: 5,
-  },
-  address: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: 'black',
-  },
-  description: {
-    color: 'black',
+  divider: {
+    marginBottom: 20,
   },
 });
