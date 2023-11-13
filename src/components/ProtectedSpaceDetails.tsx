@@ -58,6 +58,18 @@ const ProtectedSpaceDetails = ({
         style={styles.image}
         source={{uri: space.imageUrl, priority: 'high'}}
       />
+
+      <View style={styles.userInfoAndTimestampContainer}>
+        <FastImage
+          style={styles.userPhoto}
+          source={{uri: space.createdBy.photoUrl}}
+        />
+
+        <Text style={styles.userNameAndTimestamp}>
+          @{space.createdBy.name.split(' ').join('_')} on{' '}
+          {space.createdAt.toDate().toLocaleDateString()}
+        </Text>
+      </View>
     </View>
   );
 };
@@ -89,6 +101,21 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 250,
     borderRadius: 4,
+    marginBottom: 20,
+  },
+
+  userInfoAndTimestampContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userPhoto: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 5,
+  },
+  userNameAndTimestamp: {
+    color: 'gray',
   },
 
   divider: {
