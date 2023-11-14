@@ -55,8 +55,8 @@ export default FormImagePicker;
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    width: 100,
-    height: 100,
+    width: 85,
+    height: 85,
     borderRadius: 10,
     backgroundColor: '#eee',
     justifyContent: 'center',
