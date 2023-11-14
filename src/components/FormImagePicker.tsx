@@ -37,7 +37,7 @@ const FormImagePicker = ({contentContainerStyle, control, name}: Props) => {
   };
 
   return (
-    <View style={[contentContainerStyle]}>
+    <View style={contentContainerStyle}>
       <TouchableOpacity
         style={styles.buttonContainer}
         onPress={handlePickImage}>
@@ -61,7 +61,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
     justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'center',
     overflow: 'hidden',
   },
 
