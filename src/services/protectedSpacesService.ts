@@ -15,23 +15,30 @@ const add = async (
   user: FirebaseAuthTypes.User | null,
   formData: AddProtectedSpaceFormData,
 ) => {
-  await storageService.uploadImage(formData.image);
+  await storageService.uploadMultipleImages(formData.images);
 
   const spaceWithoutId: ProtectedSpaceWithoutId = {
-    imageUrl: await storageService.getImageUrl(formData.image.name),
+    imagesUrls: await storageService.getImagesUrls(formData.images),
+
     type: formData.type,
+
     address: {
       city: formData.address.city,
       street: formData.address.street,
       buildingNumber: formData.address.buildingNumber,
     },
+
     googleMapsLinkUrl: formData.address.googleMapsLinkUrl,
+
     description: formData.description,
+
     coordinate: new firestore.GeoPoint(
       formData.address.coordinate.latitude,
       formData.address.coordinate.longitude,
     ),
+
     createdAt: firestore.Timestamp.now(),
+
     createdBy: {
       name: user?.displayName ?? '',
       photoUrl: user?.photoURL ?? '',

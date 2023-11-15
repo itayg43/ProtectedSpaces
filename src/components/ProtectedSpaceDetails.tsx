@@ -56,7 +56,7 @@ const ProtectedSpaceDetails = ({
       {/** image */}
       <FastImage
         style={styles.image}
-        source={{uri: space.imageUrl, priority: 'high'}}
+        source={{uri: space.imagesUrls[0], priority: 'high'}}
       />
 
       <View style={styles.userInfoAndTimestampContainer}>

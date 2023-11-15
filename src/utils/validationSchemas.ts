@@ -3,10 +3,13 @@ import * as z from 'zod';
 import {ProtectedSpaceType} from './enums';
 
 export const addProtectedSpaceValidationSchema = z.object({
-  image: z.object({
-    name: z.string(),
-    uri: z.string(),
-  }),
+  images: z
+    .object({
+      name: z.string(),
+      uri: z.string(),
+    })
+    .array()
+    .nonempty(),
 
   type: z.nativeEnum(ProtectedSpaceType),
 

@@ -17,7 +17,7 @@ export type Location = {
 
 export type ProtectedSpace = {
   id: string;
-  imageUrl: string;
+  imagesUrls: string[];
   type: string;
   address: {
     city: string;
