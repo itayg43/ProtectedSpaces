@@ -1,19 +1,25 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import {useNavigation} from '@react-navigation/native';
 
-import type {ProtectedSpace} from '../utils/types';
 import {DEFAULT_MAP_REGION, DEFAULT_MAP_DELTAS} from '../utils/constants';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 import {useLocationContext} from '../contexts/locationContext';
+import type {ProtectedSpace} from '../utils/types';
+import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpacesStack';
 
-type Props = {
-  onMarkerPress: (protectedSpace: ProtectedSpace) => void;
-};
+const ProtectedSpacesMap = () => {
+  const navigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
 
-const ProtectedSpacesMap = ({onMarkerPress}: Props) => {
   const location = useLocationContext();
   const {protectedSpaces} = useProtectedSpacesContext();
+
+  const handleMarkerPress = (space: ProtectedSpace) => {
+    navigation.navigate('protectedSpaceDetailsScreen', {
+      id: space.id,
+    });
+  };
 
   return (
     <MapView
@@ -38,7 +44,7 @@ const ProtectedSpacesMap = ({onMarkerPress}: Props) => {
               latitude: space.coordinate.latitude,
               longitude: space.coordinate.longitude,
             }}
-            onPress={() => onMarkerPress(space)}
+            onPress={() => handleMarkerPress(space)}
           />
         ))}
     </MapView>
