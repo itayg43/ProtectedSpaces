@@ -24,13 +24,13 @@ export type ProtectedSpace = {
     street: string;
     number: string;
     url: string;
+    coordinate: FirebaseFirestoreTypes.GeoPoint;
   };
   description: string;
   createdBy: {
     name: string;
     photoUrl: string;
   };
-  coordinate: FirebaseFirestoreTypes.GeoPoint;
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
 

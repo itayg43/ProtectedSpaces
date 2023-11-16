@@ -110,7 +110,7 @@ function DetailsSection({details}: DetailsSectionProps) {
   const handleOpenGoogleMapsLink = async () => {
     if (details) {
       try {
-        await Linking.openURL(details.googleMapsLinkUrl);
+        await Linking.openURL(details.address.url);
       } catch (error) {
         log.error(error);
       }
@@ -123,7 +123,7 @@ function DetailsSection({details}: DetailsSectionProps) {
       <View style={styles.addressAndLinkContainer}>
         {/** address */}
         <Text style={styles.address} numberOfLines={1}>
-          {`${details.address.street} ${details.address.buildingNumber}, ${details.address.city}`}
+          {`${details.address.street} ${details.address.number}, ${details.address.city}`}
         </Text>
 
         {/** link */}

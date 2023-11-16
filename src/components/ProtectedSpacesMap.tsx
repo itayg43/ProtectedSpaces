@@ -6,7 +6,6 @@ import {useNavigation} from '@react-navigation/native';
 import {DEFAULT_MAP_REGION, DEFAULT_MAP_DELTAS} from '../utils/constants';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 import {useLocationContext} from '../contexts/locationContext';
-import type {ProtectedSpace} from '../utils/types';
 import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpacesStack';
 
 const ProtectedSpacesMap = () => {
@@ -15,9 +14,9 @@ const ProtectedSpacesMap = () => {
   const location = useLocationContext();
   const {protectedSpaces} = useProtectedSpacesContext();
 
-  const handleMarkerPress = (space: ProtectedSpace) => {
+  const handleMarkerPress = (id: string) => {
     navigation.navigate('protectedSpaceDetailsScreen', {
-      id: space.id,
+      id,
     });
   };
 
@@ -37,14 +36,14 @@ const ProtectedSpacesMap = () => {
       }
       showsUserLocation>
       {location &&
-        protectedSpaces.map(space => (
+        protectedSpaces.map(({id, address: {coordinate}}) => (
           <Marker
-            key={space.id}
+            key={id}
             coordinate={{
-              latitude: space.coordinate.latitude,
-              longitude: space.coordinate.longitude,
+              latitude: coordinate.latitude,
+              longitude: coordinate.longitude,
             }}
-            onPress={() => handleMarkerPress(space)}
+            onPress={() => handleMarkerPress(id)}
           />
         ))}
     </MapView>
