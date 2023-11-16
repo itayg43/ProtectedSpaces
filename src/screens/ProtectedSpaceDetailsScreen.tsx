@@ -9,11 +9,14 @@ import {
 } from 'react-native';
 import {IconButton, Divider} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
-import {useRoute} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 import log from '../utils/log';
 import type {ProtectedSpace} from '../utils/types';
-import {ProtectedSpaceDetailsScreenRouteProp} from '../navigators/ProtectedSpacesStack';
+import {
+  ProtectedSpaceDetailsScreenNavigationProp,
+  ProtectedSpaceDetailsScreenRouteProp,
+} from '../navigators/ProtectedSpacesStack';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 
 const {width} = Dimensions.get('screen');
@@ -54,7 +57,13 @@ type ImagesSectionProps = {
 };
 
 function ImagesSection({images}: ImagesSectionProps) {
+  const navigation = useNavigation<ProtectedSpaceDetailsScreenNavigationProp>();
+
   const scrollX = useRef(new Animated.Value(0)).current;
+
+  const handleClose = () => {
+    navigation.goBack();
+  };
 
   return (
     <View>
@@ -73,6 +82,16 @@ function ImagesSection({images}: ImagesSectionProps) {
           [{nativeEvent: {contentOffset: {x: scrollX}}}],
           {useNativeDriver: true},
         )}
+      />
+
+      {/** close button */}
+      <IconButton
+        style={styles.closeButton}
+        mode="contained"
+        icon="close"
+        size={20}
+        containerColor="white"
+        onPress={handleClose}
       />
 
       {/** dots */}
@@ -167,6 +186,11 @@ const styles = StyleSheet.create({
   image: {
     width: IMAGE_WIDTH,
     height: 300,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 5,
+    left: 5,
   },
   dotsContainer: {
     flexDirection: 'row',
