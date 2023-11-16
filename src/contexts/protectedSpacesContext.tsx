@@ -18,11 +18,13 @@ type ProtectedSpacesContextParams = {
   handleAddProtectedSpace: (
     formData: AddProtectedSpaceFormData,
   ) => Promise<void>;
+  getProtectedSpaceById: (id: string) => ProtectedSpace | null;
 };
 
 const ProtectedSpacesContext = createContext<ProtectedSpacesContextParams>({
   protectedSpaces: [],
   handleAddProtectedSpace: async () => {},
+  getProtectedSpaceById: () => null,
 });
 
 export const ProtectedSpacesContextProvider = ({
@@ -43,12 +45,20 @@ export const ProtectedSpacesContextProvider = ({
     [user],
   );
 
+  const getProtectedSpaceById = useCallback(
+    (id: string) => {
+      return protectedSpaces.find(p => p.id === id) ?? null;
+    },
+    [protectedSpaces],
+  );
+
   const contextValues = useMemo(
     () => ({
       protectedSpaces,
       handleAddProtectedSpace,
+      getProtectedSpaceById,
     }),
-    [protectedSpaces, handleAddProtectedSpace],
+    [protectedSpaces, handleAddProtectedSpace, getProtectedSpaceById],
   );
 
   useEffect(() => {

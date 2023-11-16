@@ -1,6 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, View, Text, Linking} from 'react-native';
-import {Divider, IconButton} from 'react-native-paper';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Linking,
+  Dimensions,
+  Animated,
+} from 'react-native';
+import {IconButton, Divider} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 import {useRoute} from '@react-navigation/native';
 
@@ -9,74 +16,31 @@ import type {ProtectedSpace} from '../utils/types';
 import {ProtectedSpaceDetailsScreenRouteProp} from '../navigators/ProtectedSpacesStack';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 
+const {width} = Dimensions.get('screen');
+
+const IMAGE_WIDTH = width;
+const DOT_SIZE = 8;
+const DOT_INDICATOR_SIZE = DOT_SIZE * 2;
+
 const ProtectedSpaceDetailsScreen = () => {
-  const route = useRoute<ProtectedSpaceDetailsScreenRouteProp>();
+  const {params} = useRoute<ProtectedSpaceDetailsScreenRouteProp>();
 
-  const {protectedSpaces} = useProtectedSpacesContext();
-  const [protectedSpace, setProtectedSpace] = useState<ProtectedSpace | null>(
-    null,
-  );
+  const {getProtectedSpaceById} = useProtectedSpacesContext();
 
-  const handleOpenGoogleMapsLink = async () => {
-    if (!protectedSpace) {
-      return;
-    }
-
-    try {
-      await Linking.openURL(protectedSpace.googleMapsLinkUrl);
-    } catch (error) {
-      log.error(error);
-    }
-  };
+  const [protectedSpaceDetails, setProtectedSpaceDetails] =
+    useState<ProtectedSpace | null>(null);
 
   useEffect(() => {
-    setProtectedSpace(
-      protectedSpaces.find(p => p.id === route.params.id) || null,
-    );
-  }, [route, protectedSpaces]);
+    setProtectedSpaceDetails(getProtectedSpaceById(params.id));
+  }, [params.id, getProtectedSpaceById]);
 
   return (
     <>
-      {protectedSpace && (
+      {protectedSpaceDetails && (
         <View style={styles.container}>
-          {/** address & link */}
-          <View style={styles.addressAndLinkContainer}>
-            {/** address */}
-            <Text style={styles.address} numberOfLines={1}>
-              {`${protectedSpace.address.street} ${protectedSpace.address.buildingNumber}, ${protectedSpace.address.city}`}
-            </Text>
+          <ImagesSection images={protectedSpaceDetails.imagesUrls} />
 
-            {/** link */}
-            <IconButton
-              mode="contained"
-              icon="google-maps"
-              size={22}
-              onPress={handleOpenGoogleMapsLink}
-            />
-          </View>
-
-          <Divider style={styles.divider} />
-
-          {/** description */}
-          <Text style={styles.description}>{protectedSpace.description}</Text>
-
-          {/** image */}
-          <FastImage
-            style={styles.image}
-            source={{uri: protectedSpace.imagesUrls[0], priority: 'high'}}
-          />
-
-          <View style={styles.userInfoAndTimestampContainer}>
-            <FastImage
-              style={styles.userPhoto}
-              source={{uri: protectedSpace.createdBy.photoUrl}}
-            />
-
-            <Text style={styles.userNameAndTimestamp}>
-              @{protectedSpace.createdBy.name.split(' ').join('_')} on{' '}
-              {protectedSpace.createdAt.toDate().toLocaleDateString()}
-            </Text>
-          </View>
+          <DetailsSection details={protectedSpaceDetails} />
         </View>
       )}
     </>
@@ -85,11 +49,152 @@ const ProtectedSpaceDetailsScreen = () => {
 
 export default ProtectedSpaceDetailsScreen;
 
+type ImagesSectionProps = {
+  images: string[];
+};
+
+function ImagesSection({images}: ImagesSectionProps) {
+  const scrollX = useRef(new Animated.Value(0)).current;
+
+  return (
+    <View>
+      <Animated.FlatList
+        data={images}
+        keyExtractor={item => item}
+        renderItem={({item: uri}) => (
+          <FastImage style={styles.image} source={{uri, priority: 'high'}} />
+        )}
+        horizontal
+        snapToInterval={IMAGE_WIDTH}
+        decelerationRate="fast"
+        showsHorizontalScrollIndicator={false}
+        bounces={false}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {x: scrollX}}}],
+          {useNativeDriver: true},
+        )}
+      />
+
+      {/** dots */}
+      <View style={styles.dotsContainer}>
+        {images.map((_, index) => (
+          <View key={index} style={styles.dot} />
+        ))}
+      </View>
+
+      {/** dot indicator */}
+      <Animated.View
+        style={[
+          styles.dotIndicator,
+          {
+            transform: [
+              {
+                translateX: Animated.divide(scrollX, IMAGE_WIDTH).interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, DOT_INDICATOR_SIZE],
+                }),
+              },
+            ],
+          },
+        ]}
+      />
+    </View>
+  );
+}
+
+type DetailsSectionProps = {
+  details: ProtectedSpace;
+};
+
+function DetailsSection({details}: DetailsSectionProps) {
+  const handleOpenGoogleMapsLink = async () => {
+    if (details) {
+      try {
+        await Linking.openURL(details.googleMapsLinkUrl);
+      } catch (error) {
+        log.error(error);
+      }
+    }
+  };
+
+  return (
+    <View style={styles.detailsContainer}>
+      {/** address & link */}
+      <View style={styles.addressAndLinkContainer}>
+        {/** address */}
+        <Text style={styles.address} numberOfLines={1}>
+          {`${details.address.street} ${details.address.buildingNumber}, ${details.address.city}`}
+        </Text>
+
+        {/** link */}
+        <IconButton
+          mode="contained"
+          icon="google-maps"
+          size={22}
+          onPress={handleOpenGoogleMapsLink}
+        />
+      </View>
+
+      <Divider style={styles.divider} />
+
+      {/** description */}
+      <Text style={styles.description}>{details.description}</Text>
+
+      {/** user info & timestamp */}
+      <View style={styles.userInfoContainer}>
+        <FastImage
+          style={styles.userImage}
+          source={{uri: details.createdBy.photoUrl}}
+        />
+
+        <Text style={styles.userName}>
+          {details.createdBy.name.split(' ').join('_')}
+        </Text>
+
+        <Text style={styles.timestamp}>
+          on {details.createdAt.toDate().toLocaleDateString()}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
 
+  image: {
+    width: IMAGE_WIDTH,
+    height: 300,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 10,
+    left: width / 2,
+    columnGap: DOT_SIZE,
+  },
+  dot: {
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: DOT_SIZE,
+    backgroundColor: 'white',
+  },
+  dotIndicator: {
+    width: DOT_INDICATOR_SIZE,
+    height: DOT_INDICATOR_SIZE,
+    borderRadius: DOT_INDICATOR_SIZE,
+    borderWidth: 1,
+    borderColor: 'white',
+    position: 'absolute',
+    bottom: 6,
+    left: width / 2 - DOT_SIZE + 4,
+  },
+
+  detailsContainer: {
+    padding: 10,
+  },
   addressAndLinkContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -100,34 +205,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
   },
-
   description: {
     color: 'black',
-    marginBottom: 20,
   },
-
-  image: {
-    width: '100%',
-    height: 250,
-    borderRadius: 4,
-    marginBottom: 20,
-  },
-
-  userInfoAndTimestampContainer: {
+  userInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 30,
+    columnGap: 5,
   },
-  userPhoto: {
+  userImage: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    marginRight: 5,
   },
-  userNameAndTimestamp: {
+  userName: {
+    color: 'gray',
+  },
+  timestamp: {
     color: 'gray',
   },
 
   divider: {
+    marginTop: 5,
     marginBottom: 20,
   },
 });
