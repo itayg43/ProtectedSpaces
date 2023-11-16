@@ -9,16 +9,16 @@ export const addProtectedSpaceValidationSchema = z.object({
       uri: z.string(),
     })
     .array()
-    .nonempty(),
+    .nonempty('Please select at least one image'),
 
   type: z.nativeEnum(ProtectedSpaceType),
 
   address: z.object({
     city: z.string(),
     street: z.string(),
-    buildingNumber: z.string(),
-    googleMapsLinkUrl: z.string(),
-    coordinate: z.object({
+    number: z.string(),
+    url: z.string(),
+    latLng: z.object({
       latitude: z.number(),
       longitude: z.number(),
     }),

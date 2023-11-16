@@ -25,16 +25,15 @@ const add = async (
     address: {
       city: formData.address.city,
       street: formData.address.street,
-      buildingNumber: formData.address.buildingNumber,
+      number: formData.address.number,
+      url: formData.address.url,
     },
-
-    googleMapsLinkUrl: formData.address.googleMapsLinkUrl,
 
     description: formData.description,
 
     coordinate: new firestore.GeoPoint(
-      formData.address.coordinate.latitude,
-      formData.address.coordinate.longitude,
+      formData.address.latLng.latitude,
+      formData.address.latLng.longitude,
     ),
 
     createdAt: firestore.Timestamp.now(),

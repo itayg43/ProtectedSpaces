@@ -22,9 +22,9 @@ export type ProtectedSpace = {
   address: {
     city: string;
     street: string;
-    buildingNumber: string;
+    number: string;
+    url: string;
   };
-  googleMapsLinkUrl: string;
   description: string;
   createdBy: {
     name: string;

@@ -1,20 +1,19 @@
 import React from 'react';
 import {StyleProp, View, ViewStyle} from 'react-native';
 import {TextInput, TextInputProps, HelperText} from 'react-native-paper';
-import {useController} from 'react-hook-form';
+import {FieldValues, UseControllerProps, useController} from 'react-hook-form';
 
-type Props = {
+type Props<T extends FieldValues> = {
   contentContainerStyle?: StyleProp<ViewStyle>;
-  control: any;
-  name: string;
-} & TextInputProps;
+} & TextInputProps &
+  UseControllerProps<T>;
 
-const FormTextInput = ({
+const FormTextInput = <T extends FieldValues>({
   contentContainerStyle,
   control,
   name,
   ...otherProps
-}: Props) => {
+}: Props<T>) => {
   const {
     field: {value, onChange, onBlur},
     fieldState: {invalid, error},
@@ -24,7 +23,6 @@ const FormTextInput = ({
     <View style={contentContainerStyle}>
       <TextInput
         value={value}
-        error={invalid}
         onChangeText={onChange}
         onBlur={onBlur}
         {...otherProps}

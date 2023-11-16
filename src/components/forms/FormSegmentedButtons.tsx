@@ -1,24 +1,23 @@
 import React from 'react';
 import {View, StyleProp, ViewStyle} from 'react-native';
-import {SegmentedButtons, HelperText} from 'react-native-paper';
-import {useController} from 'react-hook-form';
+import {
+  SegmentedButtons,
+  HelperText,
+  SegmentedButtonsProps,
+} from 'react-native-paper';
+import {FieldValues, UseControllerProps, useController} from 'react-hook-form';
 
-type Props = {
+type Props<T extends FieldValues> = {
   contentContainerStyle?: StyleProp<ViewStyle>;
-  control: any;
-  name: string;
-  options: {
-    label: string;
-    value: string;
-  }[];
-};
+} & Omit<SegmentedButtonsProps, 'value' | 'onValueChange'> &
+  UseControllerProps<T>;
 
-const FormSegmentedButtons = ({
+const FormSegmentedButtons = <T extends FieldValues>({
   contentContainerStyle,
   control,
   name,
-  options,
-}: Props) => {
+  ...otherProps
+}: Props<T>) => {
   const {
     field: {value, onChange},
     fieldState: {invalid, error},
@@ -29,7 +28,7 @@ const FormSegmentedButtons = ({
       <SegmentedButtons
         value={value}
         onValueChange={onChange}
-        buttons={options}
+        {...otherProps}
       />
 
       {invalid && <HelperText type="error">{error?.message}</HelperText>}

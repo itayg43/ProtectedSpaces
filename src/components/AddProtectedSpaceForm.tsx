@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {
   Alert,
   Keyboard,
@@ -11,15 +11,18 @@ import {Button} from 'react-native-paper';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 
-import FormTextInput from './FormTextInput';
-import FormSegmentedButtons from './FormSegmentedButtons';
-import FormGooglePlacesAutocomplete from './FormGooglePlacesAutocomplete';
+import {
+  FormTextInput,
+  FormImagesPicker,
+  FormGooglePlacesAutocomplete,
+  FormSegmentedButtons,
+} from './forms';
 import type {AddProtectedSpaceFormData} from '../utils/types';
 import {addProtectedSpaceValidationSchema} from '../utils/validationSchemas';
-import {PROTECTED_SPACE_TYPE_OPTIONS} from '../utils/constants';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 import log from '../utils/log';
-import FormImagesPicker from './FormImagesPicker';
+
+import {ProtectedSpaceType} from '../utils/enums';
 
 type Props = {
   contentContainerStyle?: StyleProp<ViewStyle>;
@@ -33,12 +36,20 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
     control,
     handleSubmit: onSubmit,
     formState,
+    setError,
   } = useForm<AddProtectedSpaceFormData>({
     resolver: zodResolver(addProtectedSpaceValidationSchema),
     defaultValues: {
       images: [],
     },
   });
+
+  const typeOptionButtons = useMemo(() => {
+    return Object.entries(ProtectedSpaceType).map(([key, value]) => ({
+      label: key,
+      value,
+    }));
+  }, []);
 
   const handleSubmit = async (formData: AddProtectedSpaceFormData) => {
     try {
@@ -53,21 +64,27 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
 
   return (
     <View style={[contentContainerStyle, styles.container]}>
-      <FormImagesPicker control={control} name="images" amount={5} />
-
-      <FormSegmentedButtons
+      <FormImagesPicker<AddProtectedSpaceFormData>
         control={control}
-        name="type"
-        options={PROTECTED_SPACE_TYPE_OPTIONS}
+        name="images"
+        amount={5}
       />
 
-      <FormGooglePlacesAutocomplete
+      <FormSegmentedButtons<AddProtectedSpaceFormData>
+        control={control}
+        name="type"
+        buttons={typeOptionButtons}
+      />
+
+      {/** check for building number in validation */}
+      <FormGooglePlacesAutocomplete<AddProtectedSpaceFormData>
         control={control}
         name="address"
         placeholder="Address"
+        onError={(message: string) => setError('address', {message})}
       />
 
-      <FormTextInput
+      <FormTextInput<AddProtectedSpaceFormData>
         control={control}
         name="description"
         label="Description"
@@ -78,7 +95,7 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
         mode="contained"
         onPress={onSubmit(handleSubmit)}
         loading={formState.isSubmitting}
-        disabled={!formState.isValid}>
+        disabled={formState.isSubmitting}>
         Submit
       </Button>
     </View>

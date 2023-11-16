@@ -1,23 +1,25 @@
 import React from 'react';
 import {StyleProp, View, ViewStyle, FlatList, StyleSheet} from 'react-native';
-import {UseControllerProps, useController} from 'react-hook-form';
+import {HelperText} from 'react-native-paper';
+import {FieldValues, UseControllerProps, useController} from 'react-hook-form';
 
-import type {AddProtectedSpaceFormData, ImageAsset} from '../utils/types';
-import ImagePicker from './ImagePicker';
+import type {ImageAsset} from '../../utils/types';
+import ImagePicker from '../ImagePicker';
 
-type Props = {
+type Props<T extends FieldValues> = {
   contentContainerStyle?: StyleProp<ViewStyle>;
   amount: number;
-} & UseControllerProps<AddProtectedSpaceFormData>;
+} & UseControllerProps<T>;
 
-const FormImagesPicker = ({
+const FormImagesPicker = <T extends FieldValues>({
   contentContainerStyle,
   control,
   name,
   amount,
-}: Props) => {
+}: Props<T>) => {
   const {
     field: {value, onChange},
+    fieldState: {invalid, error},
   } = useController({control, name});
 
   const isValueArray = Array.isArray(value);
@@ -33,7 +35,7 @@ const FormImagesPicker = ({
 
       // change already selected image
       if (value[index]) {
-        newValue = value.map((currAsset, i) =>
+        newValue = value.map((currAsset: string, i: number) =>
           i === index ? asset : currAsset,
         );
       }
@@ -63,6 +65,8 @@ const FormImagesPicker = ({
             horizontal
             ItemSeparatorComponent={ItemSeparator}
           />
+
+          {invalid && <HelperText type="error">{error?.message}</HelperText>}
         </View>
       )}
     </>
