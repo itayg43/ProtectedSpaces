@@ -6,6 +6,7 @@ import {
   Linking,
   Dimensions,
   Animated,
+  Platform,
 } from 'react-native';
 import {IconButton, Divider} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
@@ -88,7 +89,7 @@ function ImagesSection({images}: ImagesSectionProps) {
       <IconButton
         style={styles.closeButton}
         mode="contained"
-        icon="close"
+        icon={Platform.OS === 'ios' ? 'close' : 'keyboard-backspace'}
         size={20}
         containerColor="white"
         onPress={handleClose}
