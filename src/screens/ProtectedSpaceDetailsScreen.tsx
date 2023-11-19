@@ -42,7 +42,7 @@ const ProtectedSpaceDetailsScreen = () => {
     <>
       {protectedSpaceDetails && (
         <View style={styles.container}>
-          <ImagesSection images={protectedSpaceDetails.imagesUrls} />
+          <ImagesSection images={protectedSpaceDetails.images} />
 
           <DetailsSection details={protectedSpaceDetails} />
         </View>
@@ -163,12 +163,12 @@ function DetailsSection({details}: DetailsSectionProps) {
       {/** user info & timestamp */}
       <View style={styles.userInfoContainer}>
         <FastImage
-          style={styles.userImage}
-          source={{uri: details.createdBy.photoUrl}}
+          style={styles.userPhoto}
+          source={{uri: details.user.photo}}
         />
 
         <Text style={styles.userName}>
-          {details.createdBy.name.split(' ').join('_')}
+          {details.user.name.split(' ').join('_')}
         </Text>
 
         <Text style={styles.timestamp}>
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     columnGap: 5,
   },
-  userImage: {
+  userPhoto: {
     width: 30,
     height: 30,
     borderRadius: 15,

@@ -40,8 +40,8 @@ const ProtectedSpacesMap = () => {
           <Marker
             key={s.id}
             coordinate={{
-              latitude: s.address.coordinate.latitude,
-              longitude: s.address.coordinate.longitude,
+              latitude: s.address.latLng.latitude,
+              longitude: s.address.latLng.longitude,
             }}
             onPress={() => handleMarkerPress(s.id)}
           />
