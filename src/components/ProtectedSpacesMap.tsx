@@ -36,14 +36,14 @@ const ProtectedSpacesMap = () => {
       }
       showsUserLocation>
       {location &&
-        protectedSpaces.map(({id, address: {coordinate}}) => (
+        protectedSpaces.map(s => (
           <Marker
-            key={id}
+            key={s.id}
             coordinate={{
-              latitude: coordinate.latitude,
-              longitude: coordinate.longitude,
+              latitude: s.address.coordinate.latitude,
+              longitude: s.address.coordinate.longitude,
             }}
-            onPress={() => handleMarkerPress(id)}
+            onPress={() => handleMarkerPress(s.id)}
           />
         ))}
     </MapView>

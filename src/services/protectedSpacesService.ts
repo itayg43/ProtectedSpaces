@@ -18,7 +18,7 @@ const add = async (
   await storageService.uploadMultipleImages(formData.images);
 
   const spaceWithoutId: ProtectedSpaceWithoutId = {
-    imagesUrls: await storageService.getImagesUrls(formData.images),
+    images: await storageService.getImagesUrls(formData.images),
 
     type: formData.type,
 
@@ -27,7 +27,7 @@ const add = async (
       street: formData.address.street,
       number: formData.address.number,
       url: formData.address.url,
-      coordinate: new firestore.GeoPoint(
+      latLng: new firestore.GeoPoint(
         formData.address.latLng.latitude,
         formData.address.latLng.longitude,
       ),
@@ -37,9 +37,10 @@ const add = async (
 
     createdAt: firestore.Timestamp.now(),
 
-    createdBy: {
+    user: {
+      id: user?.uid ?? '',
       name: user?.displayName ?? '',
-      photoUrl: user?.photoURL ?? '',
+      photo: user?.photoURL ?? '',
     },
   };
 

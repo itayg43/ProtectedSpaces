@@ -17,19 +17,20 @@ export type Location = {
 
 export type ProtectedSpace = {
   id: string;
-  imagesUrls: string[];
+  images: string[];
   type: string;
   address: {
     city: string;
     street: string;
     number: string;
     url: string;
-    coordinate: FirebaseFirestoreTypes.GeoPoint;
+    latLng: FirebaseFirestoreTypes.GeoPoint;
   };
   description: string;
-  createdBy: {
+  user: {
+    id: string;
     name: string;
-    photoUrl: string;
+    photo: string;
   };
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
