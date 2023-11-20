@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {StyleSheet, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {FAB} from 'react-native-paper';
 
 import AddProtectedSpaceModal from '../modals/AddProtectedSpaceModal';
@@ -8,6 +9,8 @@ import KeyboardAvoidingView from '../components/KeyboardAvoidingView';
 import {useLocationContext} from '../contexts/locationContext';
 
 const ProtectedSpacesScreen = () => {
+  const safeAreaInsets = useSafeAreaInsets();
+
   const location = useLocationContext();
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -23,7 +26,7 @@ const ProtectedSpacesScreen = () => {
 
         {location && (
           <FAB
-            style={styles.fab}
+            style={[styles.addFab, {bottom: safeAreaInsets.bottom}]}
             icon="plus"
             size="medium"
             onPress={handleToggleShowAddModal}
@@ -48,9 +51,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  fab: {
+  addFab: {
     position: 'absolute',
-    bottom: 30,
-    right: 30,
+    right: 20,
+    borderRadius: 30,
   },
 });
