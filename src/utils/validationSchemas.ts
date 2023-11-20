@@ -26,3 +26,7 @@ export const addProtectedSpaceValidationSchema = z.object({
 
   description: z.string(),
 });
+
+export const addCommentValidationSchema = z.object({
+  value: z.string(),
+});

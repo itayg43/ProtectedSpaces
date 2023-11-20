@@ -1,9 +1,11 @@
 import firestore from '@react-native-firebase/firestore';
+import {v4 as uuidv4} from 'uuid';
 
 import type {
+  AddCommentFormData,
   AddProtectedSpaceFormData,
+  Comment,
   ProtectedSpace,
-  ProtectedSpaceWithoutId,
 } from '../utils/types';
 import {firestoreClient} from '../clients/firebaseClients';
 import storageService from './storageService';
@@ -17,7 +19,9 @@ const add = async (
 ) => {
   await storageService.uploadMultipleImages(formData.images);
 
-  const spaceWithoutId: ProtectedSpaceWithoutId = {
+  const protectedSpace: ProtectedSpace = {
+    id: uuidv4(),
+
     images: await storageService.getImagesUrls(formData.images),
 
     type: formData.type,
@@ -35,16 +39,39 @@ const add = async (
 
     description: formData.description,
 
-    createdAt: firestore.Timestamp.now(),
-
     user: {
       id: user?.uid ?? '',
       name: user?.displayName ?? '',
       photo: user?.photoURL ?? '',
     },
+
+    comments: [],
+
+    createdAt: firestore.Timestamp.now(),
   };
 
-  await protectedSpacesCollection.add(spaceWithoutId);
+  await protectedSpacesCollection.doc(protectedSpace.id).set(protectedSpace);
+};
+
+const addComment = async (
+  user: FirebaseAuthTypes.User | null,
+  formData: AddCommentFormData,
+  protectedSpace: ProtectedSpace,
+) => {
+  const comment: Comment = {
+    id: uuidv4(),
+    value: formData.value,
+    user: {
+      id: user?.uid ?? '',
+      name: user?.displayName ?? '',
+      photo: user?.photoURL ?? '',
+    },
+    createdAt: firestore.Timestamp.now(),
+  };
+
+  await protectedSpacesCollection.doc(protectedSpace.id).update({
+    comments: [protectedSpace.comments, comment],
+  });
 };
 
 const collectionSubscription = (
@@ -55,12 +82,7 @@ const collectionSubscription = (
     query => {
       const spaces: ProtectedSpace[] = [];
 
-      query.forEach(document => {
-        spaces.push({
-          ...document.data(),
-          id: document.id,
-        } as ProtectedSpace);
-      });
+      query.forEach(doc => spaces.push(doc.data() as ProtectedSpace));
 
       onChangeCallback(spaces);
     },
@@ -70,5 +92,6 @@ const collectionSubscription = (
 
 export default {
   add,
+  addComment,
   collectionSubscription,
 };

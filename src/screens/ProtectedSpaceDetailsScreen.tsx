@@ -13,7 +13,7 @@ import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
 import log from '../utils/log';
-import type {ProtectedSpace} from '../utils/types';
+import type {Comment, ProtectedSpace} from '../utils/types';
 import {
   ProtectedSpaceDetailsScreenNavigationProp,
   ProtectedSpaceDetailsScreenRouteProp,
@@ -45,6 +45,8 @@ const ProtectedSpaceDetailsScreen = () => {
           <ImagesSection images={protectedSpaceDetails.images} />
 
           <DetailsSection details={protectedSpaceDetails} />
+
+          <CommentsSection comments={protectedSpaceDetails.comments} />
         </View>
       )}
     </>
@@ -177,6 +179,14 @@ function DetailsSection({details}: DetailsSectionProps) {
       </View>
     </View>
   );
+}
+
+type CommentsSectionProps = {
+  comments: Comment[];
+};
+
+function CommentsSection({comments}: CommentsSectionProps) {
+  return <></>;
 }
 
 const styles = StyleSheet.create({
