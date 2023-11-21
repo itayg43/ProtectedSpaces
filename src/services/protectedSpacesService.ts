@@ -70,7 +70,7 @@ const addComment = async (
   };
 
   await protectedSpacesCollection.doc(protectedSpace.id).update({
-    comments: [protectedSpace.comments, comment],
+    comments: [...protectedSpace.comments, comment],
   });
 };
 
