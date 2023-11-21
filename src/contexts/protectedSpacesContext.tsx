@@ -26,20 +26,21 @@ type ProtectedSpacesContextParams = {
     formData: AddCommentFormData,
     protectedSpace: ProtectedSpace,
   ) => Promise<void>;
-  getProtectedSpaceById: (id: string) => ProtectedSpace | null;
+  findProtectedSpaceById: (id: string) => ProtectedSpace | null;
 };
 
 const ProtectedSpacesContext = createContext<ProtectedSpacesContextParams>({
   protectedSpaces: [],
   handleAddProtectedSpace: async () => {},
   handleAddComment: async () => {},
-  getProtectedSpaceById: () => null,
+  findProtectedSpaceById: () => null,
 });
 
 export const ProtectedSpacesContextProvider = ({
   children,
 }: PropsWithChildren) => {
   const {user} = useAuthContext();
+
   const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
 
   const handleAddProtectedSpace = useCallback(
@@ -66,7 +67,7 @@ export const ProtectedSpacesContextProvider = ({
     [user],
   );
 
-  const getProtectedSpaceById = useCallback(
+  const findProtectedSpaceById = useCallback(
     (id: string) => {
       return protectedSpaces.find(p => p.id === id) ?? null;
     },
@@ -78,13 +79,13 @@ export const ProtectedSpacesContextProvider = ({
       protectedSpaces,
       handleAddProtectedSpace,
       handleAddComment,
-      getProtectedSpaceById,
+      findProtectedSpaceById,
     }),
     [
       protectedSpaces,
       handleAddProtectedSpace,
       handleAddComment,
-      getProtectedSpaceById,
+      findProtectedSpaceById,
     ],
   );
 

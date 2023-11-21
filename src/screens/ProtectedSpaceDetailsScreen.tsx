@@ -29,14 +29,14 @@ const DOT_INDICATOR_SIZE = DOT_SIZE * 2;
 const ProtectedSpaceDetailsScreen = () => {
   const {params} = useRoute<ProtectedSpaceDetailsScreenRouteProp>();
 
-  const {getProtectedSpaceById} = useProtectedSpacesContext();
+  const {findProtectedSpaceById} = useProtectedSpacesContext();
 
   const [protectedSpaceDetails, setProtectedSpaceDetails] =
     useState<ProtectedSpace | null>(null);
 
   useEffect(() => {
-    setProtectedSpaceDetails(getProtectedSpaceById(params.id));
-  }, [params.id, getProtectedSpaceById]);
+    setProtectedSpaceDetails(findProtectedSpaceById(params.id));
+  }, [params.id, findProtectedSpaceById]);
 
   return (
     <>
