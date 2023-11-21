@@ -20,7 +20,7 @@ const add = async (
   await storageService.uploadMultipleImages(formData.images);
 
   const protectedSpace: ProtectedSpace = {
-    id: uuidv4(),
+    id: formData.address.id,
 
     images: await storageService.getImagesUrls(formData.images),
 

@@ -14,6 +14,7 @@ export const addProtectedSpaceValidationSchema = z.object({
   type: z.nativeEnum(ProtectedSpaceType),
 
   address: z.object({
+    id: z.string(),
     city: z.string(),
     street: z.string(),
     number: z.string(),

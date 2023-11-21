@@ -40,6 +40,7 @@ const FormGooglePlacesAutocomplete = <T extends FieldValues>({
     }
 
     onChange({
+      id: details.place_id,
       city: details.address_components[2].short_name,
       street: details.address_components[1].short_name,
       number: details.address_components[0].short_name,
