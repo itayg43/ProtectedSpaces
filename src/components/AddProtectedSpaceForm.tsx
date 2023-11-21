@@ -76,7 +76,6 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
         buttons={typeOptionButtons}
       />
 
-      {/** check for building number in validation */}
       <FormGooglePlacesAutocomplete<AddProtectedSpaceFormData>
         control={control}
         name="address"
