@@ -21,7 +21,10 @@ const AddProtectedSpaceModal = ({isVisible, onDismiss}: Props) => {
         onPress={onDismiss}
       />
 
-      <AddProtectedSpaceForm onSuccess={onDismiss} />
+      <AddProtectedSpaceForm
+        contentContainerStyle={styles.formContainer}
+        onSuccess={onDismiss}
+      />
     </Modal>
   );
 };
@@ -34,5 +37,11 @@ const styles = StyleSheet.create({
   },
   closeIconButton: {
     alignSelf: 'center',
+  },
+
+  formContainer: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
   },
 });

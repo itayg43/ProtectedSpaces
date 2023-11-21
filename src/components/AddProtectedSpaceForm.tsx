@@ -106,8 +106,5 @@ export default AddProtectedSpaceForm;
 const styles = StyleSheet.create({
   container: {
     rowGap: 10,
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
   },
 });
