@@ -13,12 +13,13 @@ import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
 import log from '../utils/log';
-import type {Comment, ProtectedSpace} from '../utils/types';
+import type {ProtectedSpace} from '../utils/types';
 import {
   ProtectedSpaceDetailsScreenNavigationProp,
   ProtectedSpaceDetailsScreenRouteProp,
 } from '../navigators/ProtectedSpacesStack';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
+import AddCommentForm from '../components/AddCommentForm';
 
 const {width} = Dimensions.get('screen');
 
@@ -42,11 +43,11 @@ const ProtectedSpaceDetailsScreen = () => {
     <>
       {protectedSpaceDetails && (
         <View style={styles.container}>
-          <ImagesSection images={protectedSpaceDetails.images} />
+          <ImagesSection protectedSpace={protectedSpaceDetails} />
 
-          <DetailsSection details={protectedSpaceDetails} />
+          <DetailsSection protectedSpace={protectedSpaceDetails} />
 
-          <CommentsSection comments={protectedSpaceDetails.comments} />
+          <CommentsSection protectedSpace={protectedSpaceDetails} />
         </View>
       )}
     </>
@@ -55,11 +56,11 @@ const ProtectedSpaceDetailsScreen = () => {
 
 export default ProtectedSpaceDetailsScreen;
 
-type ImagesSectionProps = {
-  images: string[];
+type SectionProps = {
+  protectedSpace: ProtectedSpace;
 };
 
-function ImagesSection({images}: ImagesSectionProps) {
+function ImagesSection({protectedSpace}: SectionProps) {
   const navigation = useNavigation<ProtectedSpaceDetailsScreenNavigationProp>();
 
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -69,9 +70,9 @@ function ImagesSection({images}: ImagesSectionProps) {
   };
 
   return (
-    <View>
+    <View style={styles.imagesSectionContainer}>
       <Animated.FlatList
-        data={images}
+        data={protectedSpace.images}
         keyExtractor={item => item}
         renderItem={({item: uri}) => (
           <FastImage style={styles.image} source={{uri, priority: 'high'}} />
@@ -99,7 +100,7 @@ function ImagesSection({images}: ImagesSectionProps) {
 
       {/** dots */}
       <View style={styles.dotsContainer}>
-        {images.map((_, index) => (
+        {protectedSpace.images.map((_, index) => (
           <View key={index} style={styles.dot} />
         ))}
       </View>
@@ -124,28 +125,22 @@ function ImagesSection({images}: ImagesSectionProps) {
   );
 }
 
-type DetailsSectionProps = {
-  details: ProtectedSpace;
-};
-
-function DetailsSection({details}: DetailsSectionProps) {
+function DetailsSection({protectedSpace}: SectionProps) {
   const handleOpenGoogleMapsLink = async () => {
-    if (details) {
-      try {
-        await Linking.openURL(details.address.url);
-      } catch (error) {
-        log.error(error);
-      }
+    try {
+      await Linking.openURL(protectedSpace.address.url);
+    } catch (error) {
+      log.error(error);
     }
   };
 
   return (
-    <View style={styles.detailsContainer}>
+    <View style={styles.detailsSectionContainer}>
       {/** address & link */}
       <View style={styles.addressAndLinkContainer}>
         {/** address */}
         <Text style={styles.address} numberOfLines={1}>
-          {`${details.address.street} ${details.address.number}, ${details.address.city}`}
+          {`${protectedSpace.address.street} ${protectedSpace.address.number}, ${protectedSpace.address.city}`}
         </Text>
 
         {/** link */}
@@ -160,33 +155,33 @@ function DetailsSection({details}: DetailsSectionProps) {
       <Divider style={styles.divider} />
 
       {/** description */}
-      <Text style={styles.description}>{details.description}</Text>
+      <Text style={styles.description}>{protectedSpace.description}</Text>
 
       {/** user info & timestamp */}
       <View style={styles.userInfoContainer}>
         <FastImage
           style={styles.userPhoto}
-          source={{uri: details.user.photo}}
+          source={{uri: protectedSpace.user.photo}}
         />
 
         <Text style={styles.userName}>
-          {details.user.name.split(' ').join('_')}
+          {protectedSpace.user.name.split(' ').join('_')}
         </Text>
 
         <Text style={styles.timestamp}>
-          on {details.createdAt.toDate().toLocaleDateString()}
+          on {protectedSpace.createdAt.toDate().toLocaleDateString()}
         </Text>
       </View>
     </View>
   );
 }
 
-type CommentsSectionProps = {
-  comments: Comment[];
-};
-
-function CommentsSection({comments}: CommentsSectionProps) {
-  return <></>;
+function CommentsSection({protectedSpace}: SectionProps) {
+  return (
+    <View style={styles.commentsSectionContainer}>
+      <AddCommentForm />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -194,6 +189,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  imagesSectionContainer: {},
   image: {
     width: IMAGE_WIDTH,
     height: 300,
@@ -227,7 +223,7 @@ const styles = StyleSheet.create({
     left: width / 2 - DOT_SIZE + 4,
   },
 
-  detailsContainer: {
+  detailsSectionContainer: {
     padding: 10,
   },
   addressAndLinkContainer: {
@@ -259,6 +255,10 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     color: 'gray',
+  },
+
+  commentsSectionContainer: {
+    padding: 10,
   },
 
   divider: {
