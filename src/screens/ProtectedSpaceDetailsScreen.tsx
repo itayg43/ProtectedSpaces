@@ -7,23 +7,20 @@ import {
   Dimensions,
   Animated,
   Platform,
-  ScrollView,
   FlatList,
-  Alert,
 } from 'react-native';
 import {IconButton, Divider} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 import log from '../utils/log';
-import type {AddCommentFormData, ProtectedSpace} from '../utils/types';
+import type {ProtectedSpace} from '../utils/types';
 import {
   ProtectedSpaceDetailsScreenNavigationProp,
   ProtectedSpaceDetailsScreenRouteProp,
 } from '../navigators/ProtectedSpacesStack';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
-import AddCommentForm from '../components/AddCommentForm';
+
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import CommentListItem from '../components/CommentListItem';
 
@@ -50,16 +47,13 @@ const ProtectedSpaceDetailsScreen = () => {
   return (
     <>
       {protectedSpaceDetails && (
-        <KeyboardAwareScrollView>
-          <View
-            style={[styles.container, {marginBottom: safeAreaInsets.bottom}]}>
-            <ImagesSection protectedSpace={protectedSpaceDetails} />
+        <View style={[styles.container, {marginBottom: safeAreaInsets.bottom}]}>
+          <ImagesSection protectedSpace={protectedSpaceDetails} />
 
-            <DetailsSection protectedSpace={protectedSpaceDetails} />
+          <DetailsSection protectedSpace={protectedSpaceDetails} />
 
-            <CommentsSection protectedSpace={protectedSpaceDetails} />
-          </View>
-        </KeyboardAwareScrollView>
+          <CommentsSection protectedSpace={protectedSpaceDetails} />
+        </View>
       )}
     </>
   );
@@ -183,32 +177,15 @@ function DetailsSection({protectedSpace}: SectionProps) {
 }
 
 function CommentsSection({protectedSpace}: SectionProps) {
-  const {handleAddComment} = useProtectedSpacesContext();
-
-  const handleSubmit = async (formData: AddCommentFormData) => {
-    try {
-      await handleAddComment(formData, protectedSpace);
-    } catch (error: any) {
-      Alert.alert('Error', error?.message);
-    }
-  };
-
   return (
     <View style={styles.commentsSectionContainer}>
-      <ScrollView
-        contentContainerStyle={styles.commentsContainer}
-        horizontal
-        scrollEnabled={false}>
-        <FlatList
-          data={protectedSpace.comments}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => <CommentListItem comment={item} />}
-          ItemSeparatorComponent={ListSpacer}
-          ListFooterComponent={ListSpacer}
-        />
-      </ScrollView>
-
-      <AddCommentForm onSubmit={handleSubmit} />
+      <FlatList
+        data={protectedSpace.comments}
+        keyExtractor={item => item.id}
+        renderItem={({item}) => <CommentListItem comment={item} />}
+        ItemSeparatorComponent={ListSpacer}
+        ListFooterComponent={ListSpacer}
+      />
     </View>
   );
 }
@@ -222,8 +199,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   divider: {
-    marginTop: 5,
     marginBottom: 20,
+    marginTop: 5,
   },
   listSpacer: {
     marginBottom: 5,
@@ -234,36 +211,36 @@ const styles = StyleSheet.create({
   // IMAGES
   imagesSectionContainer: {},
   image: {
-    width: IMAGE_WIDTH,
     height: 250,
+    width: IMAGE_WIDTH,
   },
   closeButton: {
+    left: 5,
     position: 'absolute',
     top: 5,
-    left: 5,
   },
   dotsContainer: {
-    flexDirection: 'row',
-    position: 'absolute',
     bottom: 10,
-    left: SCREEN_WIDTH / 2,
     columnGap: DOT_SIZE,
+    flexDirection: 'row',
+    left: SCREEN_WIDTH / 2,
+    position: 'absolute',
   },
   dot: {
-    width: DOT_SIZE,
-    height: DOT_SIZE,
-    borderRadius: DOT_SIZE,
     backgroundColor: 'white',
+    borderRadius: DOT_SIZE,
+    height: DOT_SIZE,
+    width: DOT_SIZE,
   },
   dotIndicator: {
-    width: DOT_INDICATOR_SIZE,
-    height: DOT_INDICATOR_SIZE,
+    borderColor: 'white',
     borderRadius: DOT_INDICATOR_SIZE,
     borderWidth: 1,
-    borderColor: 'white',
-    position: 'absolute',
     bottom: 6,
+    height: DOT_INDICATOR_SIZE,
     left: SCREEN_WIDTH / 2 - DOT_SIZE + 4,
+    position: 'absolute',
+    width: DOT_INDICATOR_SIZE,
   },
 
   // DETAILS
@@ -271,23 +248,23 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   addressAndLinkContainer: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
   address: {
-    fontWeight: 'bold',
-    fontSize: 16,
     color: 'black',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   description: {
     color: 'black',
   },
   userInfoContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
     columnGap: 5,
+    flexDirection: 'row',
+    marginTop: 10,
   },
   userName: {
     color: 'gray',
@@ -298,10 +275,7 @@ const styles = StyleSheet.create({
 
   // COMMENTS
   commentsSectionContainer: {
-    padding: 10,
-    rowGap: 10,
-  },
-  commentsContainer: {
     flex: 1,
+    padding: 10,
   },
 });
