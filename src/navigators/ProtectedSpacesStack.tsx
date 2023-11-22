@@ -48,9 +48,6 @@ const ProtectedSpacesStackNavigator = () => {
       <Stack.Screen
         name="protectedSpaceDetailsScreen"
         component={ProtectedSpaceDetailsScreen}
-        options={{
-          presentation: 'modal',
-        }}
       />
     </Stack.Navigator>
   );

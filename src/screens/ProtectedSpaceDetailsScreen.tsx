@@ -6,7 +6,6 @@ import {
   Linking,
   Dimensions,
   Animated,
-  Platform,
   FlatList,
 } from 'react-native';
 import {IconButton, Divider} from 'react-native-paper';
@@ -27,6 +26,7 @@ import CommentListItem from '../components/CommentListItem';
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
 const IMAGE_WIDTH = SCREEN_WIDTH;
+const IMAGE_HEIGHT = 300;
 const DOT_SIZE = 8;
 const DOT_INDICATOR_SIZE = DOT_SIZE * 2;
 
@@ -66,6 +66,8 @@ type SectionProps = {
 };
 
 function ImagesSection({protectedSpace}: SectionProps) {
+  const safeAreaInsets = useSafeAreaInsets();
+
   const navigation = useNavigation<ProtectedSpaceDetailsScreenNavigationProp>();
 
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -95,11 +97,9 @@ function ImagesSection({protectedSpace}: SectionProps) {
 
       {/** close button */}
       <IconButton
-        style={styles.closeButton}
+        style={[styles.closeButton, {top: safeAreaInsets.top}]}
         mode="contained"
-        icon={Platform.OS === 'ios' ? 'close' : 'keyboard-backspace'}
-        size={20}
-        containerColor="white"
+        icon="keyboard-backspace"
         onPress={handleClose}
       />
 
@@ -179,6 +179,12 @@ function DetailsSection({protectedSpace}: SectionProps) {
 function CommentsSection({protectedSpace}: SectionProps) {
   return (
     <View style={styles.commentsSectionContainer}>
+      <View style={styles.commentsSectionTitleContainer}>
+        <Text style={styles.commentsSectionTitle}>Comments</Text>
+
+        <IconButton mode="contained" icon="plus" onPress={() => null} />
+      </View>
+
       <FlatList
         data={protectedSpace.comments}
         keyExtractor={item => item.id}
@@ -211,13 +217,12 @@ const styles = StyleSheet.create({
   // IMAGES
   imagesSectionContainer: {},
   image: {
-    height: 250,
+    height: IMAGE_HEIGHT,
     width: IMAGE_WIDTH,
   },
   closeButton: {
-    left: 5,
+    left: 10,
     position: 'absolute',
-    top: 5,
   },
   dotsContainer: {
     bottom: 10,
@@ -277,5 +282,15 @@ const styles = StyleSheet.create({
   commentsSectionContainer: {
     flex: 1,
     padding: 10,
+    rowGap: 10,
+  },
+  commentsSectionTitleContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  commentsSectionTitle: {
+    color: 'black',
+    fontSize: 16,
   },
 });
