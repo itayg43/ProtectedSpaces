@@ -25,6 +25,7 @@ import {
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 import AddCommentForm from '../components/AddCommentForm';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import CommentListItem from '../components/CommentListItem';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -201,16 +202,7 @@ function CommentsSection({protectedSpace}: SectionProps) {
         <FlatList
           data={protectedSpace.comments}
           keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <View style={styles.commentListItemContainer}>
-              <Text style={styles.comment}>{item.value}</Text>
-
-              <Text style={styles.commentUserAndTimestamp}>
-                @ {item.user.name.split(' ').join('_')} |{' '}
-                {item.createdAt.toDate().toLocaleDateString()}
-              </Text>
-            </View>
-          )}
+          renderItem={({item}) => <CommentListItem comment={item} />}
           ItemSeparatorComponent={ListSpacer}
           ListFooterComponent={ListSpacer}
         />
@@ -311,17 +303,5 @@ const styles = StyleSheet.create({
   },
   commentsContainer: {
     flex: 1,
-  },
-  commentListItemContainer: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 10,
-    rowGap: 5,
-  },
-  comment: {
-    color: 'black',
-  },
-  commentUserAndTimestamp: {
-    color: 'gray',
   },
 });
