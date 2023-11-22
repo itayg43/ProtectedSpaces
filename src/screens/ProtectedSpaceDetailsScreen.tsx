@@ -7,27 +7,34 @@ import {
   Dimensions,
   Animated,
   Platform,
+  ScrollView,
+  FlatList,
+  Alert,
 } from 'react-native';
 import {IconButton, Divider} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 import log from '../utils/log';
-import type {ProtectedSpace} from '../utils/types';
+import type {AddCommentFormData, ProtectedSpace} from '../utils/types';
 import {
   ProtectedSpaceDetailsScreenNavigationProp,
   ProtectedSpaceDetailsScreenRouteProp,
 } from '../navigators/ProtectedSpacesStack';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 import AddCommentForm from '../components/AddCommentForm';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-const {width} = Dimensions.get('screen');
+const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
-const IMAGE_WIDTH = width;
+const IMAGE_WIDTH = SCREEN_WIDTH;
 const DOT_SIZE = 8;
 const DOT_INDICATOR_SIZE = DOT_SIZE * 2;
 
 const ProtectedSpaceDetailsScreen = () => {
+  const safeAreaInsets = useSafeAreaInsets();
+
   const {params} = useRoute<ProtectedSpaceDetailsScreenRouteProp>();
 
   const {findProtectedSpaceById} = useProtectedSpacesContext();
@@ -42,13 +49,16 @@ const ProtectedSpaceDetailsScreen = () => {
   return (
     <>
       {protectedSpaceDetails && (
-        <View style={styles.container}>
-          <ImagesSection protectedSpace={protectedSpaceDetails} />
+        <KeyboardAwareScrollView>
+          <View
+            style={[styles.container, {marginBottom: safeAreaInsets.bottom}]}>
+            <ImagesSection protectedSpace={protectedSpaceDetails} />
 
-          <DetailsSection protectedSpace={protectedSpaceDetails} />
+            <DetailsSection protectedSpace={protectedSpaceDetails} />
 
-          <CommentsSection protectedSpace={protectedSpaceDetails} />
-        </View>
+            <CommentsSection protectedSpace={protectedSpaceDetails} />
+          </View>
+        </KeyboardAwareScrollView>
       )}
     </>
   );
@@ -159,17 +169,12 @@ function DetailsSection({protectedSpace}: SectionProps) {
 
       {/** user info & timestamp */}
       <View style={styles.userInfoContainer}>
-        <FastImage
-          style={styles.userPhoto}
-          source={{uri: protectedSpace.user.photo}}
-        />
-
         <Text style={styles.userName}>
-          {protectedSpace.user.name.split(' ').join('_')}
+          @ {protectedSpace.user.name.split(' ').join('_')}
         </Text>
 
         <Text style={styles.timestamp}>
-          on {protectedSpace.createdAt.toDate().toLocaleDateString()}
+          | {protectedSpace.createdAt.toDate().toLocaleDateString()}
         </Text>
       </View>
     </View>
@@ -177,22 +182,68 @@ function DetailsSection({protectedSpace}: SectionProps) {
 }
 
 function CommentsSection({protectedSpace}: SectionProps) {
+  const {handleAddComment} = useProtectedSpacesContext();
+
+  const handleSubmit = async (formData: AddCommentFormData) => {
+    try {
+      await handleAddComment(formData, protectedSpace);
+    } catch (error: any) {
+      Alert.alert('Error', error?.message);
+    }
+  };
+
   return (
     <View style={styles.commentsSectionContainer}>
-      <AddCommentForm />
+      <ScrollView
+        contentContainerStyle={styles.commentsContainer}
+        horizontal
+        scrollEnabled={false}>
+        <FlatList
+          data={protectedSpace.comments}
+          keyExtractor={item => item.id}
+          renderItem={({item}) => (
+            <View style={styles.commentListItemContainer}>
+              <Text style={styles.comment}>{item.value}</Text>
+
+              <Text style={styles.commentUserAndTimestamp}>
+                @ {item.user.name.split(' ').join('_')} |{' '}
+                {item.createdAt.toDate().toLocaleDateString()}
+              </Text>
+            </View>
+          )}
+          ItemSeparatorComponent={ListSpacer}
+          ListFooterComponent={ListSpacer}
+        />
+      </ScrollView>
+
+      <AddCommentForm onSubmit={handleSubmit} />
     </View>
   );
+}
+
+function ListSpacer() {
+  return <View style={styles.listSpacer} />;
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  divider: {
+    marginTop: 5,
+    marginBottom: 20,
+  },
+  listSpacer: {
+    marginBottom: 5,
+  },
 
+  // SECTIONS
+
+  // IMAGES
   imagesSectionContainer: {},
   image: {
     width: IMAGE_WIDTH,
-    height: 300,
+    height: 250,
   },
   closeButton: {
     position: 'absolute',
@@ -203,7 +254,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     position: 'absolute',
     bottom: 10,
-    left: width / 2,
+    left: SCREEN_WIDTH / 2,
     columnGap: DOT_SIZE,
   },
   dot: {
@@ -220,9 +271,10 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     position: 'absolute',
     bottom: 6,
-    left: width / 2 - DOT_SIZE + 4,
+    left: SCREEN_WIDTH / 2 - DOT_SIZE + 4,
   },
 
+  // DETAILS
   detailsSectionContainer: {
     padding: 10,
   },
@@ -242,13 +294,8 @@ const styles = StyleSheet.create({
   userInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 10,
     columnGap: 5,
-  },
-  userPhoto: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
   },
   userName: {
     color: 'gray',
@@ -257,12 +304,24 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
 
+  // COMMENTS
   commentsSectionContainer: {
     padding: 10,
+    rowGap: 10,
   },
-
-  divider: {
-    marginTop: 5,
-    marginBottom: 20,
+  commentsContainer: {
+    flex: 1,
+  },
+  commentListItemContainer: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 10,
+    rowGap: 5,
+  },
+  comment: {
+    color: 'black',
+  },
+  commentUserAndTimestamp: {
+    color: 'gray',
   },
 });

@@ -10,13 +10,13 @@ import {addCommentValidationSchema} from '../utils/validationSchemas';
 
 type Props = {
   contentContainerStyle?: StyleProp<ViewStyle>;
-  onSubmit: (formData: AddCommentFormData) => void;
+  onSubmit: (formData: AddCommentFormData) => Promise<void>;
 };
 
 const AddCommentForm = ({contentContainerStyle, onSubmit}: Props) => {
-  const {control, handleSubmit, formState} = useForm<AddCommentFormData>({
-    resolver: zodResolver(addCommentValidationSchema),
-  });
+  const {control, handleSubmit, formState, reset} = useForm<AddCommentFormData>(
+    {resolver: zodResolver(addCommentValidationSchema)},
+  );
 
   return (
     <View style={[contentContainerStyle, styles.container]}>
@@ -30,9 +30,10 @@ const AddCommentForm = ({contentContainerStyle, onSubmit}: Props) => {
       </View>
 
       <Button
-        onPress={handleSubmit(formData => {
+        onPress={handleSubmit(async formData => {
           Keyboard.dismiss();
-          onSubmit(formData);
+          await onSubmit(formData);
+          reset({value: ''});
         })}
         loading={formState.isSubmitting}
         disabled={formState.isSubmitting}>
@@ -49,6 +50,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     rowGap: 10,
+    columnGap: 5,
   },
 
   inputContainer: {
