@@ -20,16 +20,15 @@ const AddCommentForm = ({contentContainerStyle, onSubmit}: Props) => {
 
   return (
     <View style={[contentContainerStyle, styles.container]}>
-      <View style={styles.inputContainer}>
-        <FormTextInput<AddCommentFormData>
-          control={control}
-          name="value"
-          label="Comment"
-          multiline
-        />
-      </View>
+      <FormTextInput<AddCommentFormData>
+        control={control}
+        name="value"
+        label="Comment"
+        multiline
+      />
 
       <Button
+        mode="contained"
         onPress={handleSubmit(async formData => {
           Keyboard.dismiss();
           await onSubmit(formData);
@@ -47,13 +46,6 @@ export default AddCommentForm;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
     rowGap: 10,
-    columnGap: 5,
-  },
-
-  inputContainer: {
-    flex: 1,
   },
 });
