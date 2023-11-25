@@ -62,6 +62,7 @@ const FormImagesPicker = <T extends FieldValues>({
                 onSelect={asset => handleSelect(asset, index)}
               />
             )}
+            bounces={false}
             horizontal
             ItemSeparatorComponent={ItemSeparator}
           />
