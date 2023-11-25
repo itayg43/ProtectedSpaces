@@ -14,18 +14,15 @@ import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 const protectedSpacesCollection = firestoreClient.collection('ProtectedSpaces');
 
 const add = async (
-  user: FirebaseAuthTypes.User | null,
+  user: FirebaseAuthTypes.User,
   formData: AddProtectedSpaceFormData,
 ) => {
   await storageService.uploadMultipleImages(formData.images);
 
   const protectedSpace: ProtectedSpace = {
     id: formData.address.id,
-
     images: await storageService.getImagesUrls(formData.images),
-
     type: formData.type,
-
     address: {
       city: formData.address.city,
       street: formData.address.street,
@@ -36,17 +33,12 @@ const add = async (
         formData.address.latLng.longitude,
       ),
     },
-
     description: formData.description,
-
     user: {
-      id: user?.uid ?? '',
-      name: user?.displayName ?? '',
-      photo: user?.photoURL ?? '',
+      id: user.uid,
+      name: user.displayName ?? '',
     },
-
     comments: [],
-
     createdAt: firestore.Timestamp.now(),
   };
 
@@ -54,7 +46,7 @@ const add = async (
 };
 
 const addComment = async (
-  user: FirebaseAuthTypes.User | null,
+  user: FirebaseAuthTypes.User,
   formData: AddCommentFormData,
   protectedSpace: ProtectedSpace,
 ) => {
@@ -62,9 +54,8 @@ const addComment = async (
     id: uuidv4(),
     value: formData.value,
     user: {
-      id: user?.uid ?? '',
-      name: user?.displayName ?? '',
-      photo: user?.photoURL ?? '',
+      id: user.uid,
+      name: user.displayName ?? '',
     },
     createdAt: firestore.Timestamp.now(),
   };
@@ -81,9 +72,7 @@ const collectionSubscription = (
   return protectedSpacesCollection.onSnapshot(
     query => {
       const spaces: ProtectedSpace[] = [];
-
       query.forEach(doc => spaces.push(doc.data() as ProtectedSpace));
-
       onChangeCallback(spaces);
     },
     error => onErrorCallback(error),
