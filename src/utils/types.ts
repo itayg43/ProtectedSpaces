@@ -24,7 +24,6 @@ export type Comment = {
   user: {
     id: string;
     name: string;
-    photo: string;
   };
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
@@ -44,7 +43,6 @@ export type ProtectedSpace = {
   user: {
     id: string;
     name: string;
-    photo: string;
   };
   comments: Comment[];
   createdAt: FirebaseFirestoreTypes.Timestamp;
