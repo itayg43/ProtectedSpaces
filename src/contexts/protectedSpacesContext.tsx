@@ -11,23 +11,12 @@ import React, {
 import type {
   AddCommentFormData,
   AddProtectedSpaceFormData,
-  ProtectedSpace,
+  ProtectedSpaceEntities,
+  ProtectedSpacesContextParams,
 } from '../utils/types';
 import protectedSpacesService from '../services/protectedSpacesService';
 import log from '../utils/log';
 import {useAuthContext} from './authContext';
-
-type ProtectedSpacesContextParams = {
-  protectedSpaces: ProtectedSpace[];
-  handleAddProtectedSpace: (
-    formData: AddProtectedSpaceFormData,
-  ) => Promise<void>;
-  handleAddComment: (
-    formData: AddCommentFormData,
-    protectedSpace: ProtectedSpace,
-  ) => Promise<void>;
-  findProtectedSpaceById: (id: string) => ProtectedSpace | null;
-};
 
 const ProtectedSpacesContext = createContext<ProtectedSpacesContextParams>({
   protectedSpaces: [],
@@ -41,7 +30,8 @@ export const ProtectedSpacesContextProvider = ({
 }: PropsWithChildren) => {
   const {user} = useAuthContext();
 
-  const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
+  const [entities, setEntities] = useState<ProtectedSpaceEntities | null>(null);
+  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
 
   const handleAddProtectedSpace = useCallback(
     async (formData: AddProtectedSpaceFormData) => {
@@ -60,37 +50,47 @@ export const ProtectedSpacesContextProvider = ({
   );
 
   const handleAddComment = useCallback(
-    async (formData: AddCommentFormData, protectedSpace: ProtectedSpace) => {
-      if (!user) {
+    async (formData: AddCommentFormData) => {
+      if (!user || !entities || !selectedEntityId) {
         return;
       }
 
       try {
-        await protectedSpacesService.addComment(user, formData, protectedSpace);
+        await protectedSpacesService.addComment(
+          user,
+          formData,
+          entities[selectedEntityId],
+        );
       } catch (error) {
         log.error(error);
         throw new Error("We couldn't add your comment");
       }
     },
-    [user],
+    [user, entities, selectedEntityId],
   );
 
   const findProtectedSpaceById = useCallback(
     (id: string) => {
-      return protectedSpaces.find(p => p.id === id) ?? null;
+      if (!entities) {
+        return null;
+      }
+
+      setSelectedEntityId(id);
+
+      return entities[id];
     },
-    [protectedSpaces],
+    [entities],
   );
 
   const contextValues = useMemo(
     () => ({
-      protectedSpaces,
+      protectedSpaces: entities ? Object.values(entities) : [],
       handleAddProtectedSpace,
       handleAddComment,
       findProtectedSpaceById,
     }),
     [
-      protectedSpaces,
+      entities,
       handleAddProtectedSpace,
       handleAddComment,
       findProtectedSpaceById,
@@ -99,7 +99,17 @@ export const ProtectedSpacesContextProvider = ({
 
   useEffect(() => {
     const unsubscribe = protectedSpacesService.collectionSubscription(
-      spaces => setProtectedSpaces(spaces),
+      spaces => {
+        setEntities(
+          spaces.reduce(
+            (currentEntities, currentProtectedSpace) => ({
+              ...currentEntities,
+              [currentProtectedSpace.id]: currentProtectedSpace,
+            }),
+            {},
+          ),
+        );
+      },
       error => log.error(error),
     );
 
