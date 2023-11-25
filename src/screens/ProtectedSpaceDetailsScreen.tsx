@@ -22,6 +22,9 @@ import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import CommentListItem from '../components/CommentListItem';
+import KeyboardAvoidingView from '../components/KeyboardAvoidingView';
+import Modal from '../components/Modal';
+import AddCommentForm from '../components/forms/AddCommentForm';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -33,27 +36,174 @@ const DOT_INDICATOR_SIZE = DOT_SIZE * 2;
 const ProtectedSpaceDetailsScreen = () => {
   const safeAreaInsets = useSafeAreaInsets();
 
-  const {params} = useRoute<ProtectedSpaceDetailsScreenRouteProp>();
+  const route = useRoute<ProtectedSpaceDetailsScreenRouteProp>();
+  const navigation = useNavigation<ProtectedSpaceDetailsScreenNavigationProp>();
 
   const {findProtectedSpaceById} = useProtectedSpacesContext();
 
-  const [protectedSpaceDetails, setProtectedSpaceDetails] =
-    useState<ProtectedSpace | null>(null);
+  const [space, setSpace] = useState<ProtectedSpace | null>(null);
+
+  const [showAddCommentModal, setShowAddCommentModal] = useState(false);
+
+  const imagesScrollX = useRef(new Animated.Value(0)).current;
+
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
+
+  const handleOpenGoogleMapsUrl = async () => {
+    if (space) {
+      try {
+        await Linking.openURL(space.address.url);
+      } catch (error) {
+        log.error(error);
+      }
+    }
+  };
+
+  const handleToggleShowAddCommentModal = () => {
+    setShowAddCommentModal(currentState => !currentState);
+  };
 
   useEffect(() => {
-    setProtectedSpaceDetails(findProtectedSpaceById(params.id));
-  }, [params.id, findProtectedSpaceById]);
+    setSpace(findProtectedSpaceById(route.params.id));
+  }, [route.params.id, findProtectedSpaceById]);
 
   return (
     <>
-      {protectedSpaceDetails && (
-        <View style={[styles.container, {marginBottom: safeAreaInsets.bottom}]}>
-          <ImagesSection protectedSpace={protectedSpaceDetails} />
+      {space && (
+        <KeyboardAvoidingView>
+          <View style={styles.container}>
+            {/** IMAGES SECTION */}
 
-          <DetailsSection protectedSpace={protectedSpaceDetails} />
+            <View style={styles.imagesSectionContainer}>
+              <Animated.FlatList
+                data={space.images}
+                keyExtractor={item => item}
+                renderItem={({item: uri}) => (
+                  <FastImage
+                    style={styles.image}
+                    source={{uri, priority: 'high'}}
+                  />
+                )}
+                horizontal
+                snapToInterval={IMAGE_WIDTH}
+                decelerationRate="fast"
+                showsHorizontalScrollIndicator={false}
+                bounces={false}
+                onScroll={Animated.event(
+                  [{nativeEvent: {contentOffset: {x: imagesScrollX}}}],
+                  {useNativeDriver: true},
+                )}
+              />
 
-          <CommentsSection protectedSpace={protectedSpaceDetails} />
-        </View>
+              <IconButton
+                style={[styles.closeButton, {top: safeAreaInsets.top}]}
+                mode="contained"
+                icon="keyboard-backspace"
+                onPress={handleGoBack}
+              />
+
+              <View style={styles.dotsContainer}>
+                {space.images.map((_, index) => (
+                  <View key={index} style={styles.dot} />
+                ))}
+              </View>
+
+              <Animated.View
+                style={[
+                  styles.dotIndicator,
+                  {
+                    transform: [
+                      {
+                        translateX: Animated.divide(
+                          imagesScrollX,
+                          IMAGE_WIDTH,
+                        ).interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, DOT_INDICATOR_SIZE],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              />
+            </View>
+
+            {/** DETAILS SECTION */}
+
+            <View style={styles.detailsSectionContainer}>
+              <View style={styles.addressAndLinkContainer}>
+                <Text style={styles.address} numberOfLines={1}>
+                  {`${space.address.street} ${space.address.number}, ${space.address.city}`}
+                </Text>
+
+                <IconButton
+                  mode="contained"
+                  icon="google-maps"
+                  size={22}
+                  onPress={handleOpenGoogleMapsUrl}
+                />
+              </View>
+
+              <Divider style={styles.divider} />
+
+              <Text style={styles.description}>{space.description}</Text>
+
+              <View style={styles.userInfoContainer}>
+                <Text style={styles.userName}>
+                  @ {space.user.name.split(' ').join('_')}
+                </Text>
+
+                <Text style={styles.timestamp}>
+                  | {space.createdAt.toDate().toLocaleDateString()}
+                </Text>
+              </View>
+            </View>
+
+            {/** COMMENTS SECTION */}
+
+            <View
+              style={[
+                styles.commentsSectionContainer,
+                {marginBottom: safeAreaInsets.bottom},
+              ]}>
+              <View style={styles.commentsSectionTitleContainer}>
+                <Text style={styles.commentsSectionTitle}>Comments</Text>
+
+                <IconButton
+                  mode="contained"
+                  icon="plus"
+                  onPress={handleToggleShowAddCommentModal}
+                />
+              </View>
+
+              <FlatList
+                data={space.comments}
+                keyExtractor={item => item.id}
+                renderItem={({item}) => <CommentListItem comment={item} />}
+                ListEmptyComponent={CommentsEmptyListPlaceholder}
+                scrollEnabled={space.comments.length > 0}
+                bounces={false}
+                ItemSeparatorComponent={CommentsListSpacer}
+                ListFooterComponent={CommentsListSpacer}
+              />
+            </View>
+
+            {/** MODALS */}
+
+            {showAddCommentModal && (
+              <Modal
+                isVisible={showAddCommentModal}
+                onDismiss={handleToggleShowAddCommentModal}>
+                <AddCommentForm
+                  contentContainerStyle={styles.addCommentFormContainer}
+                  onSuccess={handleToggleShowAddCommentModal}
+                />
+              </Modal>
+            )}
+          </View>
+        </KeyboardAvoidingView>
       )}
     </>
   );
@@ -61,143 +211,18 @@ const ProtectedSpaceDetailsScreen = () => {
 
 export default ProtectedSpaceDetailsScreen;
 
-type SectionProps = {
-  protectedSpace: ProtectedSpace;
-};
-
-function ImagesSection({protectedSpace}: SectionProps) {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  const navigation = useNavigation<ProtectedSpaceDetailsScreenNavigationProp>();
-
-  const scrollX = useRef(new Animated.Value(0)).current;
-
-  const handleClose = () => {
-    navigation.goBack();
-  };
-
+function CommentsEmptyListPlaceholder() {
   return (
-    <View style={styles.imagesSectionContainer}>
-      <Animated.FlatList
-        data={protectedSpace.images}
-        keyExtractor={item => item}
-        renderItem={({item: uri}) => (
-          <FastImage style={styles.image} source={{uri, priority: 'high'}} />
-        )}
-        horizontal
-        snapToInterval={IMAGE_WIDTH}
-        decelerationRate="fast"
-        showsHorizontalScrollIndicator={false}
-        bounces={false}
-        onScroll={Animated.event(
-          [{nativeEvent: {contentOffset: {x: scrollX}}}],
-          {useNativeDriver: true},
-        )}
-      />
-
-      {/** close button */}
-      <IconButton
-        style={[styles.closeButton, {top: safeAreaInsets.top}]}
-        mode="contained"
-        icon="keyboard-backspace"
-        onPress={handleClose}
-      />
-
-      {/** dots */}
-      <View style={styles.dotsContainer}>
-        {protectedSpace.images.map((_, index) => (
-          <View key={index} style={styles.dot} />
-        ))}
-      </View>
-
-      {/** dot indicator */}
-      <Animated.View
-        style={[
-          styles.dotIndicator,
-          {
-            transform: [
-              {
-                translateX: Animated.divide(scrollX, IMAGE_WIDTH).interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, DOT_INDICATOR_SIZE],
-                }),
-              },
-            ],
-          },
-        ]}
-      />
+    <View style={styles.commentsListEmptyPlaceholderContainer}>
+      <Text style={styles.commentsListEmptyPlaceholderText}>
+        No comments yet...
+      </Text>
     </View>
   );
 }
 
-function DetailsSection({protectedSpace}: SectionProps) {
-  const handleOpenGoogleMapsLink = async () => {
-    try {
-      await Linking.openURL(protectedSpace.address.url);
-    } catch (error) {
-      log.error(error);
-    }
-  };
-
-  return (
-    <View style={styles.detailsSectionContainer}>
-      {/** address & link */}
-      <View style={styles.addressAndLinkContainer}>
-        {/** address */}
-        <Text style={styles.address} numberOfLines={1}>
-          {`${protectedSpace.address.street} ${protectedSpace.address.number}, ${protectedSpace.address.city}`}
-        </Text>
-
-        {/** link */}
-        <IconButton
-          mode="contained"
-          icon="google-maps"
-          size={22}
-          onPress={handleOpenGoogleMapsLink}
-        />
-      </View>
-
-      <Divider style={styles.divider} />
-
-      {/** description */}
-      <Text style={styles.description}>{protectedSpace.description}</Text>
-
-      {/** user info & timestamp */}
-      <View style={styles.userInfoContainer}>
-        <Text style={styles.userName}>
-          @ {protectedSpace.user.name.split(' ').join('_')}
-        </Text>
-
-        <Text style={styles.timestamp}>
-          | {protectedSpace.createdAt.toDate().toLocaleDateString()}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function CommentsSection({protectedSpace}: SectionProps) {
-  return (
-    <View style={styles.commentsSectionContainer}>
-      <View style={styles.commentsSectionTitleContainer}>
-        <Text style={styles.commentsSectionTitle}>Comments</Text>
-
-        <IconButton mode="contained" icon="plus" onPress={() => null} />
-      </View>
-
-      <FlatList
-        data={protectedSpace.comments}
-        keyExtractor={item => item.id}
-        renderItem={({item}) => <CommentListItem comment={item} />}
-        ItemSeparatorComponent={ListSpacer}
-        ListFooterComponent={ListSpacer}
-      />
-    </View>
-  );
-}
-
-function ListSpacer() {
-  return <View style={styles.listSpacer} />;
+function CommentsListSpacer() {
+  return <View style={styles.commentsListSpacerContainer} />;
 }
 
 const styles = StyleSheet.create({
@@ -208,13 +233,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 5,
   },
-  listSpacer: {
-    marginBottom: 5,
-  },
 
-  // SECTIONS
-
-  // IMAGES
+  // IMAGES SECTION
   imagesSectionContainer: {},
   image: {
     height: IMAGE_HEIGHT,
@@ -248,7 +268,7 @@ const styles = StyleSheet.create({
     width: DOT_INDICATOR_SIZE,
   },
 
-  // DETAILS
+  // DETAILS SECTION
   detailsSectionContainer: {
     padding: 10,
   },
@@ -278,7 +298,7 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
 
-  // COMMENTS
+  // COMMENTS SECTION
   commentsSectionContainer: {
     flex: 1,
     padding: 10,
@@ -291,6 +311,22 @@ const styles = StyleSheet.create({
   },
   commentsSectionTitle: {
     color: 'black',
-    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  addCommentFormContainer: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+  },
+  commentsListEmptyPlaceholderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  commentsListEmptyPlaceholderText: {
+    color: 'black',
+  },
+  commentsListSpacerContainer: {
+    marginBottom: 5,
   },
 });
