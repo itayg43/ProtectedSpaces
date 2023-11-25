@@ -45,11 +45,15 @@ export const ProtectedSpacesContextProvider = ({
 
   const handleAddProtectedSpace = useCallback(
     async (formData: AddProtectedSpaceFormData) => {
+      if (!user) {
+        return;
+      }
+
       try {
-        await protectedSpacesService.add(user, formData);
+        await protectedSpacesService.addProtectedSpace(user, formData);
       } catch (error) {
         log.error(error);
-        throw new Error("We couldn't add the protected space");
+        throw new Error("We couldn't add your protected space");
       }
     },
     [user],
@@ -57,6 +61,10 @@ export const ProtectedSpacesContextProvider = ({
 
   const handleAddComment = useCallback(
     async (formData: AddCommentFormData, protectedSpace: ProtectedSpace) => {
+      if (!user) {
+        return;
+      }
+
       try {
         await protectedSpacesService.addComment(user, formData, protectedSpace);
       } catch (error) {
