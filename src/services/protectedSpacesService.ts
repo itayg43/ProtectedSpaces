@@ -13,7 +13,7 @@ import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 const protectedSpacesCollection = firestoreClient.collection('ProtectedSpaces');
 
-const add = async (
+const addProtectedSpace = async (
   user: FirebaseAuthTypes.User,
   formData: AddProtectedSpaceFormData,
 ) => {
@@ -80,7 +80,7 @@ const collectionSubscription = (
 };
 
 export default {
-  add,
+  addProtectedSpace,
   addComment,
   collectionSubscription,
 };
