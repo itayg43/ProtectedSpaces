@@ -11,18 +11,14 @@ import {Button} from 'react-native-paper';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 
-import {
-  FormTextInput,
-  FormImagesPicker,
-  FormGooglePlacesAutocomplete,
-  FormSegmentedButtons,
-} from './forms';
-import type {AddProtectedSpaceFormData} from '../utils/types';
-import {addProtectedSpaceValidationSchema} from '../utils/validationSchemas';
-import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
-import log from '../utils/log';
-
-import {ProtectedSpaceType} from '../utils/enums';
+import type {AddProtectedSpaceFormData} from '../../utils/types';
+import {addProtectedSpaceValidationSchema} from '../../utils/validationSchemas';
+import {useProtectedSpacesContext} from '../../contexts/protectedSpacesContext';
+import {ProtectedSpaceType} from '../../utils/enums';
+import FormImagesPicker from './FormImagesPicker';
+import FormSegmentedButtons from './FormSegmentedButtons';
+import FormGooglePlacesAutocomplete from './FormGooglePlacesAutocomplete';
+import FormTextInput from './FormTextInput';
 
 type Props = {
   contentContainerStyle?: StyleProp<ViewStyle>;
@@ -57,7 +53,6 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
       await handleAddProtectedSpace(formData);
       onSuccess();
     } catch (error: any) {
-      log.error(error);
       Alert.alert('Error', error.message);
     }
   };
