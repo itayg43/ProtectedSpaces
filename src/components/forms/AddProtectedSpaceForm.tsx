@@ -62,7 +62,7 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
       <FormImagesPicker<AddProtectedSpaceFormData>
         control={control}
         name="images"
-        amount={5}
+        amount={3}
       />
 
       <FormSegmentedButtons<AddProtectedSpaceFormData>
