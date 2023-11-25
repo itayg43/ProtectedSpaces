@@ -58,3 +58,16 @@ export type ImageAsset = {
   name: string;
   uri: string;
 };
+
+export type ProtectedSpaceEntities = {
+  [id: string]: ProtectedSpace;
+};
+
+export type ProtectedSpacesContextParams = {
+  protectedSpaces: ProtectedSpace[];
+  handleAddProtectedSpace: (
+    formData: AddProtectedSpaceFormData,
+  ) => Promise<void>;
+  handleAddComment: (formData: AddCommentFormData) => Promise<void>;
+  findProtectedSpaceById: (id: string) => ProtectedSpace | null;
+};
