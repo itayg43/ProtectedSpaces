@@ -67,7 +67,7 @@ const ProtectedSpacesScreen = () => {
 
         {location && (
           <FAB
-            style={[styles.addFab, {bottom: safeAreaInsets.bottom}]}
+            style={[styles.addFab, {bottom: safeAreaInsets.bottom || 20}]}
             icon="plus"
             size="medium"
             onPress={handleToggleShowAddModal}
