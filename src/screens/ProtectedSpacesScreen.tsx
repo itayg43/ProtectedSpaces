@@ -9,15 +9,16 @@ import KeyboardAvoidingView from '../components/KeyboardAvoidingView';
 import {useLocationContext} from '../contexts/locationContext';
 import Modal from '../components/Modal';
 import AddProtectedSpaceForm from '../components/forms/AddProtectedSpaceForm';
-
-import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpacesStack';
+import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpacesStackNavigator';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
-import {DEFAULT_MAP_DELTAS, DEFAULT_MAP_REGION} from '../utils/constants';
+import {DEFAULT_MAP_DELTAS} from '../utils/constants';
+import {ProtectedSpacesStackNavigationProp} from '../navigators/DrawerNavigator';
 
 const ProtectedSpacesScreen = () => {
   const safeAreaInsets = useSafeAreaInsets();
 
-  const navigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
+  const stackNavigation = useNavigation<ProtectedSpacesStackNavigationProp>();
+  const screenNavigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
 
   const location = useLocationContext();
 
@@ -26,9 +27,13 @@ const ProtectedSpacesScreen = () => {
   const [showAddModal, setShowAddModal] = useState(false);
 
   const handleMarkerPress = (id: string) => {
-    navigation.navigate('protectedSpaceDetailsScreen', {
+    screenNavigation.navigate('protectedSpaceDetailsScreen', {
       id,
     });
+  };
+
+  const handleOpenDrawer = () => {
+    stackNavigation.openDrawer();
   };
 
   const handleToggleShowAddModal = () => {
@@ -36,56 +41,60 @@ const ProtectedSpacesScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView>
-      <View style={styles.container}>
-        <MapView
-          style={styles.mapContainer}
-          provider={PROVIDER_GOOGLE}
-          region={
-            location
-              ? {
-                  latitude: location.latitude,
-                  longitude: location.longitude,
-                  latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
-                  longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
-                }
-              : DEFAULT_MAP_REGION
-          }
-          showsUserLocation>
-          {location &&
-            protectedSpaces.map(s => (
-              <Marker
-                key={s.id}
-                coordinate={{
-                  latitude: s.address.latLng.latitude,
-                  longitude: s.address.latLng.longitude,
-                }}
-                onPress={() => handleMarkerPress(s.id)}
-              />
-            ))}
-        </MapView>
+    <>
+      {location && (
+        <KeyboardAvoidingView>
+          <View style={styles.container}>
+            <MapView
+              style={styles.mapContainer}
+              provider={PROVIDER_GOOGLE}
+              region={{
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
+                longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
+              }}
+              showsUserLocation>
+              {protectedSpaces.map(s => (
+                <Marker
+                  key={s.id}
+                  coordinate={{
+                    latitude: s.address.latLng.latitude,
+                    longitude: s.address.latLng.longitude,
+                  }}
+                  onPress={() => handleMarkerPress(s.id)}
+                />
+              ))}
+            </MapView>
 
-        {location && (
-          <FAB
-            style={[styles.addFab, {bottom: safeAreaInsets.bottom || 20}]}
-            icon="plus"
-            size="medium"
-            onPress={handleToggleShowAddModal}
-          />
-        )}
-
-        {/** MODALS */}
-
-        {showAddModal && (
-          <Modal isVisible={showAddModal} onDismiss={handleToggleShowAddModal}>
-            <AddProtectedSpaceForm
-              contentContainerStyle={styles.addFormContainer}
-              onSuccess={handleToggleShowAddModal}
+            <FAB
+              style={[styles.drawerFab, {top: safeAreaInsets.top || 20}]}
+              icon="menu"
+              size="small"
+              onPress={handleOpenDrawer}
             />
-          </Modal>
-        )}
-      </View>
-    </KeyboardAvoidingView>
+
+            <FAB
+              style={[styles.addFab, {bottom: safeAreaInsets.bottom || 20}]}
+              icon="plus"
+              size="small"
+              onPress={handleToggleShowAddModal}
+            />
+
+            {/** MODALS */}
+
+            <Modal
+              isVisible={showAddModal}
+              onDismiss={handleToggleShowAddModal}>
+              <AddProtectedSpaceForm
+                contentContainerStyle={styles.addFormContainer}
+                onSuccess={handleToggleShowAddModal}
+              />
+            </Modal>
+          </View>
+        </KeyboardAvoidingView>
+      )}
+    </>
   );
 };
 
@@ -98,6 +107,12 @@ const styles = StyleSheet.create({
 
   mapContainer: {
     flex: 1,
+  },
+
+  drawerFab: {
+    position: 'absolute',
+    left: 20,
+    borderRadius: 30,
   },
 
   addFab: {

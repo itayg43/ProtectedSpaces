@@ -4,7 +4,7 @@ import LoginScreen from './screens/LoginScreen';
 import {useAuthContext} from './contexts/authContext';
 import {ProtectedSpacesContextProvider} from './contexts/protectedSpacesContext';
 import {LocationContextProvider} from './contexts/locationContext';
-import ProtectedSpacesStackNavigator from './navigators/ProtectedSpacesStack';
+import DrawerNavigator from './navigators/DrawerNavigator';
 
 const App = () => {
   const {isInitializing, user} = useAuthContext();
@@ -16,7 +16,7 @@ const App = () => {
   return user ? (
     <LocationContextProvider>
       <ProtectedSpacesContextProvider>
-        <ProtectedSpacesStackNavigator />
+        <DrawerNavigator />
       </ProtectedSpacesContextProvider>
     </LocationContextProvider>
   ) : (

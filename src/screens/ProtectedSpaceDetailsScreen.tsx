@@ -17,7 +17,7 @@ import type {ProtectedSpace} from '../utils/types';
 import {
   ProtectedSpaceDetailsScreenNavigationProp,
   ProtectedSpaceDetailsScreenRouteProp,
-} from '../navigators/ProtectedSpacesStack';
+} from '../navigators/ProtectedSpacesStackNavigator';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
