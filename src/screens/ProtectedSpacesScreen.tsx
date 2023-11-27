@@ -16,6 +16,8 @@ import {ProtectedSpacesStackNavigationProp} from '../navigators/DrawerNavigator'
 
 const ProtectedSpacesScreen = () => {
   const safeAreaInsets = useSafeAreaInsets();
+  const topInset = safeAreaInsets.top > 20 ? safeAreaInsets.top : 30;
+  const bottomInset = safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : 20;
 
   const stackNavigation = useNavigation<ProtectedSpacesStackNavigationProp>();
   const screenNavigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
@@ -68,14 +70,14 @@ const ProtectedSpacesScreen = () => {
             </MapView>
 
             <FAB
-              style={[styles.drawerFab, {top: safeAreaInsets.top || 20}]}
+              style={[styles.drawerFab, {top: topInset}]}
               icon="menu"
               size="small"
               onPress={handleOpenDrawer}
             />
 
             <FAB
-              style={[styles.addFab, {bottom: safeAreaInsets.bottom || 20}]}
+              style={[styles.addFab, {bottom: bottomInset}]}
               icon="plus"
               size="small"
               onPress={handleToggleShowAddModal}
