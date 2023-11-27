@@ -48,7 +48,7 @@ const addProtectedSpace = async (
 const addComment = async (
   user: FirebaseAuthTypes.User,
   formData: AddCommentFormData,
-  protectedSpace: ProtectedSpace,
+  protectedSpaceId: string,
 ) => {
   const comment: Comment = {
     id: uuidv4(),
@@ -60,8 +60,8 @@ const addComment = async (
     createdAt: firestore.Timestamp.now(),
   };
 
-  await protectedSpacesCollection.doc(protectedSpace.id).update({
-    comments: [...protectedSpace.comments, comment],
+  await protectedSpacesCollection.doc(protectedSpaceId).update({
+    comments: firestore.FieldValue.arrayUnion(comment),
   });
 };
 

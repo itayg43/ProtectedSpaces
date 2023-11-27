@@ -51,7 +51,7 @@ export const ProtectedSpacesContextProvider = ({
 
   const handleAddComment = useCallback(
     async (formData: AddCommentFormData) => {
-      if (!user || !entities || !selectedEntityId) {
+      if (!user || !selectedEntityId) {
         return;
       }
 
@@ -59,14 +59,14 @@ export const ProtectedSpacesContextProvider = ({
         await protectedSpacesService.addComment(
           user,
           formData,
-          entities[selectedEntityId],
+          selectedEntityId,
         );
       } catch (error) {
         log.error(error);
         throw new Error("We couldn't add your comment");
       }
     },
-    [user, entities, selectedEntityId],
+    [user, selectedEntityId],
   );
 
   const findProtectedSpaceById = useCallback(
