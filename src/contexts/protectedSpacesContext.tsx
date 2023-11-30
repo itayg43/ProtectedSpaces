@@ -11,18 +11,31 @@ import React, {
 import type {
   AddCommentFormData,
   AddProtectedSpaceFormData,
-  ProtectedSpaceEntities,
-  ProtectedSpacesContextParams,
+  ProtectedSpace,
+  Comment,
 } from '../utils/types';
 import protectedSpacesService from '../services/protectedSpacesService';
 import log from '../utils/log';
 import {useAuthContext} from './authContext';
+
+export type ProtectedSpacesContextParams = {
+  protectedSpaces: ProtectedSpace[];
+  handleAddProtectedSpace: (
+    formData: AddProtectedSpaceFormData,
+  ) => Promise<void>;
+  handleAddComment: (formData: AddCommentFormData) => Promise<void>;
+  findProtectedSpaceById: (id: string) => ProtectedSpace | null;
+  findCurrentUserProtectedSpaces: () => ProtectedSpace[];
+  findCurrentUserComments: () => Comment[];
+};
 
 const ProtectedSpacesContext = createContext<ProtectedSpacesContextParams>({
   protectedSpaces: [],
   handleAddProtectedSpace: async () => {},
   handleAddComment: async () => {},
   findProtectedSpaceById: () => null,
+  findCurrentUserProtectedSpaces: () => [],
+  findCurrentUserComments: () => [],
 });
 
 export const ProtectedSpacesContextProvider = ({
@@ -30,8 +43,10 @@ export const ProtectedSpacesContextProvider = ({
 }: PropsWithChildren) => {
   const {user} = useAuthContext();
 
-  const [entities, setEntities] = useState<ProtectedSpaceEntities | null>(null);
-  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
+  const [selectedProtectedSpaceId, setSelectedProtectedSpaceId] = useState<
+    string | null
+  >(null);
 
   const handleAddProtectedSpace = useCallback(
     async (formData: AddProtectedSpaceFormData) => {
@@ -51,7 +66,7 @@ export const ProtectedSpacesContextProvider = ({
 
   const handleAddComment = useCallback(
     async (formData: AddCommentFormData) => {
-      if (!user || !selectedEntityId) {
+      if (!user || !selectedProtectedSpaceId) {
         return;
       }
 
@@ -59,57 +74,75 @@ export const ProtectedSpacesContextProvider = ({
         await protectedSpacesService.addComment(
           user,
           formData,
-          selectedEntityId,
+          selectedProtectedSpaceId,
         );
       } catch (error) {
         log.error(error);
         throw new Error("We couldn't add your comment");
       }
     },
-    [user, selectedEntityId],
+    [user, selectedProtectedSpaceId],
   );
 
   const findProtectedSpaceById = useCallback(
     (id: string) => {
-      if (!entities) {
-        return null;
-      }
+      setSelectedProtectedSpaceId(id);
 
-      setSelectedEntityId(id);
-
-      return entities[id];
+      return protectedSpaces.find(s => s.id === id) ?? null;
     },
-    [entities],
+    [protectedSpaces],
   );
+
+  const findCurrentUserProtectedSpaces = useCallback(() => {
+    if (!user) {
+      return [];
+    }
+
+    return protectedSpaces.filter(s => s.user.id === user.uid);
+  }, [user, protectedSpaces]);
+
+  const findCurrentUserComments = useCallback(() => {
+    if (!user) {
+      return [];
+    }
+
+    const comments: Comment[] = [];
+
+    protectedSpaces.forEach(s => {
+      const currentSpaceUserComments = s.comments.filter(
+        c => c.user.id === user.uid,
+      );
+
+      if (currentSpaceUserComments.length > 0) {
+        comments.push(...currentSpaceUserComments);
+      }
+    });
+
+    return comments;
+  }, [user, protectedSpaces]);
 
   const contextValues = useMemo(
     () => ({
-      protectedSpaces: entities ? Object.values(entities) : [],
+      protectedSpaces,
       handleAddProtectedSpace,
       handleAddComment,
       findProtectedSpaceById,
+      findCurrentUserProtectedSpaces,
+      findCurrentUserComments,
     }),
     [
-      entities,
+      protectedSpaces,
       handleAddProtectedSpace,
       handleAddComment,
       findProtectedSpaceById,
+      findCurrentUserProtectedSpaces,
+      findCurrentUserComments,
     ],
   );
 
   useEffect(() => {
     const unsubscribe = protectedSpacesService.collectionSubscription(
-      spaces => {
-        setEntities(
-          spaces.reduce(
-            (currentEntities, currentProtectedSpace) => ({
-              ...currentEntities,
-              [currentProtectedSpace.id]: currentProtectedSpace,
-            }),
-            {},
-          ),
-        );
-      },
+      spaces => setProtectedSpaces(spaces),
       error => log.error(error),
     );
 

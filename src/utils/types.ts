@@ -18,6 +18,14 @@ export type Location = {
   speed: number | null;
 };
 
+export type Address = {
+  city: string;
+  street: string;
+  number: string;
+  url: string;
+  latLng: FirebaseFirestoreTypes.GeoPoint;
+};
+
 export type Comment = {
   id: string;
   value: string;
@@ -32,13 +40,7 @@ export type ProtectedSpace = {
   id: string;
   images: string[];
   type: string;
-  address: {
-    city: string;
-    street: string;
-    number: string;
-    url: string;
-    latLng: FirebaseFirestoreTypes.GeoPoint;
-  };
+  address: Address;
   description: string;
   user: {
     id: string;
@@ -57,17 +59,4 @@ export type AddCommentFormData = z.infer<typeof addCommentValidationSchema>;
 export type ImageAsset = {
   name: string;
   uri: string;
-};
-
-export type ProtectedSpaceEntities = {
-  [id: string]: ProtectedSpace;
-};
-
-export type ProtectedSpacesContextParams = {
-  protectedSpaces: ProtectedSpace[];
-  handleAddProtectedSpace: (
-    formData: AddProtectedSpaceFormData,
-  ) => Promise<void>;
-  handleAddComment: (formData: AddCommentFormData) => Promise<void>;
-  findProtectedSpaceById: (id: string) => ProtectedSpace | null;
 };
