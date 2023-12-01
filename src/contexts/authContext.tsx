@@ -10,55 +10,42 @@ import React, {
 import {Alert} from 'react-native';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
-import log from '../utils/log';
 import authService from '../services/authService';
 import type {AuthProvider} from '../utils/types';
 
 type AuthContextParams = {
   isInitializing: boolean;
   user: FirebaseAuthTypes.User | null;
-  handleSignIn: (provider: AuthProvider) => Promise<void>;
-  handleSignOut: () => Promise<void>;
+  signIn: (provider: AuthProvider) => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextParams>({
   isInitializing: true,
   user: null,
-  handleSignIn: async () => {},
-  handleSignOut: async () => {},
+  signIn: async () => {},
+  signOut: async () => {},
 });
 
 export const AuthContextProvider = (props: PropsWithChildren) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
-  const handleSignIn = useCallback(async (provider: AuthProvider) => {
+  const signIn = useCallback(async (provider: AuthProvider) => {
     try {
       await authService.signIn(provider);
-    } catch (error) {
-      log.error(error);
-      Alert.alert('Error', "We couldn't sign in to your account");
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
     }
   }, []);
 
-  const handleSignOut = useCallback(async () => {
+  const signOut = useCallback(async () => {
     try {
       await authService.signOut();
-    } catch (error) {
-      log.error(error);
-      Alert.alert('Error', "We couldn't sign out your account");
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
     }
   }, []);
-
-  const contextValues = useMemo(
-    () => ({
-      isInitializing,
-      user,
-      handleSignIn,
-      handleSignOut,
-    }),
-    [isInitializing, user, handleSignIn, handleSignOut],
-  );
 
   const handleAuthStateChange = useCallback(
     (u: FirebaseAuthTypes.User | null) => {
@@ -75,6 +62,16 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
 
     return unsubscribe;
   }, [handleAuthStateChange]);
+
+  const contextValues = useMemo(
+    () => ({
+      isInitializing,
+      user,
+      signIn,
+      signOut,
+    }),
+    [isInitializing, user, signIn, signOut],
+  );
 
   return (
     <AuthContext.Provider value={contextValues}>
