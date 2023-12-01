@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Alert, StyleSheet, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {FAB} from 'react-native-paper';
@@ -50,18 +50,22 @@ const ProtectedSpacesScreen = () => {
   const handleSubmitProtectedSpace = async (
     formData: AddProtectedSpaceFormData,
   ) => {
+    if (!user) {
+      return;
+    }
+
     try {
-      await protectedSpacesService.addProtectedSpace(user!, formData);
+      await protectedSpacesService.add(user, formData);
       handleToggleShowAddModal();
-    } catch (error) {
-      log.error(error);
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
     }
   };
 
   useEffect(() => {
     const unsubscribe = protectedSpacesService.collectionSubscription(
-      spaces => setProtectedSpaces(spaces),
-      error => log.error(error),
+      s => setProtectedSpaces(s),
+      e => log.error(e),
     );
 
     return unsubscribe;

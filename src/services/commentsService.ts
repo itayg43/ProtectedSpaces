@@ -4,21 +4,27 @@ import {v4 as uuidv4} from 'uuid';
 
 import type {AddCommentFormData, Comment} from '../utils/types';
 import {firestoreClient} from '../clients/firebaseClients';
+import log from '../utils/log';
 
-const addComment = async (
+const add = async (
   user: FirebaseAuthTypes.User,
   formData: AddCommentFormData,
   protectedSpaceId: string,
 ) => {
-  const comment = createComment(user, formData);
+  try {
+    const comment = createComment(user, formData);
 
-  await firestoreClient
-    .commentsSubCollection(protectedSpaceId)
-    .doc(comment.id)
-    .set(comment);
+    await firestoreClient
+      .commentsSubCollection(protectedSpaceId)
+      .doc(comment.id)
+      .set(comment);
+  } catch (error) {
+    log.error(error);
+    throw new Error('Add comment error');
+  }
 };
 
-const subCollectionSubscriptionByProtectedSpaceId = (
+const collectionSubscription = (
   protectedSpaceId: string,
   onChange: (c: Comment[]) => void,
   onError: (e: Error) => void,
@@ -33,8 +39,8 @@ const subCollectionSubscriptionByProtectedSpaceId = (
 };
 
 export default {
-  addComment,
-  subCollectionSubscriptionByProtectedSpaceId,
+  add,
+  collectionSubscription,
 };
 
 function createComment(

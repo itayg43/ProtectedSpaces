@@ -5,22 +5,33 @@ import {v4 as uuidv4} from 'uuid';
 import type {AddProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
 import {firestoreClient} from '../clients/firebaseClients';
 import storageService from './storageService';
+import log from '../utils/log';
 
-const addProtectedSpace = async (
+const add = async (
   user: FirebaseAuthTypes.User,
   formData: AddProtectedSpaceFormData,
 ) => {
-  const protectedSpace = await createProtectedSpace(user, formData);
+  try {
+    const protectedSpace = await createProtectedSpace(user, formData);
 
-  await firestoreClient.protectedSpacesCollection
-    .doc(protectedSpace.id)
-    .set(protectedSpace);
+    await firestoreClient.protectedSpacesCollection
+      .doc(protectedSpace.id)
+      .set(protectedSpace);
+  } catch (error) {
+    log.error(error);
+    throw new Error('Add protected space error');
+  }
 };
 
-const findProtectedSpaceById = async (id: string) => {
-  const doc = await firestoreClient.protectedSpacesCollection.doc(id).get();
+const findById = async (id: string) => {
+  try {
+    const doc = await firestoreClient.protectedSpacesCollection.doc(id).get();
 
-  return doc.data() ?? null;
+    return doc.data() ?? null;
+  } catch (error) {
+    log.error(error);
+    throw new Error('Find protected space by id error');
+  }
 };
 
 const collectionSubscription = (
@@ -34,8 +45,8 @@ const collectionSubscription = (
 };
 
 export default {
-  addProtectedSpace,
-  findProtectedSpaceById,
+  add,
+  findById,
   collectionSubscription,
 };
 
