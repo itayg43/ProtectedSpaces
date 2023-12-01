@@ -19,6 +19,7 @@ export type Location = {
 };
 
 export type Address = {
+  id: string;
   city: string;
   street: string;
   number: string;
@@ -46,7 +47,6 @@ export type ProtectedSpace = {
     id: string;
     name: string;
   };
-  comments: Comment[];
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
 

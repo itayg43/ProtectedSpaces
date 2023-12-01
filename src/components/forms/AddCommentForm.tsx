@@ -1,46 +1,22 @@
 import React from 'react';
-import {
-  Alert,
-  Keyboard,
-  StyleProp,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from 'react-native';
+import {Keyboard, StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
 import {Button} from 'react-native-paper';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 
 import type {AddCommentFormData} from '../../utils/types';
 import {addCommentValidationSchema} from '../../utils/validationSchemas';
-import {useProtectedSpacesContext} from '../../contexts/protectedSpacesContext';
 import FormTextInput from './FormTextInput';
 
 type Props = {
   contentContainerStyle?: StyleProp<ViewStyle>;
-  onSuccess: () => void;
+  onSubmit: (formData: AddCommentFormData) => Promise<void>;
 };
 
-const AddCommentForm = ({contentContainerStyle, onSuccess}: Props) => {
-  const {handleAddComment} = useProtectedSpacesContext();
-
-  const {
-    control,
-    handleSubmit: onSubmit,
-    formState,
-  } = useForm<AddCommentFormData>({
+const AddCommentForm = ({contentContainerStyle, onSubmit}: Props) => {
+  const {control, handleSubmit, formState} = useForm<AddCommentFormData>({
     resolver: zodResolver(addCommentValidationSchema),
   });
-
-  const handleSubmit = async (formData: AddCommentFormData) => {
-    try {
-      Keyboard.dismiss();
-      await handleAddComment(formData);
-      onSuccess();
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
-    }
-  };
 
   return (
     <View style={[contentContainerStyle, styles.container]}>
@@ -53,7 +29,10 @@ const AddCommentForm = ({contentContainerStyle, onSuccess}: Props) => {
 
       <Button
         mode="contained"
-        onPress={onSubmit(handleSubmit)}
+        onPress={handleSubmit(async formData => {
+          Keyboard.dismiss();
+          await onSubmit(formData);
+        })}
         loading={formState.isSubmitting}
         disabled={formState.isSubmitting}>
         Submit

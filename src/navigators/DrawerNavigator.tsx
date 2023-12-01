@@ -7,11 +7,9 @@ import {
 } from '@react-navigation/drawer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useNavigation} from '@react-navigation/native';
 
 import ProtectedSpacesStackNavigator from './ProtectedSpacesStackNavigator';
 import {useAuthContext} from '../contexts/authContext';
-import UserPlacesAndCommentsScreen from '../screens/UserPlacesAndCommentsScreen';
 
 type DrawerParams = {
   protectedSpacesStack: undefined;
@@ -21,11 +19,6 @@ type DrawerParams = {
 export type ProtectedSpacesStackNavigationProp = DrawerNavigationProp<
   DrawerParams,
   'protectedSpacesStack'
->;
-
-export type UserPlacesAndCommentsScreenNavigationProp = DrawerNavigationProp<
-  DrawerParams,
-  'userPlacesAndComments'
 >;
 
 const Drawer = createDrawerNavigator<DrawerParams>();
@@ -43,11 +36,6 @@ const DrawerNavigator = () => {
         name="protectedSpacesStack"
         component={ProtectedSpacesStackNavigator}
       />
-
-      <Drawer.Screen
-        name="userPlacesAndComments"
-        component={UserPlacesAndCommentsScreen}
-      />
     </Drawer.Navigator>
   );
 };
@@ -59,13 +47,7 @@ function DrawerContent() {
   const topInset = safeAreaInsets.top > 20 ? safeAreaInsets.top : 30;
   const bottomInset = safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : 20;
 
-  const navigation = useNavigation<UserPlacesAndCommentsScreenNavigationProp>();
-
   const {user, handleSignOut} = useAuthContext();
-
-  const handleMyPlacesAndCommentsPress = () => {
-    navigation.navigate('userPlacesAndComments');
-  };
 
   return (
     <View
@@ -74,13 +56,6 @@ function DrawerContent() {
         {marginTop: topInset, marginBottom: bottomInset},
       ]}>
       <DrawerListItem label={user?.displayName ?? ''} icon="face-man-profile" />
-      <Divider />
-
-      <DrawerListItem
-        label="My Places & Comments"
-        icon="home"
-        onPress={handleMyPlacesAndCommentsPress}
-      />
       <Divider />
 
       <DrawerListItem label="Sign out" icon="logout" onPress={handleSignOut} />

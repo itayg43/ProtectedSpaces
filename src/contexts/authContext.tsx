@@ -28,7 +28,7 @@ const AuthContext = createContext<AuthContextParams>({
   handleSignOut: async () => {},
 });
 
-export const AuthContextProvider = ({children}: PropsWithChildren) => {
+export const AuthContextProvider = (props: PropsWithChildren) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
@@ -78,7 +78,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
 
   return (
     <AuthContext.Provider value={contextValues}>
-      {children}
+      {props.children}
     </AuthContext.Provider>
   );
 };

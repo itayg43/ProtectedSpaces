@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
@@ -6,13 +6,16 @@ import {FAB} from 'react-native-paper';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
 import KeyboardAvoidingView from '../components/KeyboardAvoidingView';
-import {useLocationContext} from '../contexts/locationContext';
 import Modal from '../components/Modal';
 import AddProtectedSpaceForm from '../components/forms/AddProtectedSpaceForm';
 import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpacesStackNavigator';
-import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 import {DEFAULT_MAP_DELTAS} from '../utils/constants';
 import {ProtectedSpacesStackNavigationProp} from '../navigators/DrawerNavigator';
+import useLocation from '../hooks/useLocation';
+import type {AddProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
+import protectedSpacesService from '../services/protectedSpacesService';
+import log from '../utils/log';
+import {useAuthContext} from '../contexts/authContext';
 
 const ProtectedSpacesScreen = () => {
   const safeAreaInsets = useSafeAreaInsets();
@@ -22,9 +25,11 @@ const ProtectedSpacesScreen = () => {
   const stackNavigation = useNavigation<ProtectedSpacesStackNavigationProp>();
   const screenNavigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
 
-  const location = useLocationContext();
+  const location = useLocation();
 
-  const {protectedSpaces} = useProtectedSpacesContext();
+  const {user} = useAuthContext();
+
+  const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
 
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -41,6 +46,26 @@ const ProtectedSpacesScreen = () => {
   const handleToggleShowAddModal = () => {
     setShowAddModal(currentState => !currentState);
   };
+
+  const handleSubmitProtectedSpace = async (
+    formData: AddProtectedSpaceFormData,
+  ) => {
+    try {
+      await protectedSpacesService.addProtectedSpace(user!, formData);
+      handleToggleShowAddModal();
+    } catch (error) {
+      log.error(error);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = protectedSpacesService.collectionSubscription(
+      spaces => setProtectedSpaces(spaces),
+      error => log.error(error),
+    );
+
+    return unsubscribe;
+  }, []);
 
   return (
     <>
@@ -79,7 +104,7 @@ const ProtectedSpacesScreen = () => {
             <FAB
               style={[styles.addFab, {bottom: bottomInset}]}
               icon="plus"
-              size="small"
+              size="medium"
               onPress={handleToggleShowAddModal}
             />
 
@@ -90,7 +115,7 @@ const ProtectedSpacesScreen = () => {
               onDismiss={handleToggleShowAddModal}>
               <AddProtectedSpaceForm
                 contentContainerStyle={styles.addFormContainer}
-                onSuccess={handleToggleShowAddModal}
+                onSubmit={handleSubmitProtectedSpace}
               />
             </Modal>
           </View>

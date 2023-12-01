@@ -11,20 +11,21 @@ import {
 import {IconButton, Divider} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import log from '../utils/log';
-import type {ProtectedSpace} from '../utils/types';
+import type {AddCommentFormData, Comment, ProtectedSpace} from '../utils/types';
 import {
   ProtectedSpaceDetailsScreenNavigationProp,
   ProtectedSpaceDetailsScreenRouteProp,
 } from '../navigators/ProtectedSpacesStackNavigator';
-import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
-
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import CommentListItem from '../components/CommentListItem';
 import KeyboardAvoidingView from '../components/KeyboardAvoidingView';
 import Modal from '../components/Modal';
 import AddCommentForm from '../components/forms/AddCommentForm';
+import commentsService from '../services/commentsService';
+import {useAuthContext} from '../contexts/authContext';
+import protectedSpacesService from '../services/protectedSpacesService';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -39,9 +40,12 @@ const ProtectedSpaceDetailsScreen = () => {
   const route = useRoute<ProtectedSpaceDetailsScreenRouteProp>();
   const navigation = useNavigation<ProtectedSpaceDetailsScreenNavigationProp>();
 
-  const {findProtectedSpaceById} = useProtectedSpacesContext();
+  const {user} = useAuthContext();
 
-  const [space, setSpace] = useState<ProtectedSpace | null>(null);
+  const [protectedSpace, setProtectedSpace] = useState<ProtectedSpace | null>(
+    null,
+  );
+  const [comments, setComments] = useState<Comment[]>([]);
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
@@ -52,9 +56,9 @@ const ProtectedSpaceDetailsScreen = () => {
   };
 
   const handleOpenGoogleMapsUrl = async () => {
-    if (space) {
+    if (protectedSpace) {
       try {
-        await Linking.openURL(space.address.url);
+        await Linking.openURL(protectedSpace.address.url);
       } catch (error) {
         log.error(error);
       }
@@ -65,20 +69,54 @@ const ProtectedSpaceDetailsScreen = () => {
     setShowAddCommentModal(currentState => !currentState);
   };
 
+  const handleSubmitComment = async (formData: AddCommentFormData) => {
+    if (protectedSpace) {
+      try {
+        await commentsService.addComment(user!, formData, protectedSpace.id);
+        handleToggleShowAddCommentModal();
+      } catch (error) {
+        log.error(error);
+      }
+    }
+  };
+
   useEffect(() => {
-    setSpace(findProtectedSpaceById(route.params.id));
-  }, [route.params.id, findProtectedSpaceById]);
+    if (!protectedSpace) {
+      return;
+    }
+
+    const unsubscribe =
+      commentsService.subCollectionSubscriptionByProtectedSpaceId(
+        protectedSpace.id,
+        c => setComments(c),
+        error => log.error(error),
+      );
+
+    return unsubscribe;
+  }, [protectedSpace]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setProtectedSpace(
+          await protectedSpacesService.findProtectedSpaceById(route.params.id),
+        );
+      } catch (error) {
+        log.error(error);
+      }
+    })();
+  }, [route.params.id]);
 
   return (
     <>
-      {space && (
+      {protectedSpace && (
         <KeyboardAvoidingView>
           <View style={styles.container}>
             {/** IMAGES SECTION */}
 
             <View style={styles.imagesSectionContainer}>
               <Animated.FlatList
-                data={space.images}
+                data={protectedSpace.images}
                 keyExtractor={item => item}
                 renderItem={({item: uri}) => (
                   <FastImage
@@ -105,7 +143,7 @@ const ProtectedSpaceDetailsScreen = () => {
               />
 
               <View style={styles.dotsContainer}>
-                {space.images.map((_, index) => (
+                {protectedSpace.images.map((_, index) => (
                   <View key={index} style={styles.dot} />
                 ))}
               </View>
@@ -135,7 +173,7 @@ const ProtectedSpaceDetailsScreen = () => {
             <View style={styles.detailsSectionContainer}>
               <View style={styles.addressAndLinkContainer}>
                 <Text style={styles.address} numberOfLines={1}>
-                  {`${space.address.street} ${space.address.number}, ${space.address.city}`}
+                  {`${protectedSpace.address.street} ${protectedSpace.address.number}, ${protectedSpace.address.city}`}
                 </Text>
 
                 <IconButton
@@ -148,15 +186,17 @@ const ProtectedSpaceDetailsScreen = () => {
 
               <Divider style={styles.divider} />
 
-              <Text style={styles.description}>{space.description}</Text>
+              <Text style={styles.description}>
+                {protectedSpace.description}
+              </Text>
 
               <View style={styles.userInfoContainer}>
                 <Text style={styles.userName}>
-                  @ {space.user.name.split(' ').join('_')}
+                  @ {protectedSpace.user.name.split(' ').join('_')}
                 </Text>
 
                 <Text style={styles.timestamp}>
-                  | {space.createdAt.toDate().toLocaleDateString()}
+                  | {protectedSpace.createdAt.toDate().toLocaleDateString()}
                 </Text>
               </View>
             </View>
@@ -179,11 +219,11 @@ const ProtectedSpaceDetailsScreen = () => {
               </View>
 
               <FlatList
-                data={space.comments}
+                data={comments}
                 keyExtractor={item => item.id}
                 renderItem={({item}) => <CommentListItem comment={item} />}
                 ListEmptyComponent={CommentsEmptyListPlaceholder}
-                scrollEnabled={space.comments.length > 0}
+                scrollEnabled={comments.length > 0}
                 bounces={false}
                 ItemSeparatorComponent={CommentsListSpacer}
                 ListFooterComponent={CommentsListSpacer}
@@ -198,7 +238,7 @@ const ProtectedSpaceDetailsScreen = () => {
                 onDismiss={handleToggleShowAddCommentModal}>
                 <AddCommentForm
                   contentContainerStyle={styles.addCommentFormContainer}
-                  onSuccess={handleToggleShowAddCommentModal}
+                  onSubmit={handleSubmitComment}
                 />
               </Modal>
             )}

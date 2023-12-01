@@ -1,19 +1,11 @@
 import React, {useMemo} from 'react';
-import {
-  Alert,
-  Keyboard,
-  StyleProp,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from 'react-native';
+import {Keyboard, StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
 import {Button} from 'react-native-paper';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 
 import type {AddProtectedSpaceFormData} from '../../utils/types';
 import {addProtectedSpaceValidationSchema} from '../../utils/validationSchemas';
-import {useProtectedSpacesContext} from '../../contexts/protectedSpacesContext';
 import {ProtectedSpaceType} from '../../utils/enums';
 import FormImagesPicker from './FormImagesPicker';
 import FormSegmentedButtons from './FormSegmentedButtons';
@@ -22,23 +14,17 @@ import FormTextInput from './FormTextInput';
 
 type Props = {
   contentContainerStyle?: StyleProp<ViewStyle>;
-  onSuccess: () => void;
+  onSubmit: (formData: AddProtectedSpaceFormData) => Promise<void>;
 };
 
-const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
-  const {handleAddProtectedSpace} = useProtectedSpacesContext();
-
-  const {
-    control,
-    handleSubmit: onSubmit,
-    formState,
-    setError,
-  } = useForm<AddProtectedSpaceFormData>({
-    resolver: zodResolver(addProtectedSpaceValidationSchema),
-    defaultValues: {
-      images: [],
-    },
-  });
+const AddProtectedSpaceForm = ({contentContainerStyle, onSubmit}: Props) => {
+  const {control, handleSubmit, formState, setError} =
+    useForm<AddProtectedSpaceFormData>({
+      resolver: zodResolver(addProtectedSpaceValidationSchema),
+      defaultValues: {
+        images: [],
+      },
+    });
 
   const typeOptionButtons = useMemo(() => {
     return Object.entries(ProtectedSpaceType).map(([key, value]) => ({
@@ -46,16 +32,6 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
       value,
     }));
   }, []);
-
-  const handleSubmit = async (formData: AddProtectedSpaceFormData) => {
-    try {
-      Keyboard.dismiss();
-      await handleAddProtectedSpace(formData);
-      onSuccess();
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
-    }
-  };
 
   return (
     <View style={[contentContainerStyle, styles.container]}>
@@ -87,7 +63,10 @@ const AddProtectedSpaceForm = ({contentContainerStyle, onSuccess}: Props) => {
 
       <Button
         mode="contained"
-        onPress={onSubmit(handleSubmit)}
+        onPress={handleSubmit(async formData => {
+          Keyboard.dismiss();
+          await onSubmit(formData);
+        })}
         loading={formState.isSubmitting}
         disabled={formState.isSubmitting}>
         Submit
