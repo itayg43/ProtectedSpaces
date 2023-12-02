@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -13,7 +13,7 @@ import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
 import log from '../utils/log';
-import type {AddCommentFormData, Comment, ProtectedSpace} from '../utils/types';
+import type {AddCommentFormData} from '../utils/types';
 import {
   ProtectedSpaceDetailsScreenNavigationProp,
   ProtectedSpaceDetailsScreenRouteProp,
@@ -24,10 +24,10 @@ import Modal from '../components/Modal';
 import AddCommentForm from '../components/forms/AddCommentForm';
 import commentsService from '../services/commentsService';
 import {useAuthContext} from '../contexts/authContext';
-import protectedSpacesService from '../services/protectedSpacesService';
 import LoadingView from '../components/views/LoadingView';
 import errorAlert from '../utils/errorAlert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
+import useProtectedSpaceDetails from '../hooks/useProtectedSpaceDetails';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -42,9 +42,10 @@ const ProtectedSpaceDetailsScreen = () => {
 
   const {user} = useAuthContext();
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [space, setSpace] = useState<ProtectedSpace | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const {status, protectedSpace, comments} = useProtectedSpaceDetails(
+    route.params.id,
+  );
+
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
   const handleGoBack = useCallback(() => {
@@ -52,12 +53,12 @@ const ProtectedSpaceDetailsScreen = () => {
   }, [navigation]);
 
   const handleOpenAddressUrl = async () => {
-    if (!space) {
+    if (!protectedSpace) {
       return;
     }
 
     try {
-      await Linking.openURL(space.address.url);
+      await Linking.openURL(protectedSpace.address.url);
     } catch (error) {
       log.error(error);
       errorAlert.show('Open address url error');
@@ -69,58 +70,36 @@ const ProtectedSpaceDetailsScreen = () => {
   };
 
   const handleSubmitComment = async (formData: AddCommentFormData) => {
-    if (!user || !space) {
+    if (!user || !protectedSpace) {
       return;
     }
 
     try {
-      await commentsService.add(user, formData, space.id);
+      await commentsService.add(user, formData, protectedSpace.id);
       handleToggleShowAddCommentModal();
     } catch (error: any) {
       errorAlert.show(error.message);
     }
   };
 
-  useEffect(() => {
-    if (!space) {
-      return;
-    }
-
-    const unsubscribe = commentsService.collectionSubscription(
-      space.id,
-      c => setComments(c),
-      error => log.error(error),
-    );
-
-    return unsubscribe;
-  }, [space]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setSpace(await protectedSpacesService.findById(route.params.id));
-      } catch (error: any) {
-        errorAlert.show(error.message, [{text: 'OK', onPress: handleGoBack}]);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [route.params.id, handleGoBack]);
-
-  if (isLoading) {
+  if (status === 'loading') {
     return <LoadingView />;
+  }
+
+  if (status === 'error') {
+    return <></>;
   }
 
   return (
     <>
-      {space && (
+      {protectedSpace && (
         <KeyboardAvoidingView>
           <View style={styles.container}>
             {/** IMAGES SECTION */}
 
             <View style={styles.imagesSectionContainer}>
               <Animated.FlatList
-                data={space.images}
+                data={protectedSpace.images}
                 keyExtractor={item => item}
                 renderItem={({item: uri}) => (
                   <FastImage
@@ -148,7 +127,7 @@ const ProtectedSpaceDetailsScreen = () => {
             <View style={styles.detailsSectionContainer}>
               <View style={styles.addressAndLinkContainer}>
                 <Text style={styles.address} numberOfLines={1}>
-                  {`${space.address.street} ${space.address.number}, ${space.address.city}`}
+                  {`${protectedSpace.address.street} ${protectedSpace.address.number}, ${protectedSpace.address.city}`}
                 </Text>
 
                 <IconButton
@@ -161,15 +140,17 @@ const ProtectedSpaceDetailsScreen = () => {
 
               <Divider style={styles.divider} />
 
-              <Text style={styles.description}>{space.description}</Text>
+              <Text style={styles.description}>
+                {protectedSpace.description}
+              </Text>
 
               <View style={styles.userInfoContainer}>
                 <Text style={styles.userName}>
-                  @ {space.user.name.split(' ').join('_')}
+                  @ {protectedSpace.user.name.split(' ').join('_')}
                 </Text>
 
                 <Text style={styles.timestamp}>
-                  | {space.createdAt.toDate().toLocaleDateString()}
+                  | {protectedSpace.createdAt.toDate().toLocaleDateString()}
                 </Text>
               </View>
             </View>
