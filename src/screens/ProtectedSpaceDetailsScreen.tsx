@@ -1,11 +1,10 @@
-import React, {useCallback, useState} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
   Text,
   Linking,
   Dimensions,
-  Animated,
   FlatList,
 } from 'react-native';
 import {IconButton, Divider} from 'react-native-paper';
@@ -49,9 +48,9 @@ const ProtectedSpaceDetailsScreen = () => {
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
-  const handleGoBack = useCallback(() => {
+  const handleGoBack = () => {
     navigation.goBack();
-  }, [navigation]);
+  };
 
   const handleOpenAddressUrl = async () => {
     if (!protectedSpace) {
@@ -97,115 +96,111 @@ const ProtectedSpaceDetailsScreen = () => {
     );
   }
 
-  return (
-    <>
-      {protectedSpace && (
-        <KeyboardAvoidingView>
-          <View style={styles.container}>
-            {/** IMAGES SECTION */}
+  if (status === 'idle' && protectedSpace) {
+    return (
+      <KeyboardAvoidingView>
+        <View style={styles.container}>
+          {/** IMAGES SECTION */}
 
-            <View style={styles.imagesSectionContainer}>
-              <Animated.FlatList
-                data={protectedSpace.images}
-                keyExtractor={item => item}
-                renderItem={({item: uri}) => (
-                  <FastImage
-                    style={styles.image}
-                    source={{uri, priority: 'high'}}
-                  />
-                )}
-                horizontal
-                snapToInterval={IMAGE_WIDTH}
-                decelerationRate="fast"
-                showsHorizontalScrollIndicator={false}
-                bounces={false}
-              />
-
-              <IconButton
-                style={[styles.goBackButton, {top: safeAreaInsets.top}]}
-                mode="contained"
-                icon="keyboard-backspace"
-                onPress={handleGoBack}
-              />
-            </View>
-
-            {/** DETAILS SECTION */}
-
-            <View style={styles.detailsSectionContainer}>
-              <View style={styles.addressAndLinkContainer}>
-                <Text style={styles.address} numberOfLines={1}>
-                  {`${protectedSpace.address.street} ${protectedSpace.address.number}, ${protectedSpace.address.city}`}
-                </Text>
-
-                <IconButton
-                  mode="contained"
-                  icon="google-maps"
-                  size={22}
-                  onPress={handleOpenAddressUrl}
+          <View style={styles.imagesSectionContainer}>
+            <FlatList
+              data={protectedSpace.images}
+              keyExtractor={item => item}
+              renderItem={({item: uri}) => (
+                <FastImage
+                  style={styles.image}
+                  source={{uri, priority: 'high'}}
                 />
-              </View>
+              )}
+              horizontal
+              snapToInterval={IMAGE_WIDTH}
+              decelerationRate="fast"
+              showsHorizontalScrollIndicator={false}
+              bounces={false}
+            />
 
-              <Divider style={styles.divider} />
+            <IconButton
+              style={[styles.goBackButton, {top: safeAreaInsets.top}]}
+              mode="contained"
+              icon="keyboard-backspace"
+              onPress={handleGoBack}
+            />
+          </View>
 
-              <Text style={styles.description}>
-                {protectedSpace.description}
+          {/** DETAILS SECTION */}
+
+          <View style={styles.detailsSectionContainer}>
+            <View style={styles.addressAndLinkContainer}>
+              <Text style={styles.address} numberOfLines={1}>
+                {`${protectedSpace.address.street} ${protectedSpace.address.number}, ${protectedSpace.address.city}`}
               </Text>
 
-              <View style={styles.userInfoContainer}>
-                <Text style={styles.userName}>
-                  @ {protectedSpace.user.name.split(' ').join('_')}
-                </Text>
-
-                <Text style={styles.timestamp}>
-                  | {protectedSpace.createdAt.toDate().toLocaleDateString()}
-                </Text>
-              </View>
-            </View>
-
-            {/** COMMENTS SECTION */}
-
-            <View
-              style={[
-                styles.commentsSectionContainer,
-                {marginBottom: safeAreaInsets.bottom},
-              ]}>
-              <View style={styles.commentsSectionTitleContainer}>
-                <Text style={styles.commentsSectionTitle}>Comments</Text>
-
-                <IconButton
-                  mode="contained"
-                  icon="plus"
-                  onPress={handleToggleShowAddCommentModal}
-                />
-              </View>
-
-              <FlatList
-                data={comments}
-                keyExtractor={item => item.id}
-                renderItem={({item}) => <CommentListItem comment={item} />}
-                ListEmptyComponent={CommentsEmptyListPlaceholder}
-                scrollEnabled={comments.length > 0}
-                bounces={false}
-                ItemSeparatorComponent={CommentsListSpacer}
-                ListFooterComponent={CommentsListSpacer}
+              <IconButton
+                mode="contained"
+                icon="google-maps"
+                size={22}
+                onPress={handleOpenAddressUrl}
               />
             </View>
 
-            {/** MODALS */}
+            <Divider style={styles.divider} />
 
-            <Modal
-              isVisible={showAddCommentModal}
-              onDismiss={handleToggleShowAddCommentModal}>
-              <AddCommentForm
-                contentContainerStyle={styles.addCommentFormContainer}
-                onSubmit={handleSubmitComment}
-              />
-            </Modal>
+            <Text style={styles.description}>{protectedSpace.description}</Text>
+
+            <View style={styles.userInfoContainer}>
+              <Text style={styles.userName}>
+                @ {protectedSpace.user.name.split(' ').join('_')}
+              </Text>
+
+              <Text style={styles.timestamp}>
+                | {protectedSpace.createdAt.toDate().toLocaleDateString()}
+              </Text>
+            </View>
           </View>
-        </KeyboardAvoidingView>
-      )}
-    </>
-  );
+
+          {/** COMMENTS SECTION */}
+
+          <View
+            style={[
+              styles.commentsSectionContainer,
+              {marginBottom: safeAreaInsets.bottom},
+            ]}>
+            <View style={styles.commentsSectionTitleContainer}>
+              <Text style={styles.commentsSectionTitle}>Comments</Text>
+
+              <IconButton
+                mode="contained"
+                icon="plus"
+                onPress={handleToggleShowAddCommentModal}
+              />
+            </View>
+
+            <FlatList
+              data={comments}
+              keyExtractor={item => item.id}
+              renderItem={({item}) => <CommentListItem comment={item} />}
+              ListEmptyComponent={CommentsEmptyListPlaceholder}
+              scrollEnabled={comments.length > 0}
+              bounces={false}
+              ItemSeparatorComponent={CommentsListSpacer}
+              ListFooterComponent={CommentsListSpacer}
+            />
+          </View>
+
+          {/** MODALS */}
+
+          <Modal
+            isVisible={showAddCommentModal}
+            onDismiss={handleToggleShowAddCommentModal}>
+            <AddCommentForm
+              contentContainerStyle={styles.addCommentFormContainer}
+              onSubmit={handleSubmitComment}
+            />
+          </Modal>
+        </View>
+      </KeyboardAvoidingView>
+    );
+  }
 };
 
 export default ProtectedSpaceDetailsScreen;
