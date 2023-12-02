@@ -10,13 +10,13 @@ import AddProtectedSpaceForm from '../components/forms/AddProtectedSpaceForm';
 import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpacesStackNavigator';
 import {DEFAULT_MAP_DELTAS} from '../utils/constants';
 import {ProtectedSpacesStackNavigationProp} from '../navigators/DrawerNavigator';
-import useLocation from '../hooks/useLocation';
 import type {AddProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
 import protectedSpacesService from '../services/protectedSpacesService';
 import log from '../utils/log';
 import {useAuthContext} from '../contexts/authContext';
 import errorAlert from '../utils/errorAlert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
+import {useLocationContext} from '../contexts/locationContext';
 
 const ProtectedSpacesScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
@@ -24,7 +24,7 @@ const ProtectedSpacesScreen = () => {
   const stackNavigation = useNavigation<ProtectedSpacesStackNavigationProp>();
   const screenNavigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
 
-  const location = useLocation();
+  const {location} = useLocationContext();
 
   const {user} = useAuthContext();
 

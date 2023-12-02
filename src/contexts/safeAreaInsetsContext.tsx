@@ -6,12 +6,12 @@ import React, {
 } from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-type SafeAreaInsetsParams = {
+type SafeAreaInsetsContextParams = {
   top: number;
   bottom: number;
 };
 
-const SafeAreaInsetsContext = createContext<SafeAreaInsetsParams>({
+const SafeAreaInsetsContext = createContext<SafeAreaInsetsContextParams>({
   top: 0,
   bottom: 0,
 });
