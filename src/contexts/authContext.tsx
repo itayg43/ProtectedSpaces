@@ -12,6 +12,7 @@ import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import authService from '../services/authService';
 import type {AuthProvider} from '../utils/types';
 import errorAlert from '../utils/errorAlert';
+import log from '../utils/log';
 
 type AuthContextStatus = 'idle' | 'initializing';
 
@@ -36,16 +37,18 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
   const handleSignIn = useCallback(async (provider: AuthProvider) => {
     try {
       await authService.signIn(provider);
-    } catch (error: any) {
-      errorAlert.show(error.message);
+    } catch (error) {
+      log.error(error);
+      errorAlert.show('Sign in error');
     }
   }, []);
 
   const handleSignOut = useCallback(async () => {
     try {
       await authService.signOut();
-    } catch (error: any) {
-      errorAlert.show(error.message);
+    } catch (error) {
+      log.error(error);
+      errorAlert.show('Sign out error');
     }
   }, []);
 

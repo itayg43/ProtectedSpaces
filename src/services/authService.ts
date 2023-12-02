@@ -8,7 +8,6 @@ import {
 } from '@env';
 import type {AuthProvider} from '../utils/types';
 import {authClient} from '../clients/firebaseClients';
-import log from '../utils/log';
 
 GoogleSignin.configure({
   webClientId:
@@ -18,21 +17,11 @@ GoogleSignin.configure({
 });
 
 const signIn = async (provider: AuthProvider) => {
-  try {
-    provider === 'Google' ? await googleSignIn() : await appleSignIn();
-  } catch (error) {
-    log.error(error);
-    throw new Error('Sign in error');
-  }
+  provider === 'Google' ? await googleSignIn() : await appleSignIn();
 };
 
 const signOut = async () => {
-  try {
-    await authClient.signOut();
-  } catch (error) {
-    log.error(error);
-    throw new Error('Sign out error');
-  }
+  await authClient.signOut();
 };
 
 const stateSubscription = (
