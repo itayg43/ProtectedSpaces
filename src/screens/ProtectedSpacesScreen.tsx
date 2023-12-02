@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {FAB} from 'react-native-paper';
@@ -10,13 +10,11 @@ import AddProtectedSpaceForm from '../components/forms/AddProtectedSpaceForm';
 import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpacesStackNavigator';
 import {DEFAULT_MAP_DELTAS} from '../utils/constants';
 import {ProtectedSpacesStackNavigationProp} from '../navigators/DrawerNavigator';
-import type {AddProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
-import protectedSpacesService from '../services/protectedSpacesService';
-import log from '../utils/log';
-import {useAuthContext} from '../contexts/authContext';
+import type {AddProtectedSpaceFormData} from '../utils/types';
 import errorAlert from '../utils/errorAlert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {useLocationContext} from '../contexts/locationContext';
+import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
 
 const ProtectedSpacesScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
@@ -25,10 +23,8 @@ const ProtectedSpacesScreen = () => {
   const screenNavigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
 
   const {location} = useLocationContext();
-
-  const {user} = useAuthContext();
-
-  const [protectedSpaces, setProtectedSpaces] = useState<ProtectedSpace[]>([]);
+  const {protectedSpaces, handleAddProtectedSpace} =
+    useProtectedSpacesContext();
 
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -46,85 +42,68 @@ const ProtectedSpacesScreen = () => {
     setShowAddModal(currentState => !currentState);
   };
 
-  const handleSubmitProtectedSpace = async (
-    formData: AddProtectedSpaceFormData,
-  ) => {
-    if (!user) {
-      return;
-    }
-
+  const handleSubmit = async (formData: AddProtectedSpaceFormData) => {
     try {
-      await protectedSpacesService.add(user, formData);
+      await handleAddProtectedSpace(formData);
       handleToggleShowAddModal();
     } catch (error: any) {
       errorAlert.show(error.message);
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = protectedSpacesService.collectionSubscription(
-      s => setProtectedSpaces(s),
-      e => log.error(e),
-    );
-
-    return unsubscribe;
-  }, []);
-
   return (
-    <>
-      {location && (
-        <KeyboardAvoidingView>
-          <View style={styles.container}>
-            <MapView
-              style={styles.mapContainer}
-              provider={PROVIDER_GOOGLE}
-              region={{
-                latitude: location.latitude,
-                longitude: location.longitude,
-                latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
-                longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
+    <KeyboardAvoidingView>
+      <View style={styles.container}>
+        <MapView
+          style={styles.mapContainer}
+          provider={PROVIDER_GOOGLE}
+          region={
+            location
+              ? {
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                  latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
+                  longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
+                }
+              : undefined
+          }
+          showsUserLocation>
+          {protectedSpaces.map(s => (
+            <Marker
+              key={s.id}
+              coordinate={{
+                latitude: s.address.latLng.latitude,
+                longitude: s.address.latLng.longitude,
               }}
-              showsUserLocation>
-              {protectedSpaces.map(s => (
-                <Marker
-                  key={s.id}
-                  coordinate={{
-                    latitude: s.address.latLng.latitude,
-                    longitude: s.address.latLng.longitude,
-                  }}
-                  onPress={() => handleMarkerPress(s.id)}
-                />
-              ))}
-            </MapView>
-
-            <FAB
-              style={[styles.drawerFab, {top: safeAreaInsets.top}]}
-              icon="menu"
-              size="small"
-              onPress={handleOpenDrawer}
+              onPress={() => handleMarkerPress(s.id)}
             />
+          ))}
+        </MapView>
 
-            <FAB
-              style={[styles.addFab, {bottom: safeAreaInsets.bottom}]}
-              icon="plus"
-              size="medium"
-              onPress={handleToggleShowAddModal}
-            />
+        <FAB
+          style={[styles.drawerFab, {top: safeAreaInsets.top}]}
+          icon="menu"
+          size="small"
+          onPress={handleOpenDrawer}
+        />
 
-            {/** MODALS */}
+        <FAB
+          style={[styles.addFab, {bottom: safeAreaInsets.bottom}]}
+          icon="plus"
+          size="medium"
+          onPress={handleToggleShowAddModal}
+        />
 
-            <Modal
-              isVisible={showAddModal}
-              onDismiss={handleToggleShowAddModal}>
-              <AddProtectedSpaceForm
-                contentContainerStyle={styles.addFormContainer}
-                onSubmit={handleSubmitProtectedSpace}
-              />
-            </Modal>
-          </View>
-        </KeyboardAvoidingView>
-      )}
-    </>
+        {/** MODALS */}
+
+        <Modal isVisible={showAddModal} onDismiss={handleToggleShowAddModal}>
+          <AddProtectedSpaceForm
+            contentContainerStyle={styles.addFormContainer}
+            onSubmit={handleSubmit}
+          />
+        </Modal>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

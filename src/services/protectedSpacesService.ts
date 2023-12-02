@@ -11,16 +11,16 @@ const add = async (
   user: FirebaseAuthTypes.User,
   formData: AddProtectedSpaceFormData,
 ) => {
-  try {
-    const protectedSpace = await createProtectedSpace(user, formData);
-
-    await firestoreClient.protectedSpacesCollection
-      .doc(protectedSpace.id)
-      .set(protectedSpace);
-  } catch (error) {
-    log.error(error);
-    throw new Error('Add protected space error');
+  const space = await findByAddressId(formData.address.id);
+  if (space) {
+    throw new Error('Protected space in this address has already been added');
   }
+
+  const protectedSpace = await createProtectedSpace(user, formData);
+
+  await firestoreClient.protectedSpacesCollection
+    .doc(protectedSpace.id)
+    .set(protectedSpace);
 };
 
 const findById = async (id: string) => {
