@@ -5,7 +5,6 @@ import {useAuthContext} from './contexts/authContext';
 import DrawerNavigator from './navigators/DrawerNavigator';
 import LoadingView from './components/views/LoadingView';
 import {SafeAreaInsetsContextProvider} from './contexts/safeAreaInsetsContext';
-import {LocationContextProvider} from './contexts/locationContext';
 import {ProtectedSpacesContextProvider} from './contexts/protectedSpacesContext';
 
 const App = () => {
@@ -16,13 +15,11 @@ const App = () => {
   }
 
   return user ? (
-    <LocationContextProvider>
-      <ProtectedSpacesContextProvider>
-        <SafeAreaInsetsContextProvider>
-          <DrawerNavigator />
-        </SafeAreaInsetsContextProvider>
-      </ProtectedSpacesContextProvider>
-    </LocationContextProvider>
+    <ProtectedSpacesContextProvider>
+      <SafeAreaInsetsContextProvider>
+        <DrawerNavigator />
+      </SafeAreaInsetsContextProvider>
+    </ProtectedSpacesContextProvider>
   ) : (
     <LoginScreen />
   );
