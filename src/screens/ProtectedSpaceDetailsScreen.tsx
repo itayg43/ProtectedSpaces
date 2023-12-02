@@ -26,8 +26,9 @@ import {useAuthContext} from '../contexts/authContext';
 import LoadingView from '../components/views/LoadingView';
 import errorAlert from '../utils/errorAlert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
-import useProtectedSpaceDetails from '../hooks/useProtectedSpaceDetails';
+import useProtectedSpace from '../hooks/useProtectedSpace';
 import ErrorView from '../components/views/ErrorView';
+import useCommentsCollection from '../hooks/useCommentsCollection';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -42,9 +43,8 @@ const ProtectedSpaceDetailsScreen = () => {
 
   const {user} = useAuthContext();
 
-  const {status, protectedSpace, comments} = useProtectedSpaceDetails(
-    route.params.id,
-  );
+  const {status, protectedSpace} = useProtectedSpace(route.params.id);
+  const comments = useCommentsCollection(protectedSpace?.id);
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
