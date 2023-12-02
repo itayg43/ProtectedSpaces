@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -27,6 +27,7 @@ import AddCommentForm from '../components/forms/AddCommentForm';
 import commentsService from '../services/commentsService';
 import {useAuthContext} from '../contexts/authContext';
 import protectedSpacesService from '../services/protectedSpacesService';
+import LoadingView from '../components/LoadingView';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -41,13 +42,14 @@ const ProtectedSpaceDetailsScreen = () => {
 
   const {user} = useAuthContext();
 
+  const [isLoading, setIsLoading] = useState(true);
   const [space, setSpace] = useState<ProtectedSpace | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     navigation.goBack();
-  };
+  }, [navigation]);
 
   const handleOpenAddressUrl = async () => {
     if (!space) {
@@ -98,10 +100,21 @@ const ProtectedSpaceDetailsScreen = () => {
       try {
         setSpace(await protectedSpacesService.findById(route.params.id));
       } catch (error: any) {
-        Alert.alert('Error', error.message);
+        Alert.alert('Error', error.message, [
+          {
+            text: 'OK',
+            onPress: handleGoBack,
+          },
+        ]);
+      } finally {
+        setIsLoading(false);
       }
     })();
-  }, [route.params.id]);
+  }, [route.params.id, handleGoBack]);
+
+  if (isLoading) {
+    return <LoadingView />;
+  }
 
   return (
     <>
