@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {FAB} from 'react-native-paper';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
@@ -17,11 +16,10 @@ import protectedSpacesService from '../services/protectedSpacesService';
 import log from '../utils/log';
 import {useAuthContext} from '../contexts/authContext';
 import errorAlert from '../utils/errorAlert';
+import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 
 const ProtectedSpacesScreen = () => {
-  const safeAreaInsets = useSafeAreaInsets();
-  const topInset = safeAreaInsets.top > 20 ? safeAreaInsets.top : 30;
-  const bottomInset = safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : 20;
+  const safeAreaInsets = useSafeAreaInsetsContext();
 
   const stackNavigation = useNavigation<ProtectedSpacesStackNavigationProp>();
   const screenNavigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
@@ -100,14 +98,14 @@ const ProtectedSpacesScreen = () => {
             </MapView>
 
             <FAB
-              style={[styles.drawerFab, {top: topInset}]}
+              style={[styles.drawerFab, {top: safeAreaInsets.top}]}
               icon="menu"
               size="small"
               onPress={handleOpenDrawer}
             />
 
             <FAB
-              style={[styles.addFab, {bottom: bottomInset}]}
+              style={[styles.addFab, {bottom: safeAreaInsets.bottom}]}
               icon="plus"
               size="medium"
               onPress={handleToggleShowAddModal}

@@ -11,7 +11,6 @@ import {
 import {IconButton, Divider} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import log from '../utils/log';
 import type {AddCommentFormData, Comment, ProtectedSpace} from '../utils/types';
@@ -28,6 +27,7 @@ import {useAuthContext} from '../contexts/authContext';
 import protectedSpacesService from '../services/protectedSpacesService';
 import LoadingView from '../components/views/LoadingView';
 import errorAlert from '../utils/errorAlert';
+import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -35,7 +35,7 @@ const IMAGE_WIDTH = SCREEN_WIDTH;
 const IMAGE_HEIGHT = 300;
 
 const ProtectedSpaceDetailsScreen = () => {
-  const safeAreaInsets = useSafeAreaInsets();
+  const safeAreaInsets = useSafeAreaInsetsContext();
 
   const route = useRoute<ProtectedSpaceDetailsScreenRouteProp>();
   const navigation = useNavigation<ProtectedSpaceDetailsScreenNavigationProp>();

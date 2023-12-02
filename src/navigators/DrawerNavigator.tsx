@@ -5,11 +5,11 @@ import {
   createDrawerNavigator,
   DrawerNavigationProp,
 } from '@react-navigation/drawer';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import ProtectedSpacesStackNavigator from './ProtectedSpacesStackNavigator';
 import {useAuthContext} from '../contexts/authContext';
+import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 
 type DrawerParams = {
   protectedSpacesStack: undefined;
@@ -42,9 +42,7 @@ const DrawerNavigator = () => {
 export default DrawerNavigator;
 
 function DrawerContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const topInset = safeAreaInsets.top > 20 ? safeAreaInsets.top : 30;
-  const bottomInset = safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : 20;
+  const safeAreaInsets = useSafeAreaInsetsContext();
 
   const {user, signOut} = useAuthContext();
 
@@ -52,7 +50,7 @@ function DrawerContent() {
     <View
       style={[
         styles.container,
-        {marginTop: topInset, marginBottom: bottomInset},
+        {marginTop: safeAreaInsets.top, marginBottom: safeAreaInsets.bottom},
       ]}>
       <DrawerListItem label={user?.displayName ?? ''} icon="face-man-profile" />
       <Divider />
@@ -64,7 +62,7 @@ function DrawerContent() {
       />
       <Divider />
 
-      <Text style={[styles.versionText, {bottom: bottomInset}]}>
+      <Text style={[styles.versionText, {bottom: safeAreaInsets.bottom}]}>
         Version: 0.0.1
       </Text>
     </View>
