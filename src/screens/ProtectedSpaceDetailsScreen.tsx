@@ -20,13 +20,13 @@ import {
   ProtectedSpaceDetailsScreenRouteProp,
 } from '../navigators/ProtectedSpacesStackNavigator';
 import CommentListItem from '../components/CommentListItem';
-import KeyboardAvoidingView from '../components/KeyboardAvoidingView';
+import KeyboardAvoidingView from '../components/views/KeyboardAvoidingView';
 import Modal from '../components/Modal';
 import AddCommentForm from '../components/forms/AddCommentForm';
 import commentsService from '../services/commentsService';
 import {useAuthContext} from '../contexts/authContext';
 import protectedSpacesService from '../services/protectedSpacesService';
-import LoadingView from '../components/LoadingView';
+import LoadingView from '../components/views/LoadingView';
 import errorAlert from '../utils/errorAlert';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');

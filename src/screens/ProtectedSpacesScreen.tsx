@@ -5,7 +5,7 @@ import {useNavigation} from '@react-navigation/native';
 import {FAB} from 'react-native-paper';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
-import KeyboardAvoidingView from '../components/KeyboardAvoidingView';
+import KeyboardAvoidingView from '../components/views/KeyboardAvoidingView';
 import Modal from '../components/Modal';
 import AddProtectedSpaceForm from '../components/forms/AddProtectedSpaceForm';
 import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpacesStackNavigator';
