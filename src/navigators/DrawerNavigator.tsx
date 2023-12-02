@@ -13,7 +13,6 @@ import {useAuthContext} from '../contexts/authContext';
 
 type DrawerParams = {
   protectedSpacesStack: undefined;
-  userPlacesAndComments: undefined;
 };
 
 export type ProtectedSpacesStackNavigationProp = DrawerNavigationProp<
@@ -47,7 +46,7 @@ function DrawerContent() {
   const topInset = safeAreaInsets.top > 20 ? safeAreaInsets.top : 30;
   const bottomInset = safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : 20;
 
-  const {user, handleSignOut} = useAuthContext();
+  const {user, signOut} = useAuthContext();
 
   return (
     <View
@@ -58,7 +57,11 @@ function DrawerContent() {
       <DrawerListItem label={user?.displayName ?? ''} icon="face-man-profile" />
       <Divider />
 
-      <DrawerListItem label="Sign out" icon="logout" onPress={handleSignOut} />
+      <DrawerListItem
+        label="Sign out"
+        icon="logout"
+        onPress={async () => await signOut()}
+      />
       <Divider />
 
       <Text style={[styles.versionText, {bottom: bottomInset}]}>
