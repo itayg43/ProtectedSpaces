@@ -28,6 +28,7 @@ import LoadingView from '../components/views/LoadingView';
 import errorAlert from '../utils/errorAlert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import useProtectedSpaceDetails from '../hooks/useProtectedSpaceDetails';
+import ErrorView from '../components/views/ErrorView';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -87,7 +88,13 @@ const ProtectedSpaceDetailsScreen = () => {
   }
 
   if (status === 'error') {
-    return <></>;
+    return (
+      <ErrorView
+        message="Something went wrong"
+        buttonLabel="Go back"
+        onPress={handleGoBack}
+      />
+    );
   }
 
   return (
