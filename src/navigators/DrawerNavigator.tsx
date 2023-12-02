@@ -44,7 +44,7 @@ export default DrawerNavigator;
 function DrawerContent() {
   const safeAreaInsets = useSafeAreaInsetsContext();
 
-  const {user, signOut} = useAuthContext();
+  const {user, handleSignOut} = useAuthContext();
 
   return (
     <View
@@ -58,7 +58,7 @@ function DrawerContent() {
       <DrawerListItem
         label="Sign out"
         icon="logout"
-        onPress={async () => await signOut()}
+        onPress={async () => await handleSignOut()}
       />
       <Divider />
 

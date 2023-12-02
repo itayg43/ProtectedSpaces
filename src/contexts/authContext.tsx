@@ -13,25 +13,27 @@ import authService from '../services/authService';
 import type {AuthProvider} from '../utils/types';
 import errorAlert from '../utils/errorAlert';
 
+type AuthContextStatus = 'idle' | 'initializing';
+
 type AuthContextParams = {
-  isInitializing: boolean;
+  status: AuthContextStatus;
   user: FirebaseAuthTypes.User | null;
-  signIn: (provider: AuthProvider) => Promise<void>;
-  signOut: () => Promise<void>;
+  handleSignIn: (provider: AuthProvider) => Promise<void>;
+  handleSignOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextParams>({
-  isInitializing: true,
+  status: 'initializing',
   user: null,
-  signIn: async () => {},
-  signOut: async () => {},
+  handleSignIn: async () => {},
+  handleSignOut: async () => {},
 });
 
 export const AuthContextProvider = (props: PropsWithChildren) => {
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [status, setStatus] = useState<AuthContextStatus>('initializing');
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
-  const signIn = useCallback(async (provider: AuthProvider) => {
+  const handleSignIn = useCallback(async (provider: AuthProvider) => {
     try {
       await authService.signIn(provider);
     } catch (error: any) {
@@ -39,7 +41,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     }
   }, []);
 
-  const signOut = useCallback(async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       await authService.signOut();
     } catch (error: any) {
@@ -50,11 +52,11 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
   const handleAuthStateChange = useCallback(
     (u: FirebaseAuthTypes.User | null) => {
       setUser(u);
-      if (isInitializing) {
-        setIsInitializing(false);
+      if (status === 'initializing') {
+        setStatus('idle');
       }
     },
-    [isInitializing],
+    [status],
   );
 
   useEffect(() => {
@@ -65,12 +67,12 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
-      isInitializing,
+      status,
       user,
-      signIn,
-      signOut,
+      handleSignIn,
+      handleSignOut,
     }),
-    [isInitializing, user, signIn, signOut],
+    [status, user, handleSignIn, handleSignOut],
   );
 
   return (

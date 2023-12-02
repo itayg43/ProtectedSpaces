@@ -6,14 +6,14 @@ import SafeView from '../components/views/SafeView';
 import {useAuthContext} from '../contexts/authContext';
 
 const LoginScreen = () => {
-  const {signIn} = useAuthContext();
+  const {handleSignIn} = useAuthContext();
 
   return (
     <SafeView contentContainerStyle={styles.container}>
       <GoogleSigninButton
         size={GoogleSigninButton.Size.Wide}
         color={GoogleSigninButton.Color.Dark}
-        onPress={async () => await signIn('Google')}
+        onPress={async () => await handleSignIn('Google')}
       />
     </SafeView>
   );
