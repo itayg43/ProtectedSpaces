@@ -5,7 +5,6 @@ import {v4 as uuidv4} from 'uuid';
 import type {AddProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
 import {firestoreClient} from '../clients/firebaseClients';
 import storageService from './storageService';
-import log from '../utils/log';
 
 const add = async (
   user: FirebaseAuthTypes.User,
@@ -24,14 +23,9 @@ const add = async (
 };
 
 const findById = async (id: string) => {
-  try {
-    const doc = await firestoreClient.protectedSpacesCollection.doc(id).get();
+  const doc = await firestoreClient.protectedSpacesCollection.doc(id).get();
 
-    return doc.data() ?? null;
-  } catch (error) {
-    log.error(error);
-    throw new Error('Find protected space by id error');
-  }
+  return doc.data() ?? null;
 };
 
 const findByAddressId = async (id: string) => {

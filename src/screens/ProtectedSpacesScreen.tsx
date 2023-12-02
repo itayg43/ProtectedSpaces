@@ -15,6 +15,8 @@ import errorAlert from '../utils/errorAlert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {useLocationContext} from '../contexts/locationContext';
 import {useProtectedSpacesContext} from '../contexts/protectedSpacesContext';
+import {useAuthContext} from '../contexts/authContext';
+import protectedSpacesService from '../services/protectedSpacesService';
 
 const ProtectedSpacesScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
@@ -23,8 +25,8 @@ const ProtectedSpacesScreen = () => {
   const screenNavigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
 
   const {location} = useLocationContext();
-  const {protectedSpaces, handleAddProtectedSpace} =
-    useProtectedSpacesContext();
+  const {user} = useAuthContext();
+  const {protectedSpaces} = useProtectedSpacesContext();
 
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -43,8 +45,12 @@ const ProtectedSpacesScreen = () => {
   };
 
   const handleSubmit = async (formData: AddProtectedSpaceFormData) => {
+    if (!user) {
+      return;
+    }
+
     try {
-      await handleAddProtectedSpace(formData);
+      await protectedSpacesService.add(user, formData);
       handleToggleShowAddModal();
     } catch (error: any) {
       errorAlert.show(error.message);
