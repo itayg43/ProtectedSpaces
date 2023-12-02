@@ -34,6 +34,15 @@ const findById = async (id: string) => {
   }
 };
 
+const findByAddressId = async (id: string) => {
+  const query = await firestoreClient.protectedSpacesCollection
+    .where('address.id', '==', id)
+    .limit(1)
+    .get();
+
+  return query.docs.at(0)?.data();
+};
+
 const collectionSubscription = (
   onChange: (s: ProtectedSpace[]) => void,
   onError: (e: Error) => void,
