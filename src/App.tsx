@@ -5,7 +5,6 @@ import {useAuthContext} from './contexts/authContext';
 import DrawerNavigator from './navigators/DrawerNavigator';
 import LoadingView from './components/views/LoadingView';
 import {SafeAreaInsetsContextProvider} from './contexts/safeAreaInsetsContext';
-import {ProtectedSpacesContextProvider} from './contexts/protectedSpacesContext';
 
 const App = () => {
   const {status, user} = useAuthContext();
@@ -15,11 +14,9 @@ const App = () => {
   }
 
   return user ? (
-    <ProtectedSpacesContextProvider>
-      <SafeAreaInsetsContextProvider>
-        <DrawerNavigator />
-      </SafeAreaInsetsContextProvider>
-    </ProtectedSpacesContextProvider>
+    <SafeAreaInsetsContextProvider>
+      <DrawerNavigator />
+    </SafeAreaInsetsContextProvider>
   ) : (
     <LoginScreen />
   );
