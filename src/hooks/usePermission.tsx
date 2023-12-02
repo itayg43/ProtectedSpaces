@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Alert, Linking, Platform} from 'react-native';
+import {Linking, Platform} from 'react-native';
 import RNPermissions, {
   PERMISSIONS,
   Permission,
@@ -7,6 +7,7 @@ import RNPermissions, {
 } from 'react-native-permissions';
 
 import log from '../utils/log';
+import errorAlert from '../utils/errorAlert';
 
 const isIOS = Platform.OS === 'ios';
 
@@ -24,48 +25,40 @@ const PERMISSION_OPTIONS: PermissionOption = {
 
 const usePermission = (permissionType: PermissionType) => {
   const permission = PERMISSION_OPTIONS[permissionType];
-  const [permissionStatus, setPermissionStatus] =
-    useState<PermissionStatus | null>(null);
+  const [status, setStatus] = useState<PermissionStatus | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        let status = await RNPermissions.check(permission);
+        let s = await RNPermissions.check(permission);
 
-        if (status === 'denied') {
-          status = await RNPermissions.request(permission);
+        if (s === 'denied') {
+          s = await RNPermissions.request(permission);
         }
 
-        if (status === 'blocked') {
+        if (s === 'blocked') {
           showPermissionBlockedAlert(permissionType);
         }
 
-        setPermissionStatus(status);
+        setStatus(s);
       } catch (error) {
         log.error(error);
-        setPermissionStatus('denied');
+        setStatus('denied');
       }
     })();
   }, [permission, permissionType]);
 
-  return permissionStatus;
+  return status;
 };
 
 export default usePermission;
 
 function showPermissionBlockedAlert(permissionType: PermissionType) {
-  Alert.alert(
-    'Error',
+  errorAlert.show(
     `Please provide access to ${permissionType} and reopen the app`,
     [
-      {
-        text: 'Cancel',
-        style: 'destructive',
-      },
-      {
-        text: 'OK',
-        onPress: async () => await Linking.openSettings(),
-      },
+      {text: 'Cancel', style: 'destructive'},
+      {text: 'OK', onPress: async () => await Linking.openSettings()},
     ],
   );
 }

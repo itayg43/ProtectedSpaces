@@ -7,11 +7,11 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import {Alert} from 'react-native';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 import authService from '../services/authService';
 import type {AuthProvider} from '../utils/types';
+import errorAlert from '../utils/errorAlert';
 
 type AuthContextParams = {
   isInitializing: boolean;
@@ -35,7 +35,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     try {
       await authService.signIn(provider);
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      errorAlert.show(error.message);
     }
   }, []);
 
@@ -43,7 +43,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     try {
       await authService.signOut();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      errorAlert.show(error.message);
     }
   }, []);
 

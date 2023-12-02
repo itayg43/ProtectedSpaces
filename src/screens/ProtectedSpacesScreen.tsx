@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {FAB} from 'react-native-paper';
@@ -16,6 +16,7 @@ import type {AddProtectedSpaceFormData, ProtectedSpace} from '../utils/types';
 import protectedSpacesService from '../services/protectedSpacesService';
 import log from '../utils/log';
 import {useAuthContext} from '../contexts/authContext';
+import errorAlert from '../utils/errorAlert';
 
 const ProtectedSpacesScreen = () => {
   const safeAreaInsets = useSafeAreaInsets();
@@ -58,7 +59,7 @@ const ProtectedSpacesScreen = () => {
       await protectedSpacesService.add(user, formData);
       handleToggleShowAddModal();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      errorAlert.show(error.message);
     }
   };
 

@@ -7,7 +7,6 @@ import {
   Dimensions,
   Animated,
   FlatList,
-  Alert,
 } from 'react-native';
 import {IconButton, Divider} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
@@ -28,6 +27,7 @@ import commentsService from '../services/commentsService';
 import {useAuthContext} from '../contexts/authContext';
 import protectedSpacesService from '../services/protectedSpacesService';
 import LoadingView from '../components/LoadingView';
+import errorAlert from '../utils/errorAlert';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -60,7 +60,7 @@ const ProtectedSpaceDetailsScreen = () => {
       await Linking.openURL(space.address.url);
     } catch (error) {
       log.error(error);
-      Alert.alert('Error', 'Open address url error');
+      errorAlert.show('Open address url error');
     }
   };
 
@@ -77,7 +77,7 @@ const ProtectedSpaceDetailsScreen = () => {
       await commentsService.add(user, formData, space.id);
       handleToggleShowAddCommentModal();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      errorAlert.show(error.message);
     }
   };
 
@@ -100,12 +100,7 @@ const ProtectedSpaceDetailsScreen = () => {
       try {
         setSpace(await protectedSpacesService.findById(route.params.id));
       } catch (error: any) {
-        Alert.alert('Error', error.message, [
-          {
-            text: 'OK',
-            onPress: handleGoBack,
-          },
-        ]);
+        errorAlert.show(error.message, [{text: 'OK', onPress: handleGoBack}]);
       } finally {
         setIsLoading(false);
       }
