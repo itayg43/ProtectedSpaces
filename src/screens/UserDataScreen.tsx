@@ -24,7 +24,7 @@ const UserDataScreen = () => {
     navigation.goBack();
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteProtectedSpace = async (id: string) => {
     try {
       await protectedSpacesService.deleteById(id);
       await commentsService.deleteByProtectedSpaceId(id);
@@ -67,7 +67,10 @@ const UserDataScreen = () => {
           data={protectedSpaces}
           keyExtractor={item => item.id}
           renderItem={({item}) => (
-            <ProtectedSpaceListItem item={item} onDelete={handleDelete} />
+            <ProtectedSpaceListItem
+              item={item}
+              onDelete={handleDeleteProtectedSpace}
+            />
           )}
           bounces={false}
           ItemSeparatorComponent={ListItemSeparator}
