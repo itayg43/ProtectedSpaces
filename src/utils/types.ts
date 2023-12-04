@@ -60,3 +60,5 @@ export type ImageAsset = {
   name: string;
   uri: string;
 };
+
+export type RequestStatus = 'idle' | 'loading' | 'error';

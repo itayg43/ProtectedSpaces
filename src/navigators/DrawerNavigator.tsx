@@ -10,12 +10,12 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import ProtectedSpacesStackNavigator from './ProtectedSpacesStackNavigator';
 import {useAuthContext} from '../contexts/authContext';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
-import UserProtectedSpacesAndComments from '../screens/UserProtectedSpacesAndComments';
+import UserDataScreen from '../screens/UserDataScreen';
 import {useNavigation} from '@react-navigation/native';
 
 type DrawerParams = {
   protectedSpacesStack: undefined;
-  userProtectedSpacesAndCommentsScreen: undefined;
+  userDataScreen: undefined;
 };
 
 export type ProtectedSpacesStackNavigationProp = DrawerNavigationProp<
@@ -23,8 +23,10 @@ export type ProtectedSpacesStackNavigationProp = DrawerNavigationProp<
   'protectedSpacesStack'
 >;
 
-export type UserProtectedSpacesAndCommentsScreenNavigationProp =
-  DrawerNavigationProp<DrawerParams, 'userProtectedSpacesAndCommentsScreen'>;
+export type UserDataScreenNavigationProp = DrawerNavigationProp<
+  DrawerParams,
+  'userDataScreen'
+>;
 
 const Drawer = createDrawerNavigator<DrawerParams>();
 
@@ -42,10 +44,7 @@ const DrawerNavigator = () => {
         component={ProtectedSpacesStackNavigator}
       />
 
-      <Drawer.Screen
-        name="userProtectedSpacesAndCommentsScreen"
-        component={UserProtectedSpacesAndComments}
-      />
+      <Drawer.Screen name="userDataScreen" component={UserDataScreen} />
     </Drawer.Navigator>
   );
 };
@@ -55,8 +54,7 @@ export default DrawerNavigator;
 function DrawerContent() {
   const safeAreaInsets = useSafeAreaInsetsContext();
 
-  const drawerNavigation =
-    useNavigation<UserProtectedSpacesAndCommentsScreenNavigationProp>();
+  const drawerNavigation = useNavigation<UserDataScreenNavigationProp>();
 
   const {user, handleSignOut} = useAuthContext();
 
@@ -71,9 +69,7 @@ function DrawerContent() {
       <DrawerListItem
         label="My Places & Comments"
         icon="home-city"
-        onPress={() =>
-          drawerNavigation.navigate('userProtectedSpacesAndCommentsScreen')
-        }
+        onPress={() => drawerNavigation.navigate('userDataScreen')}
       />
       <Divider />
 

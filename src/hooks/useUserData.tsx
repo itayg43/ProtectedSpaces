@@ -4,32 +4,34 @@ import {Comment, ProtectedSpace} from '../utils/types';
 import protectedSpacesService from '../services/protectedSpacesService';
 import commentsService from '../services/commentsService';
 import log from '../utils/log';
+import {useAuthContext} from '../contexts/authContext';
+import type {RequestStatus} from '../utils/types';
 
-type Status = 'idle' | 'loading' | 'error';
-
-type Data = {
-  status: Status;
+type UserDataParams = {
+  initialRequestStatus: RequestStatus;
   protectedSpaces: ProtectedSpace[];
   comments: Comment[];
 };
 
-const initialState: Data = {
-  status: 'loading',
+const initialState: UserDataParams = {
+  initialRequestStatus: 'loading',
   protectedSpaces: [],
   comments: [],
 };
 
-const useUserProtectedSpacesAndComments = (uid?: string) => {
-  const [data, setData] = useState<Data>(initialState);
+const useUserData = () => {
+  const {user} = useAuthContext();
 
-  const handleGetData = useCallback(async (id: string) => {
+  const [data, setData] = useState<UserDataParams>(initialState);
+
+  const handleGetData = useCallback(async (uid: string) => {
     try {
       const [s, c] = await Promise.all([
-        protectedSpacesService.findByUserId(id),
-        commentsService.findByUserId(id),
+        protectedSpacesService.findByUserId(uid),
+        commentsService.findByUserId(uid),
       ]);
       setData({
-        status: 'idle',
+        initialRequestStatus: 'idle',
         protectedSpaces: s,
         comments: c,
       });
@@ -43,14 +45,14 @@ const useUserProtectedSpacesAndComments = (uid?: string) => {
   }, []);
 
   useEffect(() => {
-    if (!uid) {
+    if (!user) {
       return;
     }
 
-    handleGetData(uid);
-  }, [uid, handleGetData]);
+    handleGetData(user.uid);
+  }, [user, handleGetData]);
 
   return data;
 };
 
-export default useUserProtectedSpacesAndComments;
+export default useUserData;
