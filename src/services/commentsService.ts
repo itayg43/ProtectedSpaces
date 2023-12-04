@@ -4,24 +4,27 @@ import {v4 as uuidv4} from 'uuid';
 
 import type {AddCommentFormData, Comment} from '../utils/types';
 import {firestoreClient} from '../clients/firebaseClients';
-import log from '../utils/log';
 
 const add = async (
   user: FirebaseAuthTypes.User,
   formData: AddCommentFormData,
   protectedSpaceId: string,
 ) => {
-  try {
-    const comment = createComment(user, formData);
+  const comment = createComment(user, formData);
 
-    await firestoreClient
-      .commentsSubCollection(protectedSpaceId)
-      .doc(comment.id)
-      .set(comment);
-  } catch (error) {
-    log.error(error);
-    throw new Error('Add comment error');
-  }
+  await firestoreClient
+    .commentsSubCollection(protectedSpaceId)
+    .doc(comment.id)
+    .set(comment);
+};
+
+const findByUserId = async (id: string) => {
+  const query = await firestoreClient.commentsSubCollectionGroup
+    .where('user.id', '==', id)
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  return query.docs.map(doc => doc.data());
 };
 
 const collectionSubscription = (
@@ -40,6 +43,7 @@ const collectionSubscription = (
 
 export default {
   add,
+  findByUserId,
   collectionSubscription,
 };
 
