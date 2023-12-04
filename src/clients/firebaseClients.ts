@@ -2,7 +2,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 
-import type {ProtectedSpace} from '../utils/types';
+import type {ProtectedSpace, Comment} from '../utils/types';
 
 enum Collection {
   ProtectedSpaces = 'ProtectedSpaces',
@@ -20,18 +20,24 @@ export const authClient = auth();
 
 const db = firestore();
 
-const protectedSpacesCollection = db.collection<ProtectedSpace>(
-  Collection.ProtectedSpaces,
-);
-
-const commentsSubCollection = (protectedSpaceId: string) =>
-  protectedSpacesCollection
-    .doc(protectedSpaceId)
-    .collection(SubCollection.Comments);
-
 export const firestoreClient = {
-  protectedSpacesCollection,
-  commentsSubCollection,
+  // PROTECTED SPACES
+
+  protectedSpacesCollection: db.collection<ProtectedSpace>(
+    Collection.ProtectedSpaces,
+  ),
+
+  // COMMENTS
+
+  commentsSubCollection: (protectedSpaceId: string) =>
+    db
+      .collection<Comment>(Collection.ProtectedSpaces)
+      .doc(protectedSpaceId)
+      .collection(SubCollection.Comments),
+
+  commentsSubCollectionGroup: db.collectionGroup<Comment>(
+    SubCollection.Comments,
+  ),
 };
 
 // STORAGE
