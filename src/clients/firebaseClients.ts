@@ -38,6 +38,10 @@ export const firestoreClient = {
   commentsSubCollectionGroup: db.collectionGroup<Comment>(
     SubCollection.Comments,
   ),
+
+  // BATCH
+
+  batch: db.batch(),
 };
 
 // STORAGE

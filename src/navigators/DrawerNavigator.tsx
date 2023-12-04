@@ -10,15 +10,21 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import ProtectedSpacesStackNavigator from './ProtectedSpacesStackNavigator';
 import {useAuthContext} from '../contexts/authContext';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
+import UserProtectedSpacesAndComments from '../screens/UserProtectedSpacesAndComments';
+import {useNavigation} from '@react-navigation/native';
 
 type DrawerParams = {
   protectedSpacesStack: undefined;
+  userProtectedSpacesAndCommentsScreen: undefined;
 };
 
 export type ProtectedSpacesStackNavigationProp = DrawerNavigationProp<
   DrawerParams,
   'protectedSpacesStack'
 >;
+
+export type UserProtectedSpacesAndCommentsScreenNavigationProp =
+  DrawerNavigationProp<DrawerParams, 'userProtectedSpacesAndCommentsScreen'>;
 
 const Drawer = createDrawerNavigator<DrawerParams>();
 
@@ -35,6 +41,11 @@ const DrawerNavigator = () => {
         name="protectedSpacesStack"
         component={ProtectedSpacesStackNavigator}
       />
+
+      <Drawer.Screen
+        name="userProtectedSpacesAndCommentsScreen"
+        component={UserProtectedSpacesAndComments}
+      />
     </Drawer.Navigator>
   );
 };
@@ -43,6 +54,9 @@ export default DrawerNavigator;
 
 function DrawerContent() {
   const safeAreaInsets = useSafeAreaInsetsContext();
+
+  const drawerNavigation =
+    useNavigation<UserProtectedSpacesAndCommentsScreenNavigationProp>();
 
   const {user, handleSignOut} = useAuthContext();
 
@@ -53,10 +67,18 @@ function DrawerContent() {
         {marginTop: safeAreaInsets.top, marginBottom: safeAreaInsets.bottom},
       ]}>
       <DrawerListItem label={user?.displayName ?? ''} icon="face-man-profile" />
+
+      <DrawerListItem
+        label="My Places & Comments"
+        icon="home-city"
+        onPress={() =>
+          drawerNavigation.navigate('userProtectedSpacesAndCommentsScreen')
+        }
+      />
       <Divider />
 
       <DrawerListItem
-        label="Sign out"
+        label="Sign Out"
         icon="logout"
         onPress={async () => await handleSignOut()}
       />

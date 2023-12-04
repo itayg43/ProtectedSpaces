@@ -40,9 +40,14 @@ const findByAddressId = async (id: string) => {
 const findByUserId = async (id: string) => {
   const query = await firestoreClient.protectedSpacesCollection
     .where('user.id', '==', id)
+    .orderBy('createdAt', 'desc')
     .get();
 
   return query.docs.map(doc => doc.data());
+};
+
+const deleteById = async (id: string) => {
+  await firestoreClient.protectedSpacesCollection.doc(id).delete();
 };
 
 const collectionSubscription = (
@@ -59,6 +64,7 @@ export default {
   add,
   findById,
   findByUserId,
+  deleteById,
   collectionSubscription,
 };
 
