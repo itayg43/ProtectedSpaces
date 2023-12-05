@@ -72,11 +72,13 @@ async function createProtectedSpace(
   user: FirebaseAuthTypes.User,
   formData: AddProtectedSpaceFormData,
 ): Promise<ProtectedSpace> {
-  await storageService.uploadMultipleImages(formData.images);
+  const id = uuidv4();
+
+  await storageService.uploadMultipleImages(formData.images, id);
 
   return {
-    id: uuidv4(),
-    images: await storageService.getImagesUrls(formData.images),
+    id,
+    images: await storageService.getImagesUrls(formData.images, id),
     type: formData.type,
     address: {
       ...formData.address,
