@@ -14,24 +14,29 @@ import type {AuthProvider, RequestStatus} from '../utils/types';
 import errorAlert from '../utils/errorAlert';
 import log from '../utils/log';
 
-type AuthContextParams = {
+type AuthContextData = {
   initialRequestStatus: RequestStatus;
   user: FirebaseAuthTypes.User | null;
+};
+
+const initialData: AuthContextData = {
+  initialRequestStatus: 'loading',
+  user: null,
+};
+
+type AuthContextParams = AuthContextData & {
   handleSignIn: (provider: AuthProvider) => Promise<void>;
   handleSignOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextParams>({
-  initialRequestStatus: 'loading',
-  user: null,
+  ...initialData,
   handleSignIn: async () => {},
   handleSignOut: async () => {},
 });
 
 export const AuthContextProvider = (props: PropsWithChildren) => {
-  const [initialRequestStatus, setInitialRequestStatus] =
-    useState<RequestStatus>('loading');
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [data, setData] = useState<AuthContextData>(initialData);
 
   const handleSignIn = useCallback(async (provider: AuthProvider) => {
     try {
@@ -53,12 +58,15 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
 
   const handleAuthStateChange = useCallback(
     (u: FirebaseAuthTypes.User | null) => {
-      setUser(u);
-      if (initialRequestStatus === 'loading') {
-        setInitialRequestStatus('idle');
-      }
+      setData(currentData => ({
+        user: u,
+        initialRequestStatus:
+          currentData.initialRequestStatus === 'loading'
+            ? 'idle'
+            : currentData.initialRequestStatus,
+      }));
     },
-    [initialRequestStatus],
+    [],
   );
 
   useEffect(() => {
@@ -69,12 +77,11 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
-      initialRequestStatus,
-      user,
+      ...data,
       handleSignIn,
       handleSignOut,
     }),
-    [initialRequestStatus, user, handleSignIn, handleSignOut],
+    [data, handleSignIn, handleSignOut],
   );
 
   return (
