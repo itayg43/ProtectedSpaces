@@ -7,9 +7,9 @@ import LoadingView from './components/views/LoadingView';
 import {SafeAreaInsetsContextProvider} from './contexts/safeAreaInsetsContext';
 
 const App = () => {
-  const {status, user} = useAuthContext();
+  const {initialRequestStatus, user} = useAuthContext();
 
-  if (status === 'initializing') {
+  if (initialRequestStatus === 'loading') {
     return <LoadingView />;
   }
 

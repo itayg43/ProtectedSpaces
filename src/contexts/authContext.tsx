@@ -10,28 +10,27 @@ import React, {
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 import authService from '../services/authService';
-import type {AuthProvider} from '../utils/types';
+import type {AuthProvider, RequestStatus} from '../utils/types';
 import errorAlert from '../utils/errorAlert';
 import log from '../utils/log';
 
-type AuthContextStatus = 'idle' | 'initializing';
-
 type AuthContextParams = {
-  status: AuthContextStatus;
+  initialRequestStatus: RequestStatus;
   user: FirebaseAuthTypes.User | null;
   handleSignIn: (provider: AuthProvider) => Promise<void>;
   handleSignOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextParams>({
-  status: 'initializing',
+  initialRequestStatus: 'loading',
   user: null,
   handleSignIn: async () => {},
   handleSignOut: async () => {},
 });
 
 export const AuthContextProvider = (props: PropsWithChildren) => {
-  const [status, setStatus] = useState<AuthContextStatus>('initializing');
+  const [initialRequestStatus, setInitialRequestStatus] =
+    useState<RequestStatus>('loading');
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
   const handleSignIn = useCallback(async (provider: AuthProvider) => {
@@ -55,11 +54,11 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
   const handleAuthStateChange = useCallback(
     (u: FirebaseAuthTypes.User | null) => {
       setUser(u);
-      if (status === 'initializing') {
-        setStatus('idle');
+      if (initialRequestStatus === 'loading') {
+        setInitialRequestStatus('idle');
       }
     },
-    [status],
+    [initialRequestStatus],
   );
 
   useEffect(() => {
@@ -70,12 +69,12 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
-      status,
+      initialRequestStatus,
       user,
       handleSignIn,
       handleSignOut,
     }),
-    [status, user, handleSignIn, handleSignOut],
+    [initialRequestStatus, user, handleSignIn, handleSignOut],
   );
 
   return (
