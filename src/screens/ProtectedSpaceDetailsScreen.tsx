@@ -43,7 +43,9 @@ const ProtectedSpaceDetailsScreen = () => {
 
   const {user} = useAuthContext();
 
-  const {status, protectedSpace} = useProtectedSpace(route.params.id);
+  const {initialRequestStatus, protectedSpace} = useProtectedSpace(
+    route.params.id,
+  );
   const comments = useCommentsCollection(protectedSpace?.id);
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
@@ -82,11 +84,11 @@ const ProtectedSpaceDetailsScreen = () => {
     }
   };
 
-  if (status === 'loading') {
+  if (initialRequestStatus === 'loading') {
     return <LoadingView />;
   }
 
-  if (status === 'error') {
+  if (initialRequestStatus === 'error') {
     return (
       <ErrorView
         message="Something went wrong"
@@ -96,7 +98,7 @@ const ProtectedSpaceDetailsScreen = () => {
     );
   }
 
-  if (status === 'idle' && protectedSpace) {
+  if (protectedSpace) {
     return (
       <KeyboardAvoidingView>
         <View style={styles.container}>

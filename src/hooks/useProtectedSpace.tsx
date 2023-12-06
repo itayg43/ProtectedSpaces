@@ -1,31 +1,40 @@
 import {useEffect, useState} from 'react';
 
 import protectedSpacesService from '../services/protectedSpacesService';
-import type {ProtectedSpace} from '../utils/types';
+import type {ProtectedSpace, RequestStatus} from '../utils/types';
 import log from '../utils/log';
 
-type Status = 'idle' | 'loading' | 'error';
+type UseProtectedSpaceData = {
+  initialRequestStatus: RequestStatus;
+  protectedSpace: ProtectedSpace | null;
+};
+
+const initialData: UseProtectedSpaceData = {
+  initialRequestStatus: 'loading',
+  protectedSpace: null,
+};
 
 const useProtectedSpace = (id: string) => {
-  const [status, setStatus] = useState<Status>('loading');
-  const [space, setSpace] = useState<ProtectedSpace | null>(null);
+  const [data, setData] = useState<UseProtectedSpaceData>(initialData);
 
   useEffect(() => {
     (async () => {
       try {
-        setSpace(await protectedSpacesService.findById(id));
-        setStatus('idle');
+        setData({
+          initialRequestStatus: 'idle',
+          protectedSpace: await protectedSpacesService.findById(id),
+        });
       } catch (error) {
         log.error(error);
-        setStatus('error');
+        setData(currectData => ({
+          ...currectData,
+          initialRequestStatus: 'error',
+        }));
       }
     })();
   }, [id]);
 
-  return {
-    status,
-    protectedSpace: space,
-  };
+  return data;
 };
 
 export default useProtectedSpace;
