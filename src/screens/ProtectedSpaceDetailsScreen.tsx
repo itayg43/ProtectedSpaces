@@ -108,10 +108,11 @@ const ProtectedSpaceDetailsScreen = () => {
             <FlatList
               data={protectedSpace.images}
               keyExtractor={item => item}
-              renderItem={({item: uri}) => (
-                <FastImage
-                  style={styles.image}
-                  source={{uri, priority: 'high'}}
+              renderItem={({item, index}) => (
+                <ImageListItem
+                  url={item}
+                  index={index + 1}
+                  total={protectedSpace.images.length}
                 />
               )}
               horizontal
@@ -207,6 +208,24 @@ const ProtectedSpaceDetailsScreen = () => {
 
 export default ProtectedSpaceDetailsScreen;
 
+type ImageListItemProps = {
+  url: string;
+  index: number;
+  total: number;
+};
+
+function ImageListItem({url, index, total}: ImageListItemProps) {
+  return (
+    <View>
+      <FastImage style={styles.image} source={{uri: url, priority: 'high'}} />
+
+      <Text style={styles.imageIndexText}>
+        {index} / {total}
+      </Text>
+    </View>
+  );
+}
+
 function CommentsEmptyListPlaceholder() {
   return (
     <View style={styles.commentsListEmptyPlaceholderContainer}>
@@ -236,6 +255,13 @@ const styles = StyleSheet.create({
   image: {
     height: IMAGE_HEIGHT,
     width: IMAGE_WIDTH,
+  },
+  imageIndexText: {
+    alignSelf: 'center',
+    bottom: 10,
+    color: 'white',
+    fontWeight: 'bold',
+    position: 'absolute',
   },
   goBackButton: {
     left: 10,
