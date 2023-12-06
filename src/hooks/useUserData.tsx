@@ -39,7 +39,7 @@ const useUserData = () => {
       log.error(error);
       setData(currentData => ({
         ...currentData,
-        status: 'error',
+        initialRequestStatus: 'error',
       }));
     }
   }, []);
