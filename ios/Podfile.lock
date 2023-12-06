@@ -658,6 +658,9 @@ PODS:
   - Firebase/Firestore (10.17.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 10.17.0)
+  - Firebase/Functions (10.17.0):
+    - Firebase/CoreOnly
+    - FirebaseFunctions (~> 10.17.0)
   - Firebase/Storage (10.17.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 10.17.0)
@@ -697,6 +700,15 @@ PODS:
     - "gRPC-C++ (~> 1.49.1)"
     - leveldb-library (~> 1.22)
     - nanopb (< 2.30910.0, >= 2.30908.0)
+  - FirebaseFunctions (10.17.0):
+    - FirebaseAppCheckInterop (~> 10.10)
+    - FirebaseAuthInterop (~> 10.0)
+    - FirebaseCore (~> 10.0)
+    - FirebaseCoreExtension (~> 10.0)
+    - FirebaseMessagingInterop (~> 10.0)
+    - FirebaseSharedSwift (~> 10.0)
+    - GTMSessionFetcher/Core (< 4.0, >= 2.1)
+  - FirebaseMessagingInterop (10.18.0)
   - FirebaseSharedSwift (10.17.0)
   - FirebaseStorage (10.17.0):
     - FirebaseAppCheckInterop (~> 10.0)
@@ -1278,6 +1290,10 @@ PODS:
     - nanopb (< 2.30910.0, >= 2.30908.0)
     - React-Core
     - RNFBApp
+  - RNFBFunctions (18.7.1):
+    - Firebase/Functions (= 10.17.0)
+    - React-Core
+    - RNFBApp
   - RNFBStorage (18.6.1):
     - Firebase/Storage (= 10.17.0)
     - React-Core
@@ -1383,6 +1399,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
+  - "RNFBFunctions (from `../node_modules/@react-native-firebase/functions`)"
   - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
@@ -1405,6 +1422,8 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - FirebaseFirestore
     - FirebaseFirestoreInternal
+    - FirebaseFunctions
+    - FirebaseMessagingInterop
     - FirebaseSharedSwift
     - FirebaseStorage
     - fmt
@@ -1526,6 +1545,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/auth"
   RNFBFirestore:
     :path: "../node_modules/@react-native-firebase/firestore"
+  RNFBFunctions:
+    :path: "../node_modules/@react-native-firebase/functions"
   RNFBStorage:
     :path: "../node_modules/@react-native-firebase/storage"
   RNGestureHandler:
@@ -1563,6 +1584,8 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 2cf9202e226e3f78d2bf6d56c472686b935bfb7f
   FirebaseFirestore: 67e8c2dc613a86f056cc0037569f2aaee7dbf5fe
   FirebaseFirestoreInternal: f902222ee92a48e30693bf347f6a8f365c800e79
+  FirebaseFunctions: c6894e60efe40af356a800c39c501136e6565a51
+  FirebaseMessagingInterop: e4ff7139aad39ab9149ae6462828ed3b8cdaa86c
   FirebaseSharedSwift: e8fe8d63d434266a1b2c7f02807d5b64462e1851
   FirebaseStorage: 4af6f9ea67b6a8e4e3cbd75e006b4776a50e8b12
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
@@ -1624,6 +1647,7 @@ SPEC CHECKSUMS:
   RNFBApp: b43d4829366a5065e17f9af3b03a0c4890eaeb85
   RNFBAuth: 944424c5ba04e250d35eccd3ee2033d6fd7150d7
   RNFBFirestore: 3eb1021700bc0842bd9425c239920ae70964b9ce
+  RNFBFunctions: af7bd6b419e286dca8cbb9e21d7965367320ff8c
   RNFBStorage: 459ee1cb0c0a94ed496b00eb07e1af67f38389f3
   RNGestureHandler: 6594263b1a123e43c23ff72c8d99080187e74bf9
   RNGoogleSignin: a6a612cce56a45ab701c5c5c6e36f5390522d100
