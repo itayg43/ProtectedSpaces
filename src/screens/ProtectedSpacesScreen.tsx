@@ -11,7 +11,7 @@ import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpaces
 import {DEFAULT_MAP_DELTAS} from '../utils/constants';
 import {ProtectedSpacesStackNavigationProp} from '../navigators/DrawerNavigator';
 import type {AddProtectedSpaceFormData} from '../utils/types';
-import errorAlert from '../utils/errorAlert';
+import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {useAuthContext} from '../contexts/authContext';
 import protectedSpacesService from '../services/protectedSpacesService';
@@ -55,7 +55,7 @@ const ProtectedSpacesScreen = () => {
       await protectedSpacesService.add(user, formData);
       handleToggleShowAddModal();
     } catch (error: any) {
-      errorAlert.show(error.message);
+      alert.error(error.message);
     }
   };
 

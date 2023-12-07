@@ -24,7 +24,7 @@ import AddCommentForm from '../components/forms/AddCommentForm';
 import commentsService from '../services/commentsService';
 import {useAuthContext} from '../contexts/authContext';
 import LoadingView from '../components/views/LoadingView';
-import errorAlert from '../utils/errorAlert';
+import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import useProtectedSpace from '../hooks/useProtectedSpace';
 import ErrorView from '../components/views/ErrorView';
@@ -63,7 +63,7 @@ const ProtectedSpaceDetailsScreen = () => {
       await Linking.openURL(protectedSpace.address.url);
     } catch (error) {
       log.error(error);
-      errorAlert.show('Open address url error');
+      alert.error('Open address url error');
     }
   };
 
@@ -80,7 +80,7 @@ const ProtectedSpaceDetailsScreen = () => {
       await commentsService.add(user, formData, protectedSpace.id);
       handleToggleShowAddCommentModal();
     } catch (error: any) {
-      errorAlert.show(error.message);
+      alert.error(error.message);
     }
   };
 

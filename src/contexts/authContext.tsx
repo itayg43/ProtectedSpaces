@@ -11,7 +11,7 @@ import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 import authService from '../services/authService';
 import type {AuthProvider, RequestStatus} from '../utils/types';
-import errorAlert from '../utils/errorAlert';
+import alert from '../utils/alert';
 import log from '../utils/log';
 
 type AuthContextData = {
@@ -43,7 +43,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
       await authService.signIn(provider);
     } catch (error) {
       log.error(error);
-      errorAlert.show('Sign in error');
+      alert.error('Sign in error');
     }
   }, []);
 
@@ -52,7 +52,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
       await authService.signOut();
     } catch (error) {
       log.error(error);
-      errorAlert.show('Sign out error');
+      alert.error('Sign out error');
     }
   }, []);
 

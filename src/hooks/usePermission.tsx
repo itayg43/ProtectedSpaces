@@ -7,7 +7,7 @@ import RNPermissions, {
 } from 'react-native-permissions';
 
 import log from '../utils/log';
-import errorAlert from '../utils/errorAlert';
+import alert from '../utils/alert';
 
 const isIOS = Platform.OS === 'ios';
 
@@ -54,11 +54,8 @@ const usePermission = (permissionType: PermissionType) => {
 export default usePermission;
 
 function showPermissionBlockedAlert(permissionType: PermissionType) {
-  errorAlert.show(
-    `Please provide access to ${permissionType} and reopen the app`,
-    [
-      {text: 'Cancel', style: 'destructive'},
-      {text: 'OK', onPress: async () => await Linking.openSettings()},
-    ],
-  );
+  alert.error(`Please provide access to ${permissionType} and reopen the app`, [
+    {text: 'Cancel', style: 'destructive'},
+    {text: 'OK', onPress: async () => await Linking.openSettings()},
+  ]);
 }

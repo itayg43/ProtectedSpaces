@@ -11,6 +11,7 @@ import ErrorView from '../components/views/ErrorView';
 import {Comment, ProtectedSpace} from '../utils/types';
 import log from '../utils/log';
 import protectedSpacesService from '../services/protectedSpacesService';
+import alert from '../utils/alert';
 
 const UserDataScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
@@ -21,6 +22,17 @@ const UserDataScreen = () => {
 
   const handleGoBack = () => {
     navigation.goBack();
+  };
+
+  const handleDelete = (id: string) => {
+    alert.remove(async () => {
+      try {
+        await protectedSpacesService.deleteByIdIncludeComments(id);
+      } catch (error: any) {
+        log.error(error);
+        alert.error(error.message);
+      }
+    });
   };
 
   if (initialRequestStatus === 'loading') {
@@ -56,7 +68,12 @@ const UserDataScreen = () => {
           contentContainerStyle={styles.listContainer}
           data={protectedSpaces}
           keyExtractor={item => item.id}
-          renderItem={({item}) => <ProtectedSpaceListItem item={item} />}
+          renderItem={({item}) => (
+            <ProtectedSpaceListItem
+              item={item}
+              onDelete={() => handleDelete(item.id)}
+            />
+          )}
           bounces={false}
           ItemSeparatorComponent={ListItemSeparator}
           ListFooterComponent={ListFooter}
@@ -83,17 +100,10 @@ export default UserDataScreen;
 
 type ProtectedSpaceListItemProps = {
   item: ProtectedSpace;
+  onDelete: () => void;
 };
 
-function ProtectedSpaceListItem({item}: ProtectedSpaceListItemProps) {
-  const handleDelete = async () => {
-    try {
-      await protectedSpacesService.deleteByIdIncludeComments(item.id);
-    } catch (error) {
-      log.error(error);
-    }
-  };
-
+function ProtectedSpaceListItem({item, onDelete}: ProtectedSpaceListItemProps) {
   return (
     <View style={styles.listItemContainer}>
       <View style={styles.listItemDetailsContainer}>
@@ -106,7 +116,7 @@ function ProtectedSpaceListItem({item}: ProtectedSpaceListItemProps) {
         </Text>
       </View>
 
-      <IconButton mode="contained" icon="trash-can" onPress={handleDelete} />
+      <IconButton mode="contained" icon="trash-can" onPress={onDelete} />
     </View>
   );
 }
