@@ -11,7 +11,6 @@ import ErrorView from '../components/views/ErrorView';
 import {Comment, ProtectedSpace} from '../utils/types';
 import log from '../utils/log';
 import protectedSpacesService from '../services/protectedSpacesService';
-import commentsService from '../services/commentsService';
 
 const UserDataScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
@@ -22,15 +21,6 @@ const UserDataScreen = () => {
 
   const handleGoBack = () => {
     navigation.goBack();
-  };
-
-  const handleDeleteProtectedSpace = async (id: string) => {
-    try {
-      await protectedSpacesService.deleteById(id);
-      await commentsService.deleteByProtectedSpaceId(id);
-    } catch (error) {
-      log.error(error);
-    }
   };
 
   if (initialRequestStatus === 'loading') {
@@ -66,12 +56,7 @@ const UserDataScreen = () => {
           contentContainerStyle={styles.listContainer}
           data={protectedSpaces}
           keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <ProtectedSpaceListItem
-              item={item}
-              onDelete={handleDeleteProtectedSpace}
-            />
-          )}
+          renderItem={({item}) => <ProtectedSpaceListItem item={item} />}
           bounces={false}
           ItemSeparatorComponent={ListItemSeparator}
           ListFooterComponent={ListFooter}
@@ -98,10 +83,17 @@ export default UserDataScreen;
 
 type ProtectedSpaceListItemProps = {
   item: ProtectedSpace;
-  onDelete: (id: string) => void;
 };
 
-function ProtectedSpaceListItem({item, onDelete}: ProtectedSpaceListItemProps) {
+function ProtectedSpaceListItem({item}: ProtectedSpaceListItemProps) {
+  const handleDelete = async () => {
+    try {
+      await protectedSpacesService.deleteByIdIncludeComments(item.id);
+    } catch (error) {
+      log.error(error);
+    }
+  };
+
   return (
     <View style={styles.listItemContainer}>
       <View style={styles.listItemDetailsContainer}>
@@ -114,11 +106,7 @@ function ProtectedSpaceListItem({item, onDelete}: ProtectedSpaceListItemProps) {
         </Text>
       </View>
 
-      <IconButton
-        mode="contained"
-        icon="trash-can"
-        onPress={() => onDelete(item.id)}
-      />
+      <IconButton mode="contained" icon="trash-can" onPress={handleDelete} />
     </View>
   );
 }
@@ -193,14 +181,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   listItemContainer: {
-    padding: 10,
+    alignItems: 'center',
     backgroundColor: 'white',
+    borderColor: '#ddd',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#ddd',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    padding: 10,
   },
   listItemDetailsContainer: {
     rowGap: 5,

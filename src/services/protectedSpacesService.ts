@@ -46,8 +46,17 @@ const findByUserId = async (id: string) => {
   return query.docs.map(doc => doc.data());
 };
 
-const deleteById = async (id: string) => {
-  await firestoreClient.protectedSpacesCollection.doc(id).delete();
+const deleteByIdIncludeComments = async (id: string) => {
+  const protectedSpaceDocRef =
+    firestoreClient.protectedSpacesCollection.doc(id);
+  firestoreClient.batch.delete(protectedSpaceDocRef);
+
+  const query = await firestoreClient.commentsSubCollection(id).get();
+  if (!query.empty) {
+    query.forEach(doc => firestoreClient.batch.delete(doc.ref));
+  }
+
+  await firestoreClient.batch.commit();
 };
 
 const collectionSubscription = (
@@ -64,7 +73,7 @@ export default {
   add,
   findById,
   findByUserId,
-  deleteById,
+  deleteByIdIncludeComments,
   collectionSubscription,
 };
 
