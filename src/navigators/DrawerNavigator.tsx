@@ -3,6 +3,7 @@ import {StyleSheet, View, TouchableOpacity, Text} from 'react-native';
 import {Divider} from 'react-native-paper';
 import {
   createDrawerNavigator,
+  DrawerContentComponentProps,
   DrawerNavigationProp,
 } from '@react-navigation/drawer';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -10,22 +11,16 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import ProtectedSpacesStackNavigator from './ProtectedSpacesStackNavigator';
 import {useAuthContext} from '../contexts/authContext';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
-import UserDataScreen from '../screens/UserDataScreen';
-import {useNavigation} from '@react-navigation/native';
+import UserDataStackNavigator from './UserDataStackNavigator';
 
 type DrawerParams = {
   protectedSpacesStack: undefined;
-  userDataScreen: undefined;
+  userDataStack: undefined;
 };
 
 export type ProtectedSpacesStackNavigationProp = DrawerNavigationProp<
   DrawerParams,
   'protectedSpacesStack'
->;
-
-export type UserDataScreenNavigationProp = DrawerNavigationProp<
-  DrawerParams,
-  'userDataScreen'
 >;
 
 const Drawer = createDrawerNavigator<DrawerParams>();
@@ -44,17 +39,21 @@ const DrawerNavigator = () => {
         component={ProtectedSpacesStackNavigator}
       />
 
-      <Drawer.Screen name="userDataScreen" component={UserDataScreen} />
+      <Drawer.Screen
+        name="userDataStack"
+        component={UserDataStackNavigator}
+        options={{
+          unmountOnBlur: true,
+        }}
+      />
     </Drawer.Navigator>
   );
 };
 
 export default DrawerNavigator;
 
-function DrawerContent() {
+function DrawerContent({navigation}: DrawerContentComponentProps) {
   const safeAreaInsets = useSafeAreaInsetsContext();
-
-  const drawerNavigation = useNavigation<UserDataScreenNavigationProp>();
 
   const {user, handleSignOut} = useAuthContext();
 
@@ -69,7 +68,7 @@ function DrawerContent() {
       <DrawerListItem
         label="My Places & Comments"
         icon="home-city"
-        onPress={() => drawerNavigation.navigate('userDataScreen')}
+        onPress={() => navigation.navigate('userDataStack')}
       />
       <Divider />
 
