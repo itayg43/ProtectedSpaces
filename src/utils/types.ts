@@ -46,6 +46,7 @@ export type ProtectedSpace = {
     id: string;
     name: string;
   };
+  geohash: string;
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
 
