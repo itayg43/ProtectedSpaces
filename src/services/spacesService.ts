@@ -28,12 +28,6 @@ const add = async (
   });
 };
 
-const findById = async (id: string) => {
-  const doc = await spacesColl.doc(id).get();
-
-  return doc.data() ?? null;
-};
-
 const findByUserId = async (id: string) => {
   const query = await spacesColl
     .where('user.id', '==', id)
@@ -45,7 +39,7 @@ const findByUserId = async (id: string) => {
 
 // https://cloud.google.com/firestore/docs/solutions/geoqueries#web-version-9_2
 
-const findByGeohash = async (location: Location, radiusInKm = 0.15) => {
+const findByGeohash = async (location: Location, radiusInKm = 0.3) => {
   const center: [number, number] = [location.latitude, location.longitude];
   const radiusInM = radiusInKm * 1000;
 
@@ -108,7 +102,6 @@ const collectionSubscription = (
 
 export default {
   add,
-  findById,
   findByUserId,
   findByGeohash,
   deleteByIdIncludeComments,

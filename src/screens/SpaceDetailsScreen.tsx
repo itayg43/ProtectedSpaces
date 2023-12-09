@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -12,7 +12,7 @@ import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
 import log from '../utils/log';
-import type {AddCommentFormData} from '../utils/types';
+import type {AddCommentFormData, Space} from '../utils/types';
 import {
   SpaceDetailsScreenNavigationProp,
   SpaceDetailsScreenRouteProp,
@@ -23,12 +23,10 @@ import Modal from '../components/Modal';
 import AddCommentForm from '../components/forms/AddCommentForm';
 import commentsService from '../services/commentsService';
 import {useAuthContext} from '../contexts/authContext';
-import LoadingView from '../components/views/LoadingView';
 import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
-import useSpace from '../hooks/useSpace';
-import ErrorView from '../components/views/ErrorView';
 import useCommentsCollection from '../hooks/useCommentsCollection';
+import {useSpacesContext} from '../contexts/spacesContext';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -43,7 +41,9 @@ const SpaceDetailsScreen = () => {
 
   const {user} = useAuthContext();
 
-  const {initialRequestStatus, space} = useSpace(route.params.id);
+  const {handleFindSpaceById} = useSpacesContext();
+
+  const [space, setSpace] = useState<Space | null>(null);
   const comments = useCommentsCollection(space?.id);
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
@@ -82,19 +82,9 @@ const SpaceDetailsScreen = () => {
     }
   };
 
-  if (initialRequestStatus === 'loading') {
-    return <LoadingView />;
-  }
-
-  if (initialRequestStatus === 'error') {
-    return (
-      <ErrorView
-        message="Something went wrong"
-        buttonLabel="Go back"
-        onPress={handleGoBack}
-      />
-    );
-  }
+  useEffect(() => {
+    setSpace(handleFindSpaceById(route.params.id));
+  }, [route.params.id, handleFindSpaceById]);
 
   if (space) {
     return (

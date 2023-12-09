@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {FAB} from 'react-native-paper';
@@ -13,30 +13,27 @@ import {SpacesStackNavigationProp} from '../navigators/DrawerNavigator';
 import type {AddSpaceFormData} from '../utils/types';
 import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
-import {useAuthContext} from '../contexts/authContext';
-import spacesService from '../services/spacesService';
-import useLocation from '../hooks/useLocation';
-import useSpacesCollection from '../hooks/useSpacesCollection';
+import {useLocationContext} from '../contexts/locationContext';
+import {useSpacesContext} from '../contexts/spacesContext';
 
 const SpacesScreen = () => {
-  const safeAreaInsets = useSafeAreaInsetsContext();
-
   const stackNavigation = useNavigation<SpacesStackNavigationProp>();
   const screenNavigation = useNavigation<SpacesScreenNavigationProp>();
 
-  const location = useLocation();
-
-  const {user} = useAuthContext();
-
-  const spaces = useSpacesCollection();
+  const safeAreaInsets = useSafeAreaInsetsContext();
+  const {location} = useLocationContext();
+  const {spaces, handleAddSpace} = useSpacesContext();
 
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const handleMarkerPress = (id: string) => {
-    screenNavigation.navigate('spaceDetailsScreen', {
-      id,
-    });
-  };
+  const handleMarkerPress = useCallback(
+    (id: string) => {
+      screenNavigation.navigate('spaceDetailsScreen', {
+        id,
+      });
+    },
+    [screenNavigation],
+  );
 
   const handleOpenDrawer = () => {
     stackNavigation.openDrawer();
@@ -47,17 +44,26 @@ const SpacesScreen = () => {
   };
 
   const handleSubmit = async (formData: AddSpaceFormData) => {
-    if (!user) {
-      return;
-    }
-
     try {
-      await spacesService.add(user, formData);
+      await handleAddSpace(formData);
       handleToggleShowAddModal();
     } catch (error: any) {
       alert.error(error.message);
     }
   };
+
+  const renderSpacesMarkers = useCallback(() => {
+    return spaces.map(s => (
+      <Marker
+        key={s.id}
+        coordinate={{
+          latitude: s.latLng.latitude,
+          longitude: s.latLng.longitude,
+        }}
+        onPress={() => handleMarkerPress(s.id)}
+      />
+    ));
+  }, [spaces, handleMarkerPress]);
 
   return (
     <KeyboardAvoidingView>
@@ -76,16 +82,7 @@ const SpacesScreen = () => {
               : undefined
           }
           showsUserLocation>
-          {spaces.map(s => (
-            <Marker
-              key={s.id}
-              coordinate={{
-                latitude: s.latLng.latitude,
-                longitude: s.latLng.longitude,
-              }}
-              onPress={() => handleMarkerPress(s.id)}
-            />
-          ))}
+          {renderSpacesMarkers()}
         </MapView>
 
         <FAB
