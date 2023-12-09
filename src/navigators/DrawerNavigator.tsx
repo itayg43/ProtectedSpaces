@@ -63,7 +63,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
       <DrawerListItem label={user?.displayName ?? ''} icon="face-man-profile" />
 
       <DrawerListItem
-        label="My Places & Comments"
+        label="My Spaces & Comments"
         icon="home-city"
         onPress={() => navigation.navigate('userDataStack')}
       />
