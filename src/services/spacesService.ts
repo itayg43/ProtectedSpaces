@@ -2,35 +2,29 @@ import firestore from '@react-native-firebase/firestore';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import * as geofire from 'geofire-common';
 
-import type {
-  AddProtectedSpaceFormData,
-  Location,
-  ProtectedSpace,
-} from '../utils/types';
+import type {AddSpaceFormData, Location, Space} from '../utils/types';
 import {firestoreClient} from '../clients/firebaseClients';
 import storageService from './storageService';
 import {FirestoreCollection as Collection} from '../utils/enums';
 import {commentsSubCollection} from './commentsService';
 
-const spacesColl = firestoreClient.collection<ProtectedSpace>(
-  Collection.ProtectedSpaces,
-);
+const spacesColl = firestoreClient.collection<Space>(Collection.Spaces);
 
 const add = async (
   user: FirebaseAuthTypes.User,
-  formData: AddProtectedSpaceFormData,
+  formData: AddSpaceFormData,
 ) => {
   await firestoreClient.runTransaction(async t => {
     const docRef = spacesColl.doc(formData.address.id);
 
     const doc = await t.get(docRef);
     if (doc.exists) {
-      throw new Error('Protected space in this address has already been added');
+      throw new Error('Space in this address has already been added');
     }
 
-    const protectedSpace = await createProtectedSpace(user, formData);
+    const space = await createSpace(user, formData);
 
-    t.set(docRef, protectedSpace);
+    t.set(docRef, space);
   });
 };
 
@@ -66,17 +60,16 @@ const findByGeohash = async (location: Location, radiusInKm = 0.15) => {
 
   const snapshots = await Promise.all(promises);
 
-  const spaces: ProtectedSpace[] = [];
+  const spaces: Space[] = [];
 
   snapshots.forEach(snap => {
     snap.docs.forEach(doc => {
       const data = doc.data();
-      const {latLng} = data.address;
 
       // We have to filter out a few false positives due to GeoHash
       // accuracy, but most will match
       const distanceInKm = geofire.distanceBetween(
-        [latLng.latitude, latLng.longitude],
+        [data.latLng.latitude, data.latLng.longitude],
         center,
       );
       const distanceInM = distanceInKm * 1000;
@@ -104,7 +97,7 @@ const deleteByIdIncludeComments = async (id: string) => {
 };
 
 const collectionSubscription = (
-  onChange: (s: ProtectedSpace[]) => void,
+  onChange: (s: Space[]) => void,
   onError: (e: Error) => void,
 ) => {
   return spacesColl.onSnapshot(
@@ -122,10 +115,10 @@ export default {
   collectionSubscription,
 };
 
-async function createProtectedSpace(
+async function createSpace(
   user: FirebaseAuthTypes.User,
-  formData: AddProtectedSpaceFormData,
-): Promise<ProtectedSpace> {
+  formData: AddSpaceFormData,
+): Promise<Space> {
   const {id, latLng} = formData.address;
 
   await storageService.uploadMultipleImages(formData.images, id);
@@ -139,7 +132,6 @@ async function createProtectedSpace(
       street: formData.address.street,
       number: formData.address.number,
       url: formData.address.url,
-      latLng: new firestore.GeoPoint(latLng.latitude, latLng.longitude),
     },
     description: formData.description,
     user: {
@@ -147,6 +139,7 @@ async function createProtectedSpace(
       name: user.displayName ?? '',
     },
     geohash: geofire.geohashForLocation([latLng.latitude, latLng.longitude]),
+    latLng: new firestore.GeoPoint(latLng.latitude, latLng.longitude),
     createdAt: firestore.Timestamp.now(),
   };
 }

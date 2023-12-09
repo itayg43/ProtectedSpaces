@@ -4,22 +4,22 @@ import {Comment} from '../utils/types';
 import commentsService from '../services/commentsService';
 import log from '../utils/log';
 
-const useCommentsCollection = (protectedSpaceId?: string) => {
+const useCommentsCollection = (spaceId?: string) => {
   const [comments, setComments] = useState<Comment[]>([]);
 
   useEffect(() => {
-    if (!protectedSpaceId) {
+    if (!spaceId) {
       return;
     }
 
     const unsubscribe = commentsService.collectionSubscription(
-      protectedSpaceId,
+      spaceId,
       c => setComments(c),
       e => log.error(e),
     );
 
     return unsubscribe;
-  }, [protectedSpaceId]);
+  }, [spaceId]);
 
   return comments;
 };

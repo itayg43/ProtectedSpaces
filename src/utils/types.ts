@@ -3,7 +3,7 @@ import * as z from 'zod';
 
 import {
   addCommentValidationSchema,
-  addProtectedSpaceValidationSchema,
+  addSpaceValidationSchema,
 } from './validationSchemas';
 
 export type AuthProvider = 'Apple' | 'Google';
@@ -23,7 +23,6 @@ export type Address = {
   street: string;
   number: string;
   url: string;
-  latLng: FirebaseFirestoreTypes.GeoPoint;
 };
 
 export type Comment = {
@@ -36,7 +35,7 @@ export type Comment = {
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
 
-export type ProtectedSpace = {
+export type Space = {
   id: string;
   images: string[];
   type: string;
@@ -47,12 +46,11 @@ export type ProtectedSpace = {
     name: string;
   };
   geohash: string;
+  latLng: FirebaseFirestoreTypes.GeoPoint;
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
 
-export type AddProtectedSpaceFormData = z.infer<
-  typeof addProtectedSpaceValidationSchema
->;
+export type AddSpaceFormData = z.infer<typeof addSpaceValidationSchema>;
 
 export type AddCommentFormData = z.infer<typeof addCommentValidationSchema>;
 

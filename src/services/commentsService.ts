@@ -9,9 +9,9 @@ import {
   FirestoreSubCollection as SubColletion,
 } from '../utils/enums';
 
-export const commentsSubCollection = (protectedSpaceId: string) =>
+export const commentsSubCollection = (spaceId: string) =>
   firestoreClient.collection(
-    `${Collection.ProtectedSpaces}/${protectedSpaceId}/${SubColletion.Comments}`,
+    `${Collection.Spaces}/${spaceId}/${SubColletion.Comments}`,
   );
 
 const commentsSubCollectionGroup = firestoreClient.collectionGroup<Comment>(
@@ -21,11 +21,11 @@ const commentsSubCollectionGroup = firestoreClient.collectionGroup<Comment>(
 const add = async (
   user: FirebaseAuthTypes.User,
   formData: AddCommentFormData,
-  protectedSpaceId: string,
+  spaceId: string,
 ) => {
   const comment = createComment(user, formData);
 
-  await commentsSubCollection(protectedSpaceId).doc(comment.id).set(comment);
+  await commentsSubCollection(spaceId).doc(comment.id).set(comment);
 };
 
 const findByUserId = async (id: string) => {
@@ -38,11 +38,11 @@ const findByUserId = async (id: string) => {
 };
 
 const collectionSubscription = (
-  protectedSpaceId: string,
+  spaceId: string,
   onChange: (c: Comment[]) => void,
   onError: (e: Error) => void,
 ) => {
-  return commentsSubCollection(protectedSpaceId)
+  return commentsSubCollection(spaceId)
     .orderBy('createdAt', 'desc')
     .onSnapshot(
       query => onChange(query.docs.map(d => d.data()) as Comment[]),

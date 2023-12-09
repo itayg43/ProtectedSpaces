@@ -14,9 +14,9 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import log from '../utils/log';
 import type {AddCommentFormData} from '../utils/types';
 import {
-  ProtectedSpaceDetailsScreenNavigationProp,
-  ProtectedSpaceDetailsScreenRouteProp,
-} from '../navigators/ProtectedSpacesStackNavigator';
+  SpaceDetailsScreenNavigationProp,
+  SpaceDetailsScreenRouteProp,
+} from '../navigators/SpacesStackNavigator';
 import CommentListItem from '../components/CommentListItem';
 import KeyboardAvoidingView from '../components/views/KeyboardAvoidingView';
 import Modal from '../components/Modal';
@@ -26,7 +26,7 @@ import {useAuthContext} from '../contexts/authContext';
 import LoadingView from '../components/views/LoadingView';
 import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
-import useProtectedSpace from '../hooks/useProtectedSpace';
+import useSpace from '../hooks/useSpace';
 import ErrorView from '../components/views/ErrorView';
 import useCommentsCollection from '../hooks/useCommentsCollection';
 
@@ -35,18 +35,16 @@ const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 const IMAGE_WIDTH = SCREEN_WIDTH;
 const IMAGE_HEIGHT = 300;
 
-const ProtectedSpaceDetailsScreen = () => {
+const SpaceDetailsScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
 
-  const route = useRoute<ProtectedSpaceDetailsScreenRouteProp>();
-  const navigation = useNavigation<ProtectedSpaceDetailsScreenNavigationProp>();
+  const route = useRoute<SpaceDetailsScreenRouteProp>();
+  const navigation = useNavigation<SpaceDetailsScreenNavigationProp>();
 
   const {user} = useAuthContext();
 
-  const {initialRequestStatus, protectedSpace} = useProtectedSpace(
-    route.params.id,
-  );
-  const comments = useCommentsCollection(protectedSpace?.id);
+  const {initialRequestStatus, space} = useSpace(route.params.id);
+  const comments = useCommentsCollection(space?.id);
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
@@ -55,12 +53,12 @@ const ProtectedSpaceDetailsScreen = () => {
   };
 
   const handleOpenAddressUrl = async () => {
-    if (!protectedSpace) {
+    if (!space) {
       return;
     }
 
     try {
-      await Linking.openURL(protectedSpace.address.url);
+      await Linking.openURL(space.address.url);
     } catch (error) {
       log.error(error);
       alert.error('Open address url error');
@@ -72,12 +70,12 @@ const ProtectedSpaceDetailsScreen = () => {
   };
 
   const handleSubmitComment = async (formData: AddCommentFormData) => {
-    if (!user || !protectedSpace) {
+    if (!user || !space) {
       return;
     }
 
     try {
-      await commentsService.add(user, formData, protectedSpace.id);
+      await commentsService.add(user, formData, space.id);
       handleToggleShowAddCommentModal();
     } catch (error: any) {
       alert.error(error.message);
@@ -98,7 +96,7 @@ const ProtectedSpaceDetailsScreen = () => {
     );
   }
 
-  if (protectedSpace) {
+  if (space) {
     return (
       <KeyboardAvoidingView>
         <View style={styles.container}>
@@ -106,13 +104,13 @@ const ProtectedSpaceDetailsScreen = () => {
 
           <View style={styles.imagesSectionContainer}>
             <FlatList
-              data={protectedSpace.images}
+              data={space.images}
               keyExtractor={item => item}
               renderItem={({item, index}) => (
                 <ImageListItem
                   url={item}
                   index={index + 1}
-                  total={protectedSpace.images.length}
+                  total={space.images.length}
                 />
               )}
               horizontal
@@ -135,7 +133,7 @@ const ProtectedSpaceDetailsScreen = () => {
           <View style={styles.detailsSectionContainer}>
             <View style={styles.addressAndLinkContainer}>
               <Text style={styles.address} numberOfLines={1}>
-                {`${protectedSpace.address.street} ${protectedSpace.address.number}, ${protectedSpace.address.city}`}
+                {`${space.address.street} ${space.address.number}, ${space.address.city}`}
               </Text>
 
               <IconButton
@@ -148,15 +146,15 @@ const ProtectedSpaceDetailsScreen = () => {
 
             <Divider style={styles.divider} />
 
-            <Text style={styles.description}>{protectedSpace.description}</Text>
+            <Text style={styles.description}>{space.description}</Text>
 
             <View style={styles.userInfoContainer}>
               <Text style={styles.userName}>
-                @ {protectedSpace.user.name.split(' ').join('_')}
+                @ {space.user.name.split(' ').join('_')}
               </Text>
 
               <Text style={styles.timestamp}>
-                | {protectedSpace.createdAt.toDate().toLocaleDateString()}
+                | {space.createdAt.toDate().toLocaleDateString()}
               </Text>
             </View>
           </View>
@@ -206,7 +204,7 @@ const ProtectedSpaceDetailsScreen = () => {
   }
 };
 
-export default ProtectedSpaceDetailsScreen;
+export default SpaceDetailsScreen;
 
 type ImageListItemProps = {
   url: string;

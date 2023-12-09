@@ -8,9 +8,9 @@ import {UserDataScreenNavigationProp} from '../navigators/UserDataStackNavigator
 import useUserData from '../hooks/useUserData';
 import LoadingView from '../components/views/LoadingView';
 import ErrorView from '../components/views/ErrorView';
-import {Comment, ProtectedSpace} from '../utils/types';
+import {Comment, Space} from '../utils/types';
 import log from '../utils/log';
-import protectedSpacesService from '../services/protectedSpacesService';
+import spacesService from '../services/spacesService';
 import alert from '../utils/alert';
 
 const UserDataScreen = () => {
@@ -18,7 +18,7 @@ const UserDataScreen = () => {
 
   const navigation = useNavigation<UserDataScreenNavigationProp>();
 
-  const {initialRequestStatus, protectedSpaces, comments} = useUserData();
+  const {initialRequestStatus, spaces, comments} = useUserData();
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -27,7 +27,7 @@ const UserDataScreen = () => {
   const handleDelete = (id: string) => {
     alert.remove(async () => {
       try {
-        await protectedSpacesService.deleteByIdIncludeComments(id);
+        await spacesService.deleteByIdIncludeComments(id);
       } catch (error: any) {
         log.error(error);
         alert.error(error.message);
@@ -63,16 +63,13 @@ const UserDataScreen = () => {
       />
 
       <View style={styles.listsContainer}>
-        <Text style={styles.listLabel}>Protected Spaces</Text>
+        <Text style={styles.listLabel}>Spaces</Text>
         <FlatList
           contentContainerStyle={styles.listContainer}
-          data={protectedSpaces}
+          data={spaces}
           keyExtractor={item => item.id}
           renderItem={({item}) => (
-            <ProtectedSpaceListItem
-              item={item}
-              onDelete={() => handleDelete(item.id)}
-            />
+            <SpaceListItem item={item} onDelete={() => handleDelete(item.id)} />
           )}
           bounces={false}
           ItemSeparatorComponent={ListItemSeparator}
@@ -98,12 +95,12 @@ const UserDataScreen = () => {
 
 export default UserDataScreen;
 
-type ProtectedSpaceListItemProps = {
-  item: ProtectedSpace;
+type SpaceListItemProps = {
+  item: Space;
   onDelete: () => void;
 };
 
-function ProtectedSpaceListItem({item, onDelete}: ProtectedSpaceListItemProps) {
+function SpaceListItem({item, onDelete}: SpaceListItemProps) {
   return (
     <View style={styles.listItemContainer}>
       <View style={styles.listItemDetailsContainer}>

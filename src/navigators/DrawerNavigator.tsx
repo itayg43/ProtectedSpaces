@@ -8,19 +8,19 @@ import {
 } from '@react-navigation/drawer';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import ProtectedSpacesStackNavigator from './ProtectedSpacesStackNavigator';
+import SpacesStackNavigator from './SpacesStackNavigator';
 import {useAuthContext} from '../contexts/authContext';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import UserDataStackNavigator from './UserDataStackNavigator';
 
 type DrawerParams = {
-  protectedSpacesStack: undefined;
+  spacesStack: undefined;
   userDataStack: undefined;
 };
 
-export type ProtectedSpacesStackNavigationProp = DrawerNavigationProp<
+export type SpacesStackNavigationProp = DrawerNavigationProp<
   DrawerParams,
-  'protectedSpacesStack'
+  'spacesStack'
 >;
 
 const Drawer = createDrawerNavigator<DrawerParams>();
@@ -28,16 +28,13 @@ const Drawer = createDrawerNavigator<DrawerParams>();
 const DrawerNavigator = () => {
   return (
     <Drawer.Navigator
-      initialRouteName="protectedSpacesStack"
+      initialRouteName="spacesStack"
       screenOptions={{
         headerShown: false,
         swipeEnabled: false,
       }}
       drawerContent={DrawerContent}>
-      <Drawer.Screen
-        name="protectedSpacesStack"
-        component={ProtectedSpacesStackNavigator}
-      />
+      <Drawer.Screen name="spacesStack" component={SpacesStackNavigator} />
 
       <Drawer.Screen
         name="userDataStack"

@@ -7,12 +7,12 @@ import * as admin from 'firebase-admin';
 admin.initializeApp();
 
 export const deleteImages = functions.firestore
-  .document('protectedSpaces/{id}')
+  .document('spaces/{id}')
   .onDelete(async (_, context) => {
     try {
       const {id} = context.params;
 
-      console.log(`Delete images of protected space with the id: ${id}`);
+      console.log(`Delete images of space with the id: ${id}`);
 
       await admin
         .storage()

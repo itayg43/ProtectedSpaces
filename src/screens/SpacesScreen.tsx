@@ -6,34 +6,34 @@ import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
 import KeyboardAvoidingView from '../components/views/KeyboardAvoidingView';
 import Modal from '../components/Modal';
-import AddProtectedSpaceForm from '../components/forms/AddProtectedSpaceForm';
-import {ProtectedSpacesScreenNavigationProp} from '../navigators/ProtectedSpacesStackNavigator';
+import AddSpaceForm from '../components/forms/AddSpaceForm';
+import {SpacesScreenNavigationProp} from '../navigators/SpacesStackNavigator';
 import {DEFAULT_MAP_DELTAS} from '../utils/constants';
-import {ProtectedSpacesStackNavigationProp} from '../navigators/DrawerNavigator';
-import type {AddProtectedSpaceFormData} from '../utils/types';
+import {SpacesStackNavigationProp} from '../navigators/DrawerNavigator';
+import type {AddSpaceFormData} from '../utils/types';
 import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {useAuthContext} from '../contexts/authContext';
-import protectedSpacesService from '../services/protectedSpacesService';
+import spacesService from '../services/spacesService';
 import useLocation from '../hooks/useLocation';
-import useProtectedSpacesCollection from '../hooks/useProtectedSpacesCollection';
+import useSpacesCollection from '../hooks/useSpacesCollection';
 
-const ProtectedSpacesScreen = () => {
+const SpacesScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
 
-  const stackNavigation = useNavigation<ProtectedSpacesStackNavigationProp>();
-  const screenNavigation = useNavigation<ProtectedSpacesScreenNavigationProp>();
+  const stackNavigation = useNavigation<SpacesStackNavigationProp>();
+  const screenNavigation = useNavigation<SpacesScreenNavigationProp>();
 
   const location = useLocation();
 
   const {user} = useAuthContext();
 
-  const protectedSpaces = useProtectedSpacesCollection();
+  const spaces = useSpacesCollection();
 
   const [showAddModal, setShowAddModal] = useState(false);
 
   const handleMarkerPress = (id: string) => {
-    screenNavigation.navigate('protectedSpaceDetailsScreen', {
+    screenNavigation.navigate('spaceDetailsScreen', {
       id,
     });
   };
@@ -46,13 +46,13 @@ const ProtectedSpacesScreen = () => {
     setShowAddModal(currentState => !currentState);
   };
 
-  const handleSubmit = async (formData: AddProtectedSpaceFormData) => {
+  const handleSubmit = async (formData: AddSpaceFormData) => {
     if (!user) {
       return;
     }
 
     try {
-      await protectedSpacesService.add(user, formData);
+      await spacesService.add(user, formData);
       handleToggleShowAddModal();
     } catch (error: any) {
       alert.error(error.message);
@@ -76,12 +76,12 @@ const ProtectedSpacesScreen = () => {
               : undefined
           }
           showsUserLocation>
-          {protectedSpaces.map(s => (
+          {spaces.map(s => (
             <Marker
               key={s.id}
               coordinate={{
-                latitude: s.address.latLng.latitude,
-                longitude: s.address.latLng.longitude,
+                latitude: s.latLng.latitude,
+                longitude: s.latLng.longitude,
               }}
               onPress={() => handleMarkerPress(s.id)}
             />
@@ -105,7 +105,7 @@ const ProtectedSpacesScreen = () => {
         {/** MODALS */}
 
         <Modal isVisible={showAddModal} onDismiss={handleToggleShowAddModal}>
-          <AddProtectedSpaceForm
+          <AddSpaceForm
             contentContainerStyle={styles.addFormContainer}
             onSubmit={handleSubmit}
           />
@@ -115,7 +115,7 @@ const ProtectedSpacesScreen = () => {
   );
 };
 
-export default ProtectedSpacesScreen;
+export default SpacesScreen;
 
 const styles = StyleSheet.create({
   container: {

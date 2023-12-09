@@ -1,8 +1,8 @@
 import * as z from 'zod';
 
-import {ProtectedSpaceType} from './enums';
+import {SpaceType} from './enums';
 
-export const addProtectedSpaceValidationSchema = z.object({
+export const addSpaceValidationSchema = z.object({
   images: z
     .object({
       name: z.string(),
@@ -11,7 +11,7 @@ export const addProtectedSpaceValidationSchema = z.object({
     .array()
     .nonempty('Please select at least one image'),
 
-  type: z.nativeEnum(ProtectedSpaceType),
+  type: z.nativeEnum(SpaceType),
 
   address: z.object({
     id: z.string(),

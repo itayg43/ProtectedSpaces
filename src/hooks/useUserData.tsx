@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
-import {Comment, ProtectedSpace} from '../utils/types';
+import {Comment, Space} from '../utils/types';
 
-import protectedSpacesService from '../services/protectedSpacesService';
+import spacesService from '../services/spacesService';
 import commentsService from '../services/commentsService';
 import log from '../utils/log';
 import {useAuthContext} from '../contexts/authContext';
@@ -9,13 +9,13 @@ import type {RequestStatus} from '../utils/types';
 
 type UserDataParams = {
   initialRequestStatus: RequestStatus;
-  protectedSpaces: ProtectedSpace[];
+  spaces: Space[];
   comments: Comment[];
 };
 
 const initialState: UserDataParams = {
   initialRequestStatus: 'loading',
-  protectedSpaces: [],
+  spaces: [],
   comments: [],
 };
 
@@ -27,12 +27,12 @@ const useUserData = () => {
   const handleGetData = useCallback(async (uid: string) => {
     try {
       const [s, c] = await Promise.all([
-        protectedSpacesService.findByUserId(uid),
+        spacesService.findByUserId(uid),
         commentsService.findByUserId(uid),
       ]);
       setData({
         initialRequestStatus: 'idle',
-        protectedSpaces: s,
+        spaces: s,
         comments: c,
       });
     } catch (error) {

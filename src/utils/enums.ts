@@ -1,10 +1,10 @@
-export enum ProtectedSpaceType {
+export enum SpaceType {
   Shelter = 'shelter',
   Stairway = 'stairway',
 }
 
 export enum FirestoreCollection {
-  ProtectedSpaces = 'protectedSpaces',
+  Spaces = 'spaces',
 }
 
 export enum FirestoreSubCollection {
