@@ -90,22 +90,11 @@ const deleteByIdIncludeComments = async (id: string) => {
   await batch.commit();
 };
 
-const collectionSubscription = (
-  onChange: (s: Space[]) => void,
-  onError: (e: Error) => void,
-) => {
-  return spacesColl.onSnapshot(
-    query => onChange(query.docs.map(d => d.data())),
-    error => onError(error),
-  );
-};
-
 export default {
   add,
   findByUserId,
   findByGeohash,
   deleteByIdIncludeComments,
-  collectionSubscription,
 };
 
 async function createSpace(
