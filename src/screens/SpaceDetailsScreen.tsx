@@ -169,7 +169,7 @@ const SpaceDetailsScreen = () => {
             </View>
 
             {commentsStatus === 'loading' ? (
-              <LoadingView msg="Loading Comments..." />
+              <LoadingView message="Loading Comments..." />
             ) : (
               <View style={styles.commentListContainer}>
                 <FlatList

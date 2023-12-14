@@ -3,15 +3,15 @@ import {StyleSheet, View, Text} from 'react-native';
 import {ActivityIndicator} from 'react-native-paper';
 
 type Props = {
-  msg?: string;
+  message?: string;
 };
 
-const LoadingView = ({msg}: Props) => {
+const LoadingView = ({message}: Props) => {
   return (
     <View style={styles.container}>
       <ActivityIndicator />
 
-      {msg && <Text style={styles.msg}>{msg}</Text>}
+      {message && <Text style={styles.message}>{message}</Text>}
     </View>
   );
 };
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  msg: {
+  message: {
     color: 'black',
     marginTop: 20,
   },
