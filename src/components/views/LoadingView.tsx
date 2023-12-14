@@ -1,11 +1,17 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import {ActivityIndicator} from 'react-native-paper';
 
-const LoadingView = () => {
+type Props = {
+  msg?: string;
+};
+
+const LoadingView = ({msg}: Props) => {
   return (
     <View style={styles.container}>
       <ActivityIndicator />
+
+      {msg && <Text style={styles.msg}>{msg}</Text>}
     </View>
   );
 };
@@ -17,5 +23,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+  },
+  msg: {
+    color: 'black',
+    marginTop: 20,
   },
 });

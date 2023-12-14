@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
-import type {AddCommentFormData, Comment} from '../utils/types';
+import type {AddCommentFormData, Comment, RequestStatus} from '../utils/types';
 import log from '../utils/log';
 import commentsService from '../services/commentsService';
 import {useAuthContext} from '../contexts/authContext';
@@ -9,6 +9,7 @@ import {useAuthContext} from '../contexts/authContext';
 const useSpaceComments = (spaceId: string) => {
   const {user} = useAuthContext();
 
+  const [status, setStatus] = useState<RequestStatus>('loading');
   const [comments, setComments] = useState<Comment[]>([]);
   const [lastDocument, setLastDocument] =
     useState<FirebaseFirestoreTypes.QueryDocumentSnapshot | null>(null);
@@ -18,8 +19,10 @@ const useSpaceComments = (spaceId: string) => {
       const res = await commentsService.findBySpaceId(spaceId);
       setLastDocument(res.lastDocument);
       setComments(res.comments);
+      setStatus('idle');
     } catch (error) {
       log.error(error);
+      setStatus('error');
     }
   }, [spaceId]);
 
@@ -59,6 +62,7 @@ const useSpaceComments = (spaceId: string) => {
   }, [handleGetInitalComments]);
 
   return {
+    status,
     comments,
     handleGetMoreComments,
     handleAddComment,

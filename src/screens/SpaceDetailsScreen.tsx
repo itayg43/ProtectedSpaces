@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -12,7 +12,7 @@ import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
 import log from '../utils/log';
-import type {AddCommentFormData, Comment} from '../utils/types';
+import type {AddCommentFormData, Comment, Space} from '../utils/types';
 import {
   SpaceDetailsScreenNavigationProp,
   SpaceDetailsScreenRouteProp,
@@ -24,6 +24,7 @@ import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {useSpacesContext} from '../contexts/spacesContext';
 import useSpaceComments from '../hooks/useSpaceComments';
+import LoadingView from '../components/views/LoadingView';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -37,10 +38,15 @@ const SpaceDetailsScreen = () => {
   const navigation = useNavigation<SpaceDetailsScreenNavigationProp>();
 
   const {handleFindSpaceById} = useSpacesContext();
-  const space = handleFindSpaceById(route.params.id);
-  const {comments, handleGetMoreComments, handleAddComment} = useSpaceComments(
-    route.params.id,
-  );
+
+  const [space, setSpace] = useState<Space | null>(null);
+
+  const {
+    status: commentsStatus,
+    comments,
+    handleGetMoreComments,
+    handleAddComment,
+  } = useSpaceComments(route.params.id);
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
@@ -73,6 +79,10 @@ const SpaceDetailsScreen = () => {
       alert.error(error?.message);
     }
   };
+
+  useEffect(() => {
+    setSpace(handleFindSpaceById(route.params.id));
+  }, [route.params.id, handleFindSpaceById]);
 
   if (space) {
     return (
@@ -154,19 +164,23 @@ const SpaceDetailsScreen = () => {
               />
             </View>
 
-            <View style={styles.commentListContainer}>
-              <FlatList
-                data={comments}
-                keyExtractor={item => item.id}
-                renderItem={({item}) => <CommentListItem item={item} />}
-                ListEmptyComponent={CommentsEmptyListPlaceholder}
-                bounces={false}
-                ItemSeparatorComponent={CommentsListSpacer}
-                ListFooterComponent={CommentsListSpacer}
-                onEndReachedThreshold={0.3}
-                onEndReached={handleGetMoreComments}
-              />
-            </View>
+            {commentsStatus === 'loading' ? (
+              <LoadingView msg="Loading Comments..." />
+            ) : (
+              <View style={styles.commentListContainer}>
+                <FlatList
+                  data={comments}
+                  keyExtractor={item => item.id}
+                  renderItem={({item}) => <CommentListItem item={item} />}
+                  ListEmptyComponent={CommentsEmptyListPlaceholder}
+                  bounces={false}
+                  ItemSeparatorComponent={CommentsListSpacer}
+                  ListFooterComponent={CommentsListSpacer}
+                  onEndReachedThreshold={0.3}
+                  onEndReached={handleGetMoreComments}
+                />
+              </View>
+            )}
           </View>
 
           {/** MODALS */}
