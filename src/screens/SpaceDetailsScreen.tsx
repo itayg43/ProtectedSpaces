@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -12,7 +12,7 @@ import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
 import log from '../utils/log';
-import type {AddCommentFormData, Space} from '../utils/types';
+import type {AddCommentFormData, Comment} from '../utils/types';
 import {
   SpaceDetailsScreenNavigationProp,
   SpaceDetailsScreenRouteProp,
@@ -20,11 +20,10 @@ import {
 import KeyboardAvoidingView from '../components/views/KeyboardAvoidingView';
 import Modal from '../components/Modal';
 import AddCommentForm from '../components/forms/AddCommentForm';
-import commentsService from '../services/commentsService';
-import {useAuthContext} from '../contexts/authContext';
 import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {useSpacesContext} from '../contexts/spacesContext';
+import useSpaceComments from '../hooks/useSpaceComments';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -37,11 +36,11 @@ const SpaceDetailsScreen = () => {
   const route = useRoute<SpaceDetailsScreenRouteProp>();
   const navigation = useNavigation<SpaceDetailsScreenNavigationProp>();
 
-  const {user} = useAuthContext();
-
   const {handleFindSpaceById} = useSpacesContext();
-
-  const [space, setSpace] = useState<Space | null>(null);
+  const space = handleFindSpaceById(route.params.id);
+  const {comments, handleGetMoreComments, handleAddComment} = useSpaceComments(
+    route.params.id,
+  );
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
@@ -67,21 +66,13 @@ const SpaceDetailsScreen = () => {
   };
 
   const handleSubmitComment = async (formData: AddCommentFormData) => {
-    if (!user || !space) {
-      return;
-    }
-
     try {
-      await commentsService.add(user, formData, space.id);
+      await handleAddComment(formData);
       handleToggleShowAddCommentModal();
     } catch (error: any) {
-      alert.error(error.message);
+      alert.error(error?.message);
     }
   };
-
-  useEffect(() => {
-    setSpace(handleFindSpaceById(route.params.id));
-  }, [route.params.id, handleFindSpaceById]);
 
   if (space) {
     return (
@@ -163,16 +154,19 @@ const SpaceDetailsScreen = () => {
               />
             </View>
 
-            {/* <FlatList
-              data={comments}
-              keyExtractor={item => item.id}
-              renderItem={({item}) => <CommentListItem comment={item} />}
-              ListEmptyComponent={CommentsEmptyListPlaceholder}
-              scrollEnabled={comments.length > 0}
-              bounces={false}
-              ItemSeparatorComponent={CommentsListSpacer}
-              ListFooterComponent={CommentsListSpacer}
-            /> */}
+            <View style={styles.commentListContainer}>
+              <FlatList
+                data={comments}
+                keyExtractor={item => item.id}
+                renderItem={({item}) => <CommentListItem item={item} />}
+                ListEmptyComponent={CommentsEmptyListPlaceholder}
+                bounces={false}
+                ItemSeparatorComponent={CommentsListSpacer}
+                ListFooterComponent={CommentsListSpacer}
+                onEndReachedThreshold={0.3}
+                onEndReached={handleGetMoreComments}
+              />
+            </View>
           </View>
 
           {/** MODALS */}
@@ -211,19 +205,45 @@ function ImageListItem({url, index, total}: ImageListItemProps) {
   );
 }
 
-// function CommentsEmptyListPlaceholder() {
-//   return (
-//     <View style={styles.commentsListEmptyPlaceholderContainer}>
-//       <Text style={styles.commentsListEmptyPlaceholderText}>
-//         No comments yet...
-//       </Text>
-//     </View>
-//   );
-// }
+type CommentListItemProps = {
+  item: Comment;
+};
 
-// function CommentsListSpacer() {
-//   return <View style={styles.commentsListSpacerContainer} />;
-// }
+function CommentListItem({item}: CommentListItemProps) {
+  return (
+    <View style={styles.commentListItemContainer}>
+      <View style={styles.commentListItemDetailsContainer}>
+        <Text style={styles.colorBlack}>{item.value}</Text>
+
+        <View style={styles.commentListItemUserAndTimestampContainer}>
+          <Text style={styles.colorGray}>
+            @{item.user.name.replace(' ', '_')}
+          </Text>
+
+          <Text style={styles.colorGray}>|</Text>
+
+          <Text style={styles.colorGray}>
+            {item.createdAt.toDate().toLocaleDateString()}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function CommentsEmptyListPlaceholder() {
+  return (
+    <View style={styles.commentsListEmptyPlaceholderContainer}>
+      <Text style={styles.commentsListEmptyPlaceholderText}>
+        No comments found
+      </Text>
+    </View>
+  );
+}
+
+function CommentsListSpacer() {
+  return <View style={styles.commentsListSpacerContainer} />;
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -232,6 +252,12 @@ const styles = StyleSheet.create({
   divider: {
     marginBottom: 20,
     marginTop: 5,
+  },
+  colorGray: {
+    color: 'gray',
+  },
+  colorBlack: {
+    color: 'black',
   },
 
   // IMAGES SECTION
@@ -315,5 +341,22 @@ const styles = StyleSheet.create({
   },
   commentsListSpacerContainer: {
     marginBottom: 5,
+  },
+  commentListContainer: {
+    flex: 1,
+  },
+  commentListItemContainer: {
+    backgroundColor: 'white',
+    borderColor: '#ddd',
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 10,
+  },
+  commentListItemDetailsContainer: {
+    rowGap: 5,
+  },
+  commentListItemUserAndTimestampContainer: {
+    columnGap: 5,
+    flexDirection: 'row',
   },
 });

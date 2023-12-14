@@ -1,5 +1,6 @@
 import firestore from '@react-native-firebase/firestore';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {v4 as uuidv4} from 'uuid';
 
 import type {AddCommentFormData, Comment} from '../utils/types';
@@ -26,6 +27,26 @@ const add = async (
   const comment = createComment(user, formData);
 
   await commentsSubCollection(spaceId).doc(comment.id).set(comment);
+
+  return comment;
+};
+
+const findBySpaceId = async (
+  id: string,
+  lastDocument?: FirebaseFirestoreTypes.QueryDocumentSnapshot,
+) => {
+  let query = commentsSubCollection(id).orderBy('createdAt', 'desc');
+
+  if (lastDocument) {
+    query = query.startAfter(lastDocument);
+  }
+
+  const snap = await query.limit(5).get();
+
+  return {
+    comments: snap.docs.map(doc => doc.data()) as Comment[],
+    lastDocument: snap.docs[snap.docs.length - 1],
+  };
 };
 
 const findByUserId = async (id: string) => {
@@ -39,6 +60,7 @@ const findByUserId = async (id: string) => {
 
 export default {
   add,
+  findBySpaceId,
   findByUserId,
 };
 
