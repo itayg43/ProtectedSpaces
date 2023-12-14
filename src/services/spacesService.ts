@@ -58,18 +58,18 @@ const findByGeohash = async (location: Location, radiusInKm = 0.3) => {
 
   snapshots.forEach(snap => {
     snap.docs.forEach(doc => {
-      const data = doc.data();
+      const currSpace = doc.data();
 
       // We have to filter out a few false positives due to GeoHash
       // accuracy, but most will match
       const distanceInKm = geofire.distanceBetween(
-        [data.latLng.latitude, data.latLng.longitude],
+        [currSpace.latLng.latitude, currSpace.latLng.longitude],
         center,
       );
       const distanceInM = distanceInKm * 1000;
 
       if (distanceInM <= radiusInM) {
-        spaces.push(data);
+        spaces.push(currSpace);
       }
     });
   });
