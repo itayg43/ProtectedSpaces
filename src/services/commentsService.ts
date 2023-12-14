@@ -34,6 +34,7 @@ const add = async (
 const findBySpaceId = async (
   id: string,
   lastDocument?: FirebaseFirestoreTypes.QueryDocumentSnapshot,
+  limit: number = 5,
 ) => {
   let query = commentsSubCollection(id).orderBy('createdAt', 'desc');
 
@@ -41,7 +42,7 @@ const findBySpaceId = async (
     query = query.startAfter(lastDocument);
   }
 
-  const snap = await query.limit(5).get();
+  const snap = await query.limit(limit).get();
 
   return {
     comments: snap.docs.map(doc => doc.data()) as Comment[],
