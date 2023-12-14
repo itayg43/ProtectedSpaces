@@ -1,3 +1,5 @@
+/* eslint-disable react-native/no-inline-styles */
+
 import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
@@ -134,15 +136,17 @@ const SpaceDetailsScreen = () => {
 
             <Divider style={styles.divider} />
 
-            <Text style={styles.description}>{space.description}</Text>
+            <Text style={styles.colorBlack}>{space.description}</Text>
 
-            <View style={styles.userInfoContainer}>
-              <Text style={styles.userName}>
-                @ {space.user.name.split(' ').join('_')}
+            <View style={styles.userAndTimestampContainer}>
+              <Text style={styles.colorGray}>
+                @{space.user.name.replace(' ', '_')}
               </Text>
 
-              <Text style={styles.timestamp}>
-                | {space.createdAt.toDate().toLocaleDateString()}
+              <Text style={styles.colorGray}>|</Text>
+
+              <Text style={styles.colorGray}>
+                {space.createdAt.toDate().toLocaleDateString()}
               </Text>
             </View>
           </View>
@@ -172,10 +176,10 @@ const SpaceDetailsScreen = () => {
                   data={comments}
                   keyExtractor={item => item.id}
                   renderItem={({item}) => <CommentListItem item={item} />}
-                  ListEmptyComponent={CommentsEmptyListPlaceholder}
+                  ListEmptyComponent={CommentListEmptyPlaceholder}
                   bounces={false}
-                  ItemSeparatorComponent={CommentsListSpacer}
-                  ListFooterComponent={CommentsListSpacer}
+                  ItemSeparatorComponent={CommentListSpacer}
+                  ListFooterComponent={CommentListFooter}
                   onEndReachedThreshold={0.3}
                   onEndReached={handleGetMoreComments}
                 />
@@ -245,18 +249,20 @@ function CommentListItem({item}: CommentListItemProps) {
   );
 }
 
-function CommentsEmptyListPlaceholder() {
+function CommentListEmptyPlaceholder() {
   return (
-    <View style={styles.commentsListEmptyPlaceholderContainer}>
-      <Text style={styles.commentsListEmptyPlaceholderText}>
-        No comments found
-      </Text>
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text style={{color: 'black'}}>No comments found</Text>
     </View>
   );
 }
 
-function CommentsListSpacer() {
-  return <View style={styles.commentsListSpacerContainer} />;
+function CommentListSpacer() {
+  return <View style={{marginBottom: 5}} />;
+}
+
+function CommentListFooter() {
+  return <View style={{marginBottom: 5}} />;
 }
 
 const styles = StyleSheet.create({
@@ -308,20 +314,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  description: {
-    color: 'black',
-  },
-  userInfoContainer: {
-    alignItems: 'center',
+  userAndTimestampContainer: {
     columnGap: 5,
     flexDirection: 'row',
     marginTop: 10,
-  },
-  userName: {
-    color: 'gray',
-  },
-  timestamp: {
-    color: 'gray',
   },
 
   // COMMENTS SECTION
@@ -340,22 +336,6 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
   },
-  addCommentFormContainer: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-  },
-  commentsListEmptyPlaceholderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  commentsListEmptyPlaceholderText: {
-    color: 'black',
-  },
-  commentsListSpacerContainer: {
-    marginBottom: 5,
-  },
   commentListContainer: {
     flex: 1,
   },
@@ -372,5 +352,10 @@ const styles = StyleSheet.create({
   commentListItemUserAndTimestampContainer: {
     columnGap: 5,
     flexDirection: 'row',
+  },
+  addCommentFormContainer: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
   },
 });
