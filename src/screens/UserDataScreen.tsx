@@ -63,31 +63,38 @@ const UserDataScreen = () => {
       />
 
       <View style={styles.listsContainer}>
-        <Text style={styles.listLabel}>Spaces</Text>
-        <FlatList
-          contentContainerStyle={styles.listContainer}
-          data={spaces}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <SpaceListItem item={item} onDelete={() => handleDelete(item.id)} />
-          )}
-          bounces={false}
-          ItemSeparatorComponent={ListItemSeparator}
-          ListFooterComponent={ListFooter}
-          ListEmptyComponent={ListEmpty}
-        />
+        <View style={styles.listContainer}>
+          <Text style={styles.listLabel}>Spaces</Text>
 
-        <Text style={styles.listLabel}>Comments</Text>
-        <FlatList
-          contentContainerStyle={styles.listContainer}
-          data={comments}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => <CommentListItem item={item} />}
-          bounces={false}
-          ItemSeparatorComponent={ListItemSeparator}
-          ListFooterComponent={ListFooter}
-          ListEmptyComponent={ListEmpty}
-        />
+          <FlatList
+            data={spaces}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <SpaceListItem
+                item={item}
+                onDelete={() => handleDelete(item.id)}
+              />
+            )}
+            bounces={false}
+            ItemSeparatorComponent={ListItemSeparator}
+            ListFooterComponent={ListFooter}
+            ListEmptyComponent={ListEmpty}
+          />
+        </View>
+
+        <View style={styles.listContainer}>
+          <Text style={styles.listLabel}>Comments</Text>
+
+          <FlatList
+            data={comments}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => <CommentListItem item={item} />}
+            bounces={false}
+            ItemSeparatorComponent={ListItemSeparator}
+            ListFooterComponent={ListFooter}
+            ListEmptyComponent={ListEmpty}
+          />
+        </View>
       </View>
     </View>
   );
@@ -182,6 +189,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
+    rowGap: 10,
   },
   listLabel: {
     fontSize: 16,
