@@ -37,23 +37,9 @@ const findByUserId = async (id: string) => {
   return query.docs.map(doc => doc.data());
 };
 
-const collectionSubscription = (
-  spaceId: string,
-  onChange: (c: Comment[]) => void,
-  onError: (e: Error) => void,
-) => {
-  return commentsSubCollection(spaceId)
-    .orderBy('createdAt', 'desc')
-    .onSnapshot(
-      query => onChange(query.docs.map(d => d.data()) as Comment[]),
-      error => onError(error),
-    );
-};
-
 export default {
   add,
   findByUserId,
-  collectionSubscription,
 };
 
 function createComment(

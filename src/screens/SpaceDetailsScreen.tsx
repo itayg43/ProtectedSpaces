@@ -17,7 +17,6 @@ import {
   SpaceDetailsScreenNavigationProp,
   SpaceDetailsScreenRouteProp,
 } from '../navigators/SpacesStackNavigator';
-import CommentListItem from '../components/CommentListItem';
 import KeyboardAvoidingView from '../components/views/KeyboardAvoidingView';
 import Modal from '../components/Modal';
 import AddCommentForm from '../components/forms/AddCommentForm';
@@ -25,7 +24,6 @@ import commentsService from '../services/commentsService';
 import {useAuthContext} from '../contexts/authContext';
 import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
-import useCommentsCollection from '../hooks/useCommentsCollection';
 import {useSpacesContext} from '../contexts/spacesContext';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
@@ -44,7 +42,6 @@ const SpaceDetailsScreen = () => {
   const {handleFindSpaceById} = useSpacesContext();
 
   const [space, setSpace] = useState<Space | null>(null);
-  const comments = useCommentsCollection(space?.id);
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
@@ -166,7 +163,7 @@ const SpaceDetailsScreen = () => {
               />
             </View>
 
-            <FlatList
+            {/* <FlatList
               data={comments}
               keyExtractor={item => item.id}
               renderItem={({item}) => <CommentListItem comment={item} />}
@@ -175,7 +172,7 @@ const SpaceDetailsScreen = () => {
               bounces={false}
               ItemSeparatorComponent={CommentsListSpacer}
               ListFooterComponent={CommentsListSpacer}
-            />
+            /> */}
           </View>
 
           {/** MODALS */}
@@ -214,19 +211,19 @@ function ImageListItem({url, index, total}: ImageListItemProps) {
   );
 }
 
-function CommentsEmptyListPlaceholder() {
-  return (
-    <View style={styles.commentsListEmptyPlaceholderContainer}>
-      <Text style={styles.commentsListEmptyPlaceholderText}>
-        No comments yet...
-      </Text>
-    </View>
-  );
-}
+// function CommentsEmptyListPlaceholder() {
+//   return (
+//     <View style={styles.commentsListEmptyPlaceholderContainer}>
+//       <Text style={styles.commentsListEmptyPlaceholderText}>
+//         No comments yet...
+//       </Text>
+//     </View>
+//   );
+// }
 
-function CommentsListSpacer() {
-  return <View style={styles.commentsListSpacerContainer} />;
-}
+// function CommentsListSpacer() {
+//   return <View style={styles.commentsListSpacerContainer} />;
+// }
 
 const styles = StyleSheet.create({
   container: {
