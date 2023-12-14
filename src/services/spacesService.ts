@@ -48,11 +48,11 @@ const findByGeohash = async (location: Location, radiusInKm = 0.3) => {
   // depending on overlap, but in most cases there are 4.
   const bounds = geofire.geohashQueryBounds(center, radiusInM);
 
-  const promises = bounds.map(b =>
+  const queries = bounds.map(b =>
     spacesColl.orderBy('geohash').startAt(b[0]).endAt(b[1]).get(),
   );
 
-  const snapshots = await Promise.all(promises);
+  const snapshots = await Promise.all(queries);
 
   const spaces: Space[] = [];
 
