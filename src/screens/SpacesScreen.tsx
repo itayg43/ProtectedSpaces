@@ -15,25 +15,19 @@ import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {useLocationContext} from '../contexts/locationContext';
 import {useSpacesContext} from '../contexts/spacesContext';
+import LoadingView from '../components/views/LoadingView';
 
 const SpacesScreen = () => {
+  const safeAreaInsets = useSafeAreaInsetsContext();
+
   const stackNavigation = useNavigation<SpacesStackNavigationProp>();
   const screenNavigation = useNavigation<SpacesScreenNavigationProp>();
 
-  const safeAreaInsets = useSafeAreaInsetsContext();
   const {location} = useLocationContext();
-  const {spaces, handleAddSpace} = useSpacesContext();
+
+  const {status, spaces, handleAddSpace} = useSpacesContext();
 
   const [showAddModal, setShowAddModal] = useState(false);
-
-  const handleMarkerPress = useCallback(
-    (id: string) => {
-      screenNavigation.navigate('spaceDetailsScreen', {
-        id,
-      });
-    },
-    [screenNavigation],
-  );
 
   const handleOpenDrawer = () => {
     stackNavigation.openDrawer();
@@ -60,10 +54,18 @@ const SpacesScreen = () => {
           latitude: s.latLng.latitude,
           longitude: s.latLng.longitude,
         }}
-        onPress={() => handleMarkerPress(s.id)}
+        onPress={() =>
+          screenNavigation.navigate('spaceDetailsScreen', {
+            id: s.id,
+          })
+        }
       />
     ));
-  }, [spaces, handleMarkerPress]);
+  }, [spaces, screenNavigation]);
+
+  if (status === 'loading') {
+    return <LoadingView />;
+  }
 
   return (
     <KeyboardAvoidingView>

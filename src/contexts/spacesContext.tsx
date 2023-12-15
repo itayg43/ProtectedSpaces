@@ -8,19 +8,21 @@ import React, {
   useState,
 } from 'react';
 
-import {AddSpaceFormData, Location, Space} from '../utils/types';
+import {AddSpaceFormData, Location, RequestStatus, Space} from '../utils/types';
 import {useLocationContext} from './locationContext';
 import spacesService from '../services/spacesService';
 import log from '../utils/log';
 import {useAuthContext} from './authContext';
 
 type SpacesContextParams = {
+  status: RequestStatus;
   spaces: Space[];
   handleAddSpace: (formData: AddSpaceFormData) => Promise<void>;
   handleFindSpaceById: (id: string) => Space | null;
 };
 
 const SpacesContext = createContext<SpacesContextParams>({
+  status: 'loading',
   spaces: [],
   handleAddSpace: async () => {},
   handleFindSpaceById: () => null,
@@ -30,6 +32,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
   const {user} = useAuthContext();
   const {location} = useLocationContext();
 
+  const [status, setStatus] = useState<RequestStatus>('loading');
   const [spaces, setSpaces] = useState<Space[]>([]);
 
   const handleAddSpace = useCallback(
@@ -56,13 +59,19 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
     [spaces],
   );
 
-  const handleGetSpacesByLocation = useCallback(async (l: Location) => {
-    try {
-      setSpaces(await spacesService.findByGeohash(l));
-    } catch (error) {
-      log.error(error);
-    }
-  }, []);
+  const handleGetSpacesByLocation = useCallback(
+    async (l: Location) => {
+      try {
+        setSpaces(await spacesService.findByGeohash(l));
+        if (status === 'loading') {
+          setStatus('idle');
+        }
+      } catch (error) {
+        log.error(error);
+      }
+    },
+    [status],
+  );
 
   useEffect(() => {
     if (location) {
@@ -72,11 +81,12 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
+      status,
       spaces,
       handleAddSpace,
       handleFindSpaceById,
     }),
-    [spaces, handleAddSpace, handleFindSpaceById],
+    [status, spaces, handleAddSpace, handleFindSpaceById],
   );
 
   return (
