@@ -50,13 +50,23 @@ const findBySpaceId = async (
   };
 };
 
-const findByUserId = async (id: string) => {
-  const query = await commentsSubCollectionGroup
-    .where('user.id', '==', id)
-    .orderBy('createdAt', 'desc')
-    .get();
+const findByUserId = async (
+  id: string,
+  lastDocument?: FirebaseFirestoreTypes.QueryDocumentSnapshot,
+  limit: number = 5,
+) => {
+  let query = commentsSubCollectionGroup.orderBy('createdAt', 'desc');
 
-  return query.docs.map(doc => doc.data());
+  if (lastDocument) {
+    query = query.startAfter(lastDocument);
+  }
+
+  const snap = await query.where('user.id', '==', id).limit(limit).get();
+
+  return {
+    comments: snap.docs.map(doc => doc.data()),
+    lastDocument: snap.docs[snap.docs.length - 1],
+  };
 };
 
 export default {

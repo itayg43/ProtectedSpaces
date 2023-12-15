@@ -7,9 +7,6 @@ import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {IconButton} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import {UserDataScreenNavigationProp} from '../navigators/UserDataStackNavigator';
-import useUserData from '../hooks/useUserData';
-import LoadingView from '../components/views/LoadingView';
-import ErrorView from '../components/views/ErrorView';
 import {Comment, Space} from '../utils/types';
 import log from '../utils/log';
 import spacesService from '../services/spacesService';
@@ -19,8 +16,6 @@ const UserDataScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
 
   const navigation = useNavigation<UserDataScreenNavigationProp>();
-
-  const {initialRequestStatus, spaces, comments} = useUserData();
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -36,20 +31,6 @@ const UserDataScreen = () => {
       }
     });
   };
-
-  if (initialRequestStatus === 'loading') {
-    return <LoadingView />;
-  }
-
-  if (initialRequestStatus === 'error') {
-    return (
-      <ErrorView
-        message="Something went wrong"
-        buttonLabel="Go back"
-        onPress={handleGoBack}
-      />
-    );
-  }
 
   return (
     <View

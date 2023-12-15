@@ -1,4 +1,6 @@
-import firestore from '@react-native-firebase/firestore';
+import firestore, {
+  FirebaseFirestoreTypes,
+} from '@react-native-firebase/firestore';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import * as geofire from 'geofire-common';
 
@@ -33,13 +35,23 @@ const add = async (
   return space;
 };
 
-const findByUserId = async (id: string) => {
-  const query = await spacesColl
-    .where('user.id', '==', id)
-    .orderBy('createdAt', 'desc')
-    .get();
+const findByUserId = async (
+  id: string,
+  lastDocument?: FirebaseFirestoreTypes.QueryDocumentSnapshot,
+  limit: number = 5,
+) => {
+  let query = spacesColl.orderBy('createdAt', 'desc');
 
-  return query.docs.map(doc => doc.data());
+  if (lastDocument) {
+    query = query.startAfter(lastDocument);
+  }
+
+  const snap = await query.where('user.id', '==', id).limit(limit).get();
+
+  return {
+    spaces: snap.docs.map(doc => doc.data()),
+    lastDocument: snap.docs[snap.docs.length - 1],
+  };
 };
 
 // https://cloud.google.com/firestore/docs/solutions/geoqueries#web-version-9_2
@@ -48,9 +60,6 @@ const findByGeohash = async (location: Location, radiusInKm = 0.2) => {
   const center: [number, number] = [location.latitude, location.longitude];
   const radiusInM = radiusInKm * 1000;
 
-  // Each item in 'bounds' represents a startAt/endAt pair. We have to issue
-  // a separate query for each pair. There can be up to 9 pairs of bounds
-  // depending on overlap, but in most cases there are 4.
   const bounds = geofire.geohashQueryBounds(center, radiusInM);
 
   const queries = bounds.map(b =>
@@ -65,8 +74,6 @@ const findByGeohash = async (location: Location, radiusInKm = 0.2) => {
     snap.docs.forEach(doc => {
       const currSpace = doc.data();
 
-      // We have to filter out a few false positives due to GeoHash
-      // accuracy, but most will match
       const distanceInKm = geofire.distanceBetween(
         [currSpace.latLng.latitude, currSpace.latLng.longitude],
         center,
