@@ -3,19 +3,33 @@ import {StyleSheet, View, Text} from 'react-native';
 import {Button} from 'react-native-paper';
 
 type Props = {
-  message: string;
-  buttonLabel: string;
-  onPress: () => void;
+  message?: string;
+  onGoBack?: () => void;
+  onTryAgain?: () => void;
 };
 
-const ErrorView = ({message, buttonLabel, onPress}: Props) => {
+const ErrorView = ({
+  message = 'Unexpected error',
+  onGoBack,
+  onTryAgain,
+}: Props) => {
   return (
     <View style={styles.container}>
       <Text>{message}</Text>
 
-      <Button mode="contained" onPress={onPress}>
-        {buttonLabel}
-      </Button>
+      <View style={styles.buttonsContainer}>
+        {onGoBack && (
+          <Button mode="contained" onPress={onGoBack}>
+            Go Back
+          </Button>
+        )}
+
+        {onTryAgain && (
+          <Button mode="contained" onPress={onTryAgain}>
+            Try Again
+          </Button>
+        )}
+      </View>
     </View>
   );
 };
@@ -27,6 +41,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    rowGap: 10,
+  },
+  buttonsContainer: {
+    marginTop: 10,
   },
 });

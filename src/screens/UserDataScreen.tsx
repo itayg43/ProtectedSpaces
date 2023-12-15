@@ -11,11 +11,17 @@ import {Comment, Space} from '../utils/types';
 import log from '../utils/log';
 import spacesService from '../services/spacesService';
 import alert from '../utils/alert';
+import useUserData from '../hooks/useUserData';
+import LoadingView from '../components/views/LoadingView';
+import ErrorView from '../components/views/ErrorView';
 
 const UserDataScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
 
   const navigation = useNavigation<UserDataScreenNavigationProp>();
+
+  const {status, spaces, comments, handleGetMoreSpaces, handleGetMoreComments} =
+    useUserData();
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -31,6 +37,14 @@ const UserDataScreen = () => {
       }
     });
   };
+
+  if (status === 'loading') {
+    return <LoadingView />;
+  }
+
+  if (status === 'error') {
+    return <ErrorView onGoBack={handleGoBack} />;
+  }
 
   return (
     <View
@@ -62,6 +76,8 @@ const UserDataScreen = () => {
             ItemSeparatorComponent={ListItemSeparator}
             ListFooterComponent={ListFooter}
             ListEmptyComponent={ListEmptyPlaceholder}
+            onEndReachedThreshold={0.3}
+            onEndReached={handleGetMoreSpaces}
           />
         </View>
 
@@ -76,6 +92,8 @@ const UserDataScreen = () => {
             ItemSeparatorComponent={ListItemSeparator}
             ListFooterComponent={ListFooter}
             ListEmptyComponent={ListEmptyPlaceholder}
+            onEndReachedThreshold={0.3}
+            onEndReached={handleGetMoreComments}
           />
         </View>
       </View>
