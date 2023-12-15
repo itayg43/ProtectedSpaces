@@ -1,3 +1,5 @@
+/* eslint-disable react-native/no-inline-styles */
+
 import React from 'react';
 import {FlatList, StyleSheet, Text, View} from 'react-native';
 
@@ -78,7 +80,7 @@ const UserDataScreen = () => {
             bounces={false}
             ItemSeparatorComponent={ListItemSeparator}
             ListFooterComponent={ListFooter}
-            ListEmptyComponent={ListEmpty}
+            ListEmptyComponent={ListEmptyPlaceholder}
           />
         </View>
 
@@ -92,7 +94,7 @@ const UserDataScreen = () => {
             bounces={false}
             ItemSeparatorComponent={ListItemSeparator}
             ListFooterComponent={ListFooter}
-            ListEmptyComponent={ListEmpty}
+            ListEmptyComponent={ListEmptyPlaceholder}
           />
         </View>
       </View>
@@ -111,11 +113,11 @@ function SpaceListItem({item, onDelete}: SpaceListItemProps) {
   return (
     <View style={styles.listItemContainer}>
       <View style={styles.listItemDetailsContainer}>
-        <Text>
+        <Text style={styles.colorBlack}>
           {item.address.street} {item.address.number}
         </Text>
 
-        <Text style={styles.timestamp}>
+        <Text style={styles.colorGray}>
           {item.createdAt.toDate().toLocaleDateString()}
         </Text>
       </View>
@@ -133,9 +135,9 @@ function CommentListItem({item}: CommentListItemProps) {
   return (
     <View style={styles.listItemContainer}>
       <View style={styles.listItemDetailsContainer}>
-        <Text>{item.value}</Text>
+        <Text style={styles.colorBlack}>{item.value}</Text>
 
-        <Text style={styles.timestamp}>
+        <Text style={styles.colorGray}>
           {item.createdAt.toDate().toLocaleDateString()}
         </Text>
       </View>
@@ -145,31 +147,24 @@ function CommentListItem({item}: CommentListItemProps) {
   );
 }
 
-type ListEmptyProps = {
-  message: string;
-};
-
-function ListEmpty({message = 'No data found'}: ListEmptyProps) {
+function ListEmptyPlaceholder() {
   return (
     <View
-      // eslint-disable-next-line react-native/no-inline-styles
       style={{
         alignItems: 'center',
         flex: 1,
         justifyContent: 'center',
       }}>
-      <Text>{message}</Text>
+      <Text style={styles.colorBlack}>No data found</Text>
     </View>
   );
 }
 
 function ListItemSeparator() {
-  // eslint-disable-next-line react-native/no-inline-styles
   return <View style={{marginBottom: 5}} />;
 }
 
 function ListFooter() {
-  // eslint-disable-next-line react-native/no-inline-styles
   return <View style={{marginBottom: 5}} />;
 }
 
@@ -194,6 +189,7 @@ const styles = StyleSheet.create({
   listLabel: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: 'black',
   },
   listItemContainer: {
     alignItems: 'center',
@@ -208,7 +204,11 @@ const styles = StyleSheet.create({
   listItemDetailsContainer: {
     rowGap: 5,
   },
-  timestamp: {
+
+  colorBlack: {
+    color: 'black',
+  },
+  colorGray: {
     color: 'gray',
   },
 });
