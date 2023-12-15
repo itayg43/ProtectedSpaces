@@ -24,7 +24,7 @@ const add = async (
   formData: AddCommentFormData,
   spaceId: string,
 ) => {
-  const comment = createComment(user, formData);
+  const comment = createComment(user, formData, spaceId);
 
   await commentsSubCollection(spaceId).doc(comment.id).set(comment);
 
@@ -69,18 +69,25 @@ const findByUserId = async (
   };
 };
 
+const deleteById = async (spaceId: string, commentId: string) => {
+  await commentsSubCollection(spaceId).doc(commentId).delete();
+};
+
 export default {
   add,
   findBySpaceId,
   findByUserId,
+  deleteById,
 };
 
 function createComment(
   user: FirebaseAuthTypes.User,
   formData: AddCommentFormData,
+  spaceId: string,
 ): Comment {
   return {
     id: uuidv4(),
+    spaceId,
     value: formData.value,
     user: {
       id: user.uid,

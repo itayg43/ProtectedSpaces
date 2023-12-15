@@ -27,6 +27,7 @@ export type Address = {
 
 export type Comment = {
   id: string;
+  spaceId: string;
   value: string;
   user: {
     id: string;

@@ -8,9 +8,6 @@ import {IconButton} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import {UserDataScreenNavigationProp} from '../navigators/UserDataStackNavigator';
 import {Comment, Space} from '../utils/types';
-import log from '../utils/log';
-import spacesService from '../services/spacesService';
-import alert from '../utils/alert';
 import useUserData from '../hooks/useUserData';
 import LoadingView from '../components/views/LoadingView';
 import ErrorView from '../components/views/ErrorView';
@@ -20,22 +17,18 @@ const UserDataScreen = () => {
 
   const navigation = useNavigation<UserDataScreenNavigationProp>();
 
-  const {status, spaces, comments, handleGetMoreSpaces, handleGetMoreComments} =
-    useUserData();
+  const {
+    status,
+    spaces,
+    comments,
+    handleGetMoreSpaces,
+    handleGetMoreComments,
+    handleDeleteSpace,
+    handleDeleteComment,
+  } = useUserData();
 
   const handleGoBack = () => {
     navigation.goBack();
-  };
-
-  const handleDelete = (id: string) => {
-    alert.remove(async () => {
-      try {
-        await spacesService.deleteByIdIncludeComments(id);
-      } catch (error: any) {
-        log.error(error);
-        alert.error(error.message);
-      }
-    });
   };
 
   if (status === 'loading') {
@@ -69,7 +62,7 @@ const UserDataScreen = () => {
             renderItem={({item}) => (
               <SpaceListItem
                 item={item}
-                onDelete={() => handleDelete(item.id)}
+                onDelete={() => handleDeleteSpace(item.id)}
               />
             )}
             bounces={false}
@@ -87,7 +80,12 @@ const UserDataScreen = () => {
           <FlatList
             data={comments}
             keyExtractor={item => item.id}
-            renderItem={({item}) => <CommentListItem item={item} />}
+            renderItem={({item}) => (
+              <CommentListItem
+                item={item}
+                onDelete={() => handleDeleteComment(item.spaceId, item.id)}
+              />
+            )}
             bounces={false}
             ItemSeparatorComponent={ListItemSeparator}
             ListFooterComponent={ListFooter}
@@ -128,9 +126,10 @@ function SpaceListItem({item, onDelete}: SpaceListItemProps) {
 
 type CommentListItemProps = {
   item: Comment;
+  onDelete: () => void;
 };
 
-function CommentListItem({item}: CommentListItemProps) {
+function CommentListItem({item, onDelete}: CommentListItemProps) {
   return (
     <View style={styles.listItemContainer}>
       <View style={styles.listItemDetailsContainer}>
@@ -141,7 +140,7 @@ function CommentListItem({item}: CommentListItemProps) {
         </Text>
       </View>
 
-      <IconButton mode="contained" icon="trash-can" />
+      <IconButton mode="contained" icon="trash-can" onPress={onDelete} />
     </View>
   );
 }
