@@ -39,7 +39,8 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
       }
 
       try {
-        await spacesService.add(user, formData);
+        const space = await spacesService.add(user, formData);
+        setSpaces(currSpaces => [space, ...currSpaces]);
       } catch (error) {
         log.error(error);
         throw new Error('Add space error');

@@ -14,18 +14,23 @@ const add = async (
   user: FirebaseAuthTypes.User,
   formData: AddSpaceFormData,
 ) => {
-  await firestoreClient.runTransaction(async t => {
-    const docRef = spacesColl.doc(formData.address.id);
+  const docRef = spacesColl.doc(formData.address.id);
 
+  const space: Space = await firestoreClient.runTransaction(async t => {
     const doc = await t.get(docRef);
+
     if (doc.exists) {
       throw new Error('Space in this address has already been added');
     }
 
-    const space = await createSpace(user, formData);
+    const newSpace = await createSpace(user, formData);
 
-    t.set(docRef, space);
+    t.set(docRef, newSpace);
+
+    return newSpace;
   });
+
+  return space;
 };
 
 const findByUserId = async (id: string) => {
@@ -39,7 +44,7 @@ const findByUserId = async (id: string) => {
 
 // https://cloud.google.com/firestore/docs/solutions/geoqueries#web-version-9_2
 
-const findByGeohash = async (location: Location, radiusInKm = 0.3) => {
+const findByGeohash = async (location: Location, radiusInKm = 0.2) => {
   const center: [number, number] = [location.latitude, location.longitude];
   const radiusInM = radiusInKm * 1000;
 
