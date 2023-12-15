@@ -39,6 +39,11 @@ const FormGooglePlacesAutocomplete = <T extends FieldValues>({
       return;
     }
 
+    // IF ERROR FROM PREVIOUS INVALID SELECTION RESET IT
+    if (error) {
+      onError('');
+    }
+
     onChange({
       id: details.place_id,
       city: details.address_components[2].short_name,
@@ -88,14 +93,6 @@ const styles = StyleSheet.create({
 
 function checkIfValidAddress(addressComponent: AddressComponent[]) {
   if (addressComponent[0].types[0] !== 'street_number') {
-    return false;
-  }
-
-  if (addressComponent[1].types[0] !== 'route') {
-    return false;
-  }
-
-  if (addressComponent[2].types[0] !== 'locality') {
     return false;
   }
 
