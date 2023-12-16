@@ -39,7 +39,7 @@ const UserProfileScreen = () => {
       />
 
       <View style={styles.sliderContainer}>
-        <Text style={styles.sliderLabel}>Radius In Meters</Text>
+        <Text style={styles.sliderLabel}>Radius (Meters)</Text>
 
         <Slider
           minimumValue={MIN_RADIUS_IN_M}
