@@ -11,11 +11,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import SpacesStackNavigator from './SpacesStackNavigator';
 import {useAuthContext} from '../contexts/authContext';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
-import UserDataStackNavigator from './UserDataStackNavigator';
+import UserDataScreen from '../screens/UserDataScreen';
 
 type DrawerParams = {
   spacesStack: undefined;
-  userDataStack: undefined;
+  userDataScreen: undefined;
 };
 
 export type SpacesStackNavigationProp = DrawerNavigationProp<
@@ -37,8 +37,8 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="spacesStack" component={SpacesStackNavigator} />
 
       <Drawer.Screen
-        name="userDataStack"
-        component={UserDataStackNavigator}
+        name="userDataScreen"
+        component={UserDataScreen}
         options={{
           unmountOnBlur: true,
         }}
@@ -65,7 +65,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
       <DrawerListItem
         label="My Spaces & Comments"
         icon="home-city"
-        onPress={() => navigation.navigate('userDataStack')}
+        onPress={() => navigation.navigate('userDataScreen')}
       />
       <Divider />
 
