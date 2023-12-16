@@ -7,9 +7,11 @@ import log from '../utils/log';
 import alert from '../utils/alert';
 import spacesService from '../services/spacesService';
 import commentsService from '../services/commentsService';
+import {useSpacesContext} from '../contexts/spacesContext';
 
 const useUserData = () => {
   const {user} = useAuthContext();
+  const {handleDeleteSpace: handleDeleteFromSpacesContext} = useSpacesContext();
 
   const [status, setStatus] = useState<RequestStatus>('loading');
 
@@ -75,18 +77,24 @@ const useUserData = () => {
     }
   }, [user, commentsLastDoc]);
 
-  const handleDeleteSpace = useCallback((id: string) => {
-    alert.remove(async () => {
-      try {
-        await spacesService.deleteByIdIncludeComments(id);
-        setSpaces(currSpaces => currSpaces.filter(s => s.id !== id));
-        setComments(currComments => currComments.filter(c => c.spaceId !== id));
-      } catch (error) {
-        log.error(error);
-        alert.error('Delete space error');
-      }
-    });
-  }, []);
+  const handleDeleteSpace = useCallback(
+    (id: string) => {
+      alert.remove(async () => {
+        try {
+          await spacesService.deleteByIdIncludeComments(id);
+          setSpaces(currSpaces => currSpaces.filter(s => s.id !== id));
+          setComments(currComments =>
+            currComments.filter(c => c.spaceId !== id),
+          );
+          handleDeleteFromSpacesContext(id);
+        } catch (error) {
+          log.error(error);
+          alert.error('Delete space error');
+        }
+      });
+    },
+    [handleDeleteFromSpacesContext],
+  );
 
   const handleDeleteComment = useCallback(
     (spaceId: string, commentId: string) => {

@@ -19,6 +19,7 @@ type SpacesContextParams = {
   spaces: Space[];
   handleAddSpace: (formData: AddSpaceFormData) => Promise<void>;
   handleFindSpaceById: (id: string) => Space | null;
+  handleDeleteSpace: (id: string) => void;
 };
 
 const SpacesContext = createContext<SpacesContextParams>({
@@ -26,6 +27,7 @@ const SpacesContext = createContext<SpacesContextParams>({
   spaces: [],
   handleAddSpace: async () => {},
   handleFindSpaceById: () => null,
+  handleDeleteSpace: () => {},
 });
 
 export const SpacesContextProvider = (props: PropsWithChildren) => {
@@ -33,6 +35,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
   const {location} = useLocationContext();
 
   const [status, setStatus] = useState<RequestStatus>('loading');
+
   const [spaces, setSpaces] = useState<Space[]>([]);
 
   const handleAddSpace = useCallback(
@@ -58,6 +61,10 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
     },
     [spaces],
   );
+
+  const handleDeleteSpace = useCallback((id: string) => {
+    setSpaces(currSpaces => currSpaces.filter(s => s.id !== id));
+  }, []);
 
   const handleGetSpacesByLocation = useCallback(
     async (l: Location) => {
@@ -85,8 +92,9 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
       spaces,
       handleAddSpace,
       handleFindSpaceById,
+      handleDeleteSpace,
     }),
-    [status, spaces, handleAddSpace, handleFindSpaceById],
+    [status, spaces, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
   );
 
   return (
