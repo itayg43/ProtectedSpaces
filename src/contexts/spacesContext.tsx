@@ -13,6 +13,7 @@ import {useLocationContext} from './locationContext';
 import spacesService from '../services/spacesService';
 import log from '../utils/log';
 import {useAuthContext} from './authContext';
+import {useProfileContext} from './profileContext';
 
 type SpacesContextParams = {
   status: RequestStatus;
@@ -33,6 +34,7 @@ const SpacesContext = createContext<SpacesContextParams>({
 export const SpacesContextProvider = (props: PropsWithChildren) => {
   const {user} = useAuthContext();
   const {location} = useLocationContext();
+  const {radiusInM} = useProfileContext();
 
   const [status, setStatus] = useState<RequestStatus>('loading');
 
@@ -67,9 +69,9 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
   }, []);
 
   const handleGetSpacesByLocation = useCallback(
-    async (l: Location) => {
+    async (l: Location, rInM: number) => {
       try {
-        setSpaces(await spacesService.findByGeohash(l));
+        setSpaces(await spacesService.findByGeohash(l, rInM));
         if (status === 'loading') {
           setStatus('idle');
         }
@@ -82,9 +84,9 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   useEffect(() => {
     if (location) {
-      handleGetSpacesByLocation(location);
+      handleGetSpacesByLocation(location, radiusInM);
     }
-  }, [location, handleGetSpacesByLocation]);
+  }, [location, radiusInM, handleGetSpacesByLocation]);
 
   const contextValues = useMemo(
     () => ({

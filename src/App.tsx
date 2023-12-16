@@ -7,6 +7,7 @@ import LoadingView from './components/views/LoadingView';
 import {SafeAreaInsetsContextProvider} from './contexts/safeAreaInsetsContext';
 import {LocationContextProvider} from './contexts/locationContext';
 import {SpacesContextProvider} from './contexts/spacesContext';
+import {ProfileContextProvider} from './contexts/profileContext';
 
 const App = () => {
   const {initialRequestStatus, user} = useAuthContext();
@@ -16,13 +17,15 @@ const App = () => {
   }
 
   return user ? (
-    <LocationContextProvider>
-      <SpacesContextProvider>
-        <SafeAreaInsetsContextProvider>
-          <DrawerNavigator />
-        </SafeAreaInsetsContextProvider>
-      </SpacesContextProvider>
-    </LocationContextProvider>
+    <ProfileContextProvider>
+      <LocationContextProvider>
+        <SpacesContextProvider>
+          <SafeAreaInsetsContextProvider>
+            <DrawerNavigator />
+          </SafeAreaInsetsContextProvider>
+        </SpacesContextProvider>
+      </LocationContextProvider>
+    </ProfileContextProvider>
   ) : (
     <LoginScreen />
   );

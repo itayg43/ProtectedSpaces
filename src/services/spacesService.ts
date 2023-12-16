@@ -56,9 +56,8 @@ const findByUserId = async (
 
 // https://cloud.google.com/firestore/docs/solutions/geoqueries#web-version-9_2
 
-const findByGeohash = async (location: Location, radiusInKm = 0.2) => {
+const findByGeohash = async (location: Location, radiusInM: number) => {
   const center: [number, number] = [location.latitude, location.longitude];
-  const radiusInM = radiusInKm * 1000;
 
   const bounds = geofire.geohashQueryBounds(center, radiusInM);
 
