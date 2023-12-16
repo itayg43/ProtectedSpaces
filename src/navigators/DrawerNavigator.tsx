@@ -11,16 +11,28 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import SpacesStackNavigator from './SpacesStackNavigator';
 import {useAuthContext} from '../contexts/authContext';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
+import UserProfileScreen from '../screens/UserProfileScreen';
 import UserDataScreen from '../screens/UserDataScreen';
 
 type DrawerParams = {
   spacesStack: undefined;
+  userProfileScreen: undefined;
   userDataScreen: undefined;
 };
 
 export type SpacesStackNavigationProp = DrawerNavigationProp<
   DrawerParams,
   'spacesStack'
+>;
+
+export type UserProfileScreenNavigationProps = DrawerNavigationProp<
+  DrawerParams,
+  'userProfileScreen'
+>;
+
+export type UserDataScreenNavigationProps = DrawerNavigationProp<
+  DrawerParams,
+  'userDataScreen'
 >;
 
 const Drawer = createDrawerNavigator<DrawerParams>();
@@ -35,6 +47,8 @@ const DrawerNavigator = () => {
       }}
       drawerContent={DrawerContent}>
       <Drawer.Screen name="spacesStack" component={SpacesStackNavigator} />
+
+      <Drawer.Screen name="userProfileScreen" component={UserProfileScreen} />
 
       <Drawer.Screen
         name="userDataScreen"
@@ -60,7 +74,11 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
         styles.container,
         {marginTop: safeAreaInsets.top, marginBottom: safeAreaInsets.bottom},
       ]}>
-      <DrawerListItem label={user?.displayName ?? ''} icon="face-man-profile" />
+      <DrawerListItem
+        label={user?.displayName ?? ''}
+        icon="face-man-profile"
+        onPress={() => navigation.navigate('userProfileScreen')}
+      />
 
       <DrawerListItem
         label="My Spaces & Comments"

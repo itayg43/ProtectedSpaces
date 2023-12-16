@@ -6,16 +6,16 @@ import {FlatList, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {IconButton} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
-import {UserDataScreenNavigationProp} from '../navigators/UserDataStackNavigator';
 import {Comment, Space} from '../utils/types';
 import useUserData from '../hooks/useUserData';
 import LoadingView from '../components/views/LoadingView';
 import ErrorView from '../components/views/ErrorView';
+import {UserDataScreenNavigationProps} from '../navigators/DrawerNavigator';
 
 const UserDataScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
 
-  const navigation = useNavigation<UserDataScreenNavigationProp>();
+  const navigation = useNavigation<UserDataScreenNavigationProps>();
 
   const {
     status,
