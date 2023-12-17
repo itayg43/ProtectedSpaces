@@ -48,6 +48,7 @@ const UserProfileScreen = () => {
           value={sliderValue}
           onSlidingComplete={async value => await handleRadiusChange(value)}
           onValueChange={setSliderValue}
+          minimumTrackTintColor="#6200ee"
         />
 
         <Text style={styles.sliderValueLabel}>{sliderValue}</Text>
