@@ -8,9 +8,9 @@ import {useNavigation} from '@react-navigation/native';
 import {UserProfileScreenNavigationProps} from '../navigators/DrawerNavigator';
 import {useProfileContext} from '../contexts/profileContext';
 
-const MIN_RADIUS_IN_M = 100;
-const MAX_RADIUS_IN_M = 800;
-const STEP_IN_M = 50;
+const MIN_RADIUS_IN_M = 25;
+const MAX_RADIUS_IN_M = 300;
+const STEP_IN_M = 25;
 
 const UserProfileScreen = () => {
   const safeAreaInsets = useSafeAreaInsetsContext();
@@ -46,7 +46,7 @@ const UserProfileScreen = () => {
           maximumValue={MAX_RADIUS_IN_M}
           step={STEP_IN_M}
           value={sliderValue}
-          onSlidingComplete={handleRadiusChange}
+          onSlidingComplete={async value => await handleRadiusChange(value)}
           onValueChange={setSliderValue}
         />
 

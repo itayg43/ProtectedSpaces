@@ -17,15 +17,15 @@ const App = () => {
   }
 
   return user ? (
-    <ProfileContextProvider>
-      <LocationContextProvider>
+    <LocationContextProvider>
+      <ProfileContextProvider>
         <SpacesContextProvider>
           <SafeAreaInsetsContextProvider>
             <DrawerNavigator />
           </SafeAreaInsetsContextProvider>
         </SpacesContextProvider>
-      </LocationContextProvider>
-    </ProfileContextProvider>
+      </ProfileContextProvider>
+    </LocationContextProvider>
   ) : (
     <LoginScreen />
   );

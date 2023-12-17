@@ -48,7 +48,13 @@ const DrawerNavigator = () => {
       drawerContent={DrawerContent}>
       <Drawer.Screen name="spacesStack" component={SpacesStackNavigator} />
 
-      <Drawer.Screen name="userProfileScreen" component={UserProfileScreen} />
+      <Drawer.Screen
+        name="userProfileScreen"
+        component={UserProfileScreen}
+        options={{
+          unmountOnBlur: true,
+        }}
+      />
 
       <Drawer.Screen
         name="userDataScreen"
