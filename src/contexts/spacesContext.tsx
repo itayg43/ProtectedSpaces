@@ -8,12 +8,18 @@ import React, {
   useReducer,
 } from 'react';
 
-import {AddSpaceFormData, Location, RequestStatus, Space} from '../utils/types';
+import type {
+  AddSpaceFormData,
+  Location,
+  RequestStatus,
+  Space,
+} from '../utils/types';
 import {useLocationContext} from './locationContext';
 import spacesService from '../services/spacesService';
 import log from '../utils/log';
 import {useAuthContext} from './authContext';
 import {useProfileContext} from './profileContext';
+import normalize from '../utils/normalize';
 
 type SpacesContextParams = {
   status: RequestStatus;
@@ -131,7 +137,7 @@ function spacesReducer(
     case 'SET': {
       return {
         status: data.status === 'loading' ? 'idle' : data.status,
-        entities: normalizeArrayByKey(action.payload as Space[], 'id'),
+        entities: normalize.arrayByKey(action.payload as Space[], 'id'),
       };
     }
 
@@ -156,14 +162,4 @@ function spacesReducer(
       };
     }
   }
-}
-
-function normalizeArrayByKey<T, K extends keyof T>(array: T[], key: K) {
-  return array.reduce((prev, currItem) => {
-    const currKeyValue = currItem[key] as string | number;
-    return {
-      ...prev,
-      [currKeyValue]: currItem,
-    };
-  }, {});
 }
