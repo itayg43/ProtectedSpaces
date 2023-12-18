@@ -5,7 +5,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useReducer,
 } from 'react';
 
 import {AddSpaceFormData, Location, RequestStatus, Space} from '../utils/types';
@@ -36,9 +36,10 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
   const {location} = useLocationContext();
   const {radiusInM} = useProfileContext();
 
-  const [status, setStatus] = useState<RequestStatus>('loading');
-
-  const [spaces, setSpaces] = useState<{[id: string]: Space}>({});
+  const [{status, entities}, dispatch] = useReducer(spacesReducer, {
+    status: 'loading',
+    entities: {},
+  });
 
   const handleAddSpace = useCallback(
     async (formData: AddSpaceFormData) => {
@@ -47,11 +48,10 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
       }
 
       try {
-        const space = await spacesService.add(user, formData);
-        setSpaces(currSpaces => ({
-          ...currSpaces,
-          [space.id]: space,
-        }));
+        dispatch({
+          type: 'ADD',
+          payload: await spacesService.add(user, formData),
+        });
       } catch (error) {
         log.error(error);
         throw new Error('Add space error');
@@ -62,34 +62,27 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const handleFindSpaceById = useCallback(
     (id: string) => {
-      return spaces[id];
+      return entities[id];
     },
-    [spaces],
+    [entities],
   );
 
   const handleDeleteSpace = useCallback((id: string) => {
-    setSpaces(currSpaces => {
-      delete currSpaces[id];
-      return {
-        ...currSpaces,
-      };
-    });
+    dispatch({type: 'DELETE', payload: id});
   }, []);
 
   const handleGetSpacesByLocation = useCallback(
     async (l: Location, rInM: number) => {
       try {
-        const s = await spacesService.findByGeohash(l, rInM);
-        const e = normalizeArrayByKey(s, 'id');
-        setSpaces(e);
-        if (status === 'loading') {
-          setStatus('idle');
-        }
+        dispatch({
+          type: 'SET',
+          payload: await spacesService.findByGeohash(l, rInM),
+        });
       } catch (error) {
         log.error(error);
       }
     },
-    [status],
+    [],
   );
 
   useEffect(() => {
@@ -100,13 +93,13 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
-      status,
-      spaces: Object.values(spaces),
+      status: status,
+      spaces: Object.values(entities),
       handleAddSpace,
       handleFindSpaceById,
       handleDeleteSpace,
     }),
-    [status, spaces, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
+    [status, entities, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
   );
 
   return (
@@ -117,6 +110,53 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 };
 
 export const useSpacesContext = () => useContext(SpacesContext);
+
+type SpacesReducerData = {
+  status: RequestStatus;
+  entities: {
+    [id: string]: Space;
+  };
+};
+
+type SpacesReducerAction = {
+  type: 'SET' | 'ADD' | 'DELETE';
+  payload: Space[] | Space | string;
+};
+
+function spacesReducer(
+  data: SpacesReducerData,
+  action: SpacesReducerAction,
+): SpacesReducerData {
+  switch (action.type) {
+    case 'SET': {
+      return {
+        status: data.status === 'loading' ? 'idle' : data.status,
+        entities: normalizeArrayByKey(action.payload as Space[], 'id'),
+      };
+    }
+
+    case 'ADD': {
+      const s = action.payload as Space;
+      return {
+        status: data.status,
+        entities: {
+          ...data.entities,
+          [s.id]: s,
+        },
+      };
+    }
+
+    case 'DELETE': {
+      delete data.entities[action.payload as string];
+      return {
+        status: data.status,
+        entities: {
+          ...data.entities,
+        },
+      };
+    }
+  }
+}
 
 function normalizeArrayByKey<T, K extends keyof T>(array: T[], key: K) {
   return array.reduce((prev, currItem) => {
