@@ -83,7 +83,8 @@ const SpaceDetailsScreen = () => {
   };
 
   useEffect(() => {
-    setSpace(handleFindSpaceById(route.params.id));
+    const s = handleFindSpaceById(route.params.id);
+    setSpace(s);
   }, [route.params.id, handleFindSpaceById]);
 
   if (space) {

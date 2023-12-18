@@ -15,6 +15,10 @@ import log from '../utils/log';
 import {useAuthContext} from './authContext';
 import {useProfileContext} from './profileContext';
 
+type SpacesEntities = {
+  [id: string]: Space;
+};
+
 type SpacesContextParams = {
   status: RequestStatus;
   spaces: Space[];
@@ -38,7 +42,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const [status, setStatus] = useState<RequestStatus>('loading');
 
-  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [entities, setEntities] = useState<SpacesEntities>({});
 
   const handleAddSpace = useCallback(
     async (formData: AddSpaceFormData) => {
@@ -48,7 +52,10 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
       try {
         const space = await spacesService.add(user, formData);
-        setSpaces(currSpaces => [space, ...currSpaces]);
+        setEntities(currEntities => ({
+          ...currEntities,
+          [space.id]: space,
+        }));
       } catch (error) {
         log.error(error);
         throw new Error('Add space error');
@@ -59,19 +66,26 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const handleFindSpaceById = useCallback(
     (id: string) => {
-      return spaces.find(s => s.id === id) ?? null;
+      return entities[id];
     },
-    [spaces],
+    [entities],
   );
 
   const handleDeleteSpace = useCallback((id: string) => {
-    setSpaces(currSpaces => currSpaces.filter(s => s.id !== id));
+    setEntities(currEntities => {
+      delete currEntities[id];
+      return {
+        ...currEntities,
+      };
+    });
   }, []);
 
   const handleGetSpacesByLocation = useCallback(
     async (l: Location, rInM: number) => {
       try {
-        setSpaces(await spacesService.findByGeohash(l, rInM));
+        const s = await spacesService.findByGeohash(l, rInM);
+        const e = normalizeArrayByKey(s, 'id');
+        setEntities(e);
         if (status === 'loading') {
           setStatus('idle');
         }
@@ -91,12 +105,12 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
   const contextValues = useMemo(
     () => ({
       status,
-      spaces,
+      spaces: Object.values(entities),
       handleAddSpace,
       handleFindSpaceById,
       handleDeleteSpace,
     }),
-    [status, spaces, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
+    [status, entities, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
   );
 
   return (
@@ -107,3 +121,13 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 };
 
 export const useSpacesContext = () => useContext(SpacesContext);
+
+function normalizeArrayByKey<T, K extends keyof T>(array: T[], key: K) {
+  return array.reduce((prev, currItem) => {
+    const currKeyValue = currItem[key] as string | number;
+    return {
+      ...prev,
+      [currKeyValue]: currItem,
+    };
+  }, {});
+}
