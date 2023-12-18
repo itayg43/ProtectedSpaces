@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useReducer} from 'react';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
 import type {AddCommentFormData, Comment, RequestStatus} from '../utils/types';
@@ -6,39 +6,54 @@ import log from '../utils/log';
 import commentsService from '../services/commentsService';
 import {useAuthContext} from '../contexts/authContext';
 
+type SpaceCommentsReducerData = {
+  status: RequestStatus;
+  comments: Comment[];
+  lastCommentDocument: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
+};
+
+const initialReducerData: SpaceCommentsReducerData = {
+  status: 'loading',
+  comments: [],
+  lastCommentDocument: null,
+};
+
 const useSpaceComments = (spaceId: string) => {
   const {user} = useAuthContext();
 
-  const [status, setStatus] = useState<RequestStatus>('loading');
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [lastDocument, setLastDocument] =
-    useState<FirebaseFirestoreTypes.QueryDocumentSnapshot | null>(null);
+  const [{status, comments, lastCommentDocument}, dispatch] = useReducer(
+    spaceCommentsReducer,
+    initialReducerData,
+  );
 
   const handleGetInitalComments = useCallback(async () => {
     try {
-      const res = await commentsService.findBySpaceId(spaceId);
-      setLastDocument(res.lastDocument);
-      setComments(res.comments);
-      setStatus('idle');
+      dispatch({
+        type: 'GET_INITIAL',
+        payload: await commentsService.findBySpaceId(spaceId),
+      });
     } catch (error) {
       log.error(error);
-      setStatus('error');
     }
   }, [spaceId]);
 
   const handleGetMoreComments = useCallback(async () => {
-    if (!lastDocument) {
+    if (!lastCommentDocument) {
       return;
     }
 
     try {
-      const res = await commentsService.findBySpaceId(spaceId, lastDocument);
-      setLastDocument(res.lastDocument);
-      setComments(currComments => [...currComments, ...res.comments]);
+      dispatch({
+        type: 'GET_MORE',
+        payload: await commentsService.findBySpaceId(
+          spaceId,
+          lastCommentDocument,
+        ),
+      });
     } catch (error) {
       log.error(error);
     }
-  }, [spaceId, lastDocument]);
+  }, [spaceId, lastCommentDocument]);
 
   const handleAddComment = useCallback(
     async (formData: AddCommentFormData) => {
@@ -47,8 +62,10 @@ const useSpaceComments = (spaceId: string) => {
       }
 
       try {
-        const comment = await commentsService.add(user, formData, spaceId);
-        setComments(currComments => [comment, ...currComments]);
+        dispatch({
+          type: 'ADD',
+          payload: await commentsService.add(user, formData, spaceId),
+        });
       } catch (error) {
         log.error(error);
         throw new Error('Add comment error');
@@ -70,3 +87,46 @@ const useSpaceComments = (spaceId: string) => {
 };
 
 export default useSpaceComments;
+
+type GetPayload = {
+  comments: Comment[];
+  lastDocument: FirebaseFirestoreTypes.QueryDocumentSnapshot;
+};
+
+type SpaceCommentsReducerAction = {
+  type: 'GET_INITIAL' | 'GET_MORE' | 'ADD';
+  payload: GetPayload | Comment;
+};
+
+function spaceCommentsReducer(
+  data: SpaceCommentsReducerData,
+  action: SpaceCommentsReducerAction,
+): SpaceCommentsReducerData {
+  switch (action.type) {
+    case 'GET_INITIAL': {
+      const {comments, lastDocument} = action.payload as GetPayload;
+      return {
+        status: 'idle',
+        comments,
+        lastCommentDocument: lastDocument,
+      };
+    }
+
+    case 'GET_MORE': {
+      const {comments, lastDocument} = action.payload as GetPayload;
+      return {
+        ...data,
+        comments: [...data.comments, ...comments],
+        lastCommentDocument: lastDocument,
+      };
+    }
+
+    case 'ADD': {
+      const c = action.payload as Comment;
+      return {
+        ...data,
+        comments: [c, ...data.comments],
+      };
+    }
+  }
+}
