@@ -15,10 +15,6 @@ import log from '../utils/log';
 import {useAuthContext} from './authContext';
 import {useProfileContext} from './profileContext';
 
-type SpacesEntities = {
-  [id: string]: Space;
-};
-
 type SpacesContextParams = {
   status: RequestStatus;
   spaces: Space[];
@@ -42,7 +38,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const [status, setStatus] = useState<RequestStatus>('loading');
 
-  const [entities, setEntities] = useState<SpacesEntities>({});
+  const [spaces, setSpaces] = useState<{[id: string]: Space}>({});
 
   const handleAddSpace = useCallback(
     async (formData: AddSpaceFormData) => {
@@ -52,8 +48,8 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
       try {
         const space = await spacesService.add(user, formData);
-        setEntities(currEntities => ({
-          ...currEntities,
+        setSpaces(currSpaces => ({
+          ...currSpaces,
           [space.id]: space,
         }));
       } catch (error) {
@@ -66,16 +62,16 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const handleFindSpaceById = useCallback(
     (id: string) => {
-      return entities[id];
+      return spaces[id];
     },
-    [entities],
+    [spaces],
   );
 
   const handleDeleteSpace = useCallback((id: string) => {
-    setEntities(currEntities => {
-      delete currEntities[id];
+    setSpaces(currSpaces => {
+      delete currSpaces[id];
       return {
-        ...currEntities,
+        ...currSpaces,
       };
     });
   }, []);
@@ -85,7 +81,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
       try {
         const s = await spacesService.findByGeohash(l, rInM);
         const e = normalizeArrayByKey(s, 'id');
-        setEntities(e);
+        setSpaces(e);
         if (status === 'loading') {
           setStatus('idle');
         }
@@ -105,12 +101,12 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
   const contextValues = useMemo(
     () => ({
       status,
-      spaces: Object.values(entities),
+      spaces: Object.values(spaces),
       handleAddSpace,
       handleFindSpaceById,
       handleDeleteSpace,
     }),
-    [status, entities, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
+    [status, spaces, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
   );
 
   return (
