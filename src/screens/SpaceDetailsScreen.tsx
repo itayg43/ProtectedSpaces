@@ -27,6 +27,7 @@ import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {useSpacesContext} from '../contexts/spacesContext';
 import useSpaceComments from '../hooks/useSpaceComments';
 import LoadingView from '../components/views/LoadingView';
+import ErrorView from '../components/views/ErrorView';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('screen');
 
@@ -44,7 +45,8 @@ const SpaceDetailsScreen = () => {
   const [space, setSpace] = useState<Space | null>(null);
 
   const {
-    status: commentsStatus,
+    commentsStatus,
+    commentsErrorMessage,
     comments,
     handleGetMoreComments,
     handleAddComment,
@@ -171,6 +173,8 @@ const SpaceDetailsScreen = () => {
 
             {commentsStatus === 'loading' ? (
               <LoadingView message="Loading Comments..." />
+            ) : commentsStatus === 'error' ? (
+              <ErrorView message={commentsErrorMessage} />
             ) : (
               <View style={styles.commentListContainer}>
                 <FlatList

@@ -8,12 +8,14 @@ import {useAuthContext} from '../contexts/authContext';
 
 type SpaceCommentsReducerData = {
   status: RequestStatus;
+  errorMessage: string;
   comments: Comment[];
   lastCommentDocument: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
 };
 
 const initialReducerData: SpaceCommentsReducerData = {
   status: 'loading',
+  errorMessage: '',
   comments: [],
   lastCommentDocument: null,
 };
@@ -21,19 +23,21 @@ const initialReducerData: SpaceCommentsReducerData = {
 const useSpaceComments = (spaceId: string) => {
   const {user} = useAuthContext();
 
-  const [{status, comments, lastCommentDocument}, dispatch] = useReducer(
-    spaceCommentsReducer,
-    initialReducerData,
-  );
+  const [{status, errorMessage, comments, lastCommentDocument}, dispatch] =
+    useReducer(spaceCommentsReducer, initialReducerData);
 
   const handleGetInitalComments = useCallback(async () => {
     try {
       dispatch({
-        type: 'GET_INITIAL',
+        type: 'GET_INITIAL_SUCCESS',
         payload: await commentsService.findBySpaceId(spaceId),
       });
     } catch (error) {
       log.error(error);
+      dispatch({
+        type: 'GET_INITIAL_FAIL',
+        payload: 'Get comments error',
+      });
     }
   }, [spaceId]);
 
@@ -79,7 +83,8 @@ const useSpaceComments = (spaceId: string) => {
   }, [handleGetInitalComments]);
 
   return {
-    status,
+    commentsStatus: status,
+    commentsErrorMessage: errorMessage,
     comments,
     handleGetMoreComments,
     handleAddComment,
@@ -94,8 +99,8 @@ type GetPayload = {
 };
 
 type SpaceCommentsReducerAction = {
-  type: 'GET_INITIAL' | 'GET_MORE' | 'ADD';
-  payload: GetPayload | Comment;
+  type: 'GET_INITIAL_SUCCESS' | 'GET_INITIAL_FAIL' | 'GET_MORE' | 'ADD';
+  payload: GetPayload | Comment | string;
 };
 
 function spaceCommentsReducer(
@@ -103,12 +108,21 @@ function spaceCommentsReducer(
   action: SpaceCommentsReducerAction,
 ): SpaceCommentsReducerData {
   switch (action.type) {
-    case 'GET_INITIAL': {
+    case 'GET_INITIAL_SUCCESS': {
       const {comments, lastDocument} = action.payload as GetPayload;
       return {
-        status: 'idle',
+        ...data,
+        status: 'success',
         comments,
         lastCommentDocument: lastDocument,
+      };
+    }
+
+    case 'GET_INITIAL_FAIL': {
+      return {
+        ...data,
+        status: 'error',
+        errorMessage: action.payload as string,
       };
     }
 
