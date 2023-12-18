@@ -99,7 +99,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
-      status: status,
+      status,
       spaces: Object.values(entities),
       handleAddSpace,
       handleFindSpaceById,
