@@ -19,6 +19,7 @@ const UserDataScreen = () => {
 
   const {
     status,
+    errorMessage,
     spaces,
     comments,
     handleGetMoreSpaces,
@@ -36,7 +37,7 @@ const UserDataScreen = () => {
   }
 
   if (status === 'error') {
-    return <ErrorView onGoBack={handleGoBack} />;
+    return <ErrorView message={errorMessage} onGoBack={handleGoBack} />;
   }
 
   return (

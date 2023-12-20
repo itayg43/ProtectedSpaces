@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useReducer} from 'react';
 
 import {useAuthContext} from '../contexts/authContext';
 import type {Comment, RequestStatus, Space} from '../utils/types';
@@ -9,19 +9,39 @@ import spacesService from '../services/spacesService';
 import commentsService from '../services/commentsService';
 import {useSpacesContext} from '../contexts/spacesContext';
 
+type SpacesData = {
+  spaces: Space[];
+  spacesLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
+};
+
+type CommentsData = {
+  comments: Comment[];
+  commentsLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
+};
+
+type UserDataReducerData = {
+  status: RequestStatus;
+  errorMessage: string;
+} & SpacesData &
+  CommentsData;
+
+const initialReducerData: UserDataReducerData = {
+  status: 'loading',
+  errorMessage: '',
+  spaces: [],
+  spacesLastDoc: null,
+  comments: [],
+  commentsLastDoc: null,
+};
+
 const useUserData = () => {
   const {user} = useAuthContext();
   const {handleDeleteSpace: handleDeleteFromSpacesContext} = useSpacesContext();
 
-  const [status, setStatus] = useState<RequestStatus>('loading');
-
-  const [spaces, setSpaces] = useState<Space[]>([]);
-  const [spacesLastDoc, setSpacesLastDoc] =
-    useState<FirebaseFirestoreTypes.QueryDocumentSnapshot | null>(null);
-
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [commentsLastDoc, setCommentsLastDoc] =
-    useState<FirebaseFirestoreTypes.QueryDocumentSnapshot | null>(null);
+  const [
+    {status, errorMessage, spaces, spacesLastDoc, comments, commentsLastDoc},
+    dispatch,
+  ] = useReducer(userDataReducer, initialReducerData);
 
   const handleGetInitalData = useCallback(async () => {
     if (!user) {
@@ -29,23 +49,23 @@ const useUserData = () => {
     }
 
     try {
-      const {uid} = user;
-
       const [sRes, cRes] = await Promise.all([
-        spacesService.findByUserId(uid),
-        commentsService.findByUserId(uid),
+        spacesService.findByUserId(user.uid),
+        commentsService.findByUserId(user.uid),
       ]);
 
-      setSpacesLastDoc(sRes.lastDocument);
-      setSpaces(sRes.spaces);
-
-      setCommentsLastDoc(cRes.lastDocument);
-      setComments(cRes.comments);
-
-      setStatus('idle');
+      dispatch({
+        type: 'GET_INITIAL_SUCCESS',
+        payload: {
+          spaces: sRes.spaces,
+          spacesLastDoc: sRes.lastDocument,
+          comments: cRes.comments,
+          commentsLastDoc: cRes.lastDocument,
+        },
+      });
     } catch (error) {
       log.error(error);
-      setStatus('error');
+      dispatch({type: 'GET_INITIAL_FAIL', payload: 'Get initial error'});
     }
   }, [user]);
 
@@ -56,8 +76,13 @@ const useUserData = () => {
 
     try {
       const res = await spacesService.findByUserId(user.uid, spacesLastDoc);
-      setSpacesLastDoc(res.lastDocument);
-      setSpaces(currSpaces => [...currSpaces, ...res.spaces]);
+      dispatch({
+        type: 'GET_MORE_SPACES_SUCCESS',
+        payload: {
+          spaces: res.spaces,
+          spacesLastDoc: res.lastDocument,
+        },
+      });
     } catch (error) {
       log.error(error);
     }
@@ -70,8 +95,13 @@ const useUserData = () => {
 
     try {
       const res = await commentsService.findByUserId(user.uid, commentsLastDoc);
-      setCommentsLastDoc(res.lastDocument);
-      setComments(currComments => [...currComments, ...res.comments]);
+      dispatch({
+        type: 'GET_MORE_COMMENTS_SUCCESS',
+        payload: {
+          comments: res.comments,
+          commentsLastDoc: res.lastDocument,
+        },
+      });
     } catch (error) {
       log.error(error);
     }
@@ -82,11 +112,8 @@ const useUserData = () => {
       alert.remove(async () => {
         try {
           await spacesService.deleteByIdIncludeComments(id);
-          setSpaces(currSpaces => currSpaces.filter(s => s.id !== id));
-          setComments(currComments =>
-            currComments.filter(c => c.spaceId !== id),
-          );
           handleDeleteFromSpacesContext(id);
+          dispatch({type: 'DELETE_SPACE_SUCCESS', payload: id});
         } catch (error) {
           log.error(error);
           alert.error('Delete space error');
@@ -101,9 +128,7 @@ const useUserData = () => {
       alert.remove(async () => {
         try {
           await commentsService.deleteById(spaceId, commentId);
-          setComments(currComments =>
-            currComments.filter(c => c.id !== commentId),
-          );
+          dispatch({type: 'DELETE_COMMENT_SUCCESS', payload: commentId});
         } catch (error) {
           log.error(error);
           alert.error('Delete comment error');
@@ -119,6 +144,7 @@ const useUserData = () => {
 
   return {
     status,
+    errorMessage,
     spaces,
     comments,
     handleGetMoreSpaces,
@@ -129,3 +155,75 @@ const useUserData = () => {
 };
 
 export default useUserData;
+
+type GetInitialSuccessPayload = SpacesData & CommentsData;
+
+type UserDataReducerAction = {
+  type:
+    | 'GET_INITIAL_SUCCESS'
+    | 'GET_INITIAL_FAIL'
+    | 'GET_MORE_SPACES_SUCCESS'
+    | 'GET_MORE_COMMENTS_SUCCESS'
+    | 'DELETE_SPACE_SUCCESS'
+    | 'DELETE_COMMENT_SUCCESS';
+  payload: GetInitialSuccessPayload | string | SpacesData | CommentsData;
+};
+
+function userDataReducer(
+  data: UserDataReducerData,
+  action: UserDataReducerAction,
+): UserDataReducerData {
+  switch (action.type) {
+    case 'GET_INITIAL_SUCCESS': {
+      const payload = action.payload as GetInitialSuccessPayload;
+      return {
+        ...data,
+        status: 'success',
+        ...payload,
+      };
+    }
+
+    case 'GET_INITIAL_FAIL': {
+      return {
+        ...data,
+        status: 'error',
+        errorMessage: action.payload as string,
+      };
+    }
+
+    case 'GET_MORE_SPACES_SUCCESS': {
+      const payload = action.payload as SpacesData;
+      return {
+        ...data,
+        spaces: [...data.spaces, ...payload.spaces],
+        spacesLastDoc: payload.spacesLastDoc,
+      };
+    }
+
+    case 'GET_MORE_COMMENTS_SUCCESS': {
+      const payload = action.payload as CommentsData;
+      return {
+        ...data,
+        comments: [...data.comments, ...payload.comments],
+        commentsLastDoc: payload.commentsLastDoc,
+      };
+    }
+
+    case 'DELETE_SPACE_SUCCESS': {
+      const id = action.payload as string;
+      return {
+        ...data,
+        spaces: data.spaces.filter(s => s.id !== id),
+        comments: data.comments.filter(c => c.spaceId !== id),
+      };
+    }
+
+    case 'DELETE_COMMENT_SUCCESS': {
+      const id = action.payload as string;
+      return {
+        ...data,
+        comments: data.comments.filter(c => c.id !== id),
+      };
+    }
+  }
+}
