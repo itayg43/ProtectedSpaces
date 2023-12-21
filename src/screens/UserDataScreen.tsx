@@ -44,7 +44,7 @@ const UserDataScreen = () => {
     <View
       style={[
         styles.container,
-        {marginTop: safeAreaInsets.top, marginBottom: safeAreaInsets.bottom},
+        {marginTop: safeAreaInsets?.top, marginBottom: safeAreaInsets?.bottom},
       ]}>
       <IconButton
         style={styles.goBackButton}

@@ -88,14 +88,14 @@ const SpacesScreen = () => {
         </MapView>
 
         <FAB
-          style={[styles.drawerFab, {top: safeAreaInsets.top}]}
+          style={[styles.drawerFab, {top: safeAreaInsets?.top}]}
           icon="menu"
           size="small"
           onPress={handleOpenDrawer}
         />
 
         <FAB
-          style={[styles.addFab, {bottom: safeAreaInsets.bottom}]}
+          style={[styles.addFab, {bottom: safeAreaInsets?.bottom}]}
           icon="plus"
           size="medium"
           onPress={handleToggleShowAddModal}

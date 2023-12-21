@@ -78,7 +78,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
     <View
       style={[
         styles.container,
-        {marginTop: safeAreaInsets.top, marginBottom: safeAreaInsets.bottom},
+        {marginTop: safeAreaInsets?.top, marginBottom: safeAreaInsets?.bottom},
       ]}>
       <DrawerListItem
         label={authContext?.user?.displayName ?? ''}
@@ -100,7 +100,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
       />
       <Divider />
 
-      <Text style={[styles.versionText, {bottom: safeAreaInsets.bottom}]}>
+      <Text style={[styles.versionText, {bottom: safeAreaInsets?.bottom}]}>
         Version: 0.0.1
       </Text>
     </View>

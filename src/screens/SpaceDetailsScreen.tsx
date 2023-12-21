@@ -113,7 +113,7 @@ const SpaceDetailsScreen = () => {
             />
 
             <IconButton
-              style={[styles.goBackButton, {top: safeAreaInsets.top}]}
+              style={[styles.goBackButton, {top: safeAreaInsets?.top}]}
               mode="contained"
               icon="keyboard-backspace"
               onPress={handleGoBack}
@@ -158,7 +158,7 @@ const SpaceDetailsScreen = () => {
           <View
             style={[
               styles.commentsSectionContainer,
-              {marginBottom: safeAreaInsets.bottom},
+              {marginBottom: safeAreaInsets?.bottom},
             ]}>
             <View style={styles.commentsSectionTitleContainer}>
               <Text style={styles.commentsSectionTitle}>Comments</Text>
