@@ -21,7 +21,7 @@ const initialReducerData: SpaceCommentsReducerData = {
 };
 
 const useSpaceComments = (spaceId: string) => {
-  const {user} = useAuthContext();
+  const authContext = useAuthContext();
 
   const [{status, errorMessage, comments, lastCommentDocument}, dispatch] =
     useReducer(spaceCommentsReducer, initialReducerData);
@@ -61,21 +61,25 @@ const useSpaceComments = (spaceId: string) => {
 
   const handleAddComment = useCallback(
     async (formData: AddCommentFormData) => {
-      if (!user) {
+      if (!authContext?.user) {
         return;
       }
 
       try {
         dispatch({
           type: 'ADD',
-          payload: await commentsService.add(user, formData, spaceId),
+          payload: await commentsService.add(
+            authContext.user,
+            formData,
+            spaceId,
+          ),
         });
       } catch (error) {
         log.error(error);
         throw new Error('Add comment error');
       }
     },
-    [user, spaceId],
+    [authContext, spaceId],
   );
 
   useEffect(() => {

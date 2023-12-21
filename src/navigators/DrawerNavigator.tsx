@@ -72,7 +72,7 @@ export default DrawerNavigator;
 function DrawerContent({navigation}: DrawerContentComponentProps) {
   const safeAreaInsets = useSafeAreaInsetsContext();
 
-  const {user, handleSignOut} = useAuthContext();
+  const authContext = useAuthContext();
 
   return (
     <View
@@ -81,7 +81,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
         {marginTop: safeAreaInsets.top, marginBottom: safeAreaInsets.bottom},
       ]}>
       <DrawerListItem
-        label={user?.displayName ?? ''}
+        label={authContext?.user?.displayName ?? ''}
         icon="face-man-profile"
         onPress={() => navigation.navigate('userProfileScreen')}
       />
@@ -96,7 +96,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
       <DrawerListItem
         label="Sign Out"
         icon="logout"
-        onPress={async () => await handleSignOut()}
+        onPress={async () => await authContext?.handleSignOut()}
       />
       <Divider />
 

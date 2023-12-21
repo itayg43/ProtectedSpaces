@@ -10,13 +10,13 @@ import {SpacesContextProvider} from './contexts/spacesContext';
 import {ProfileContextProvider} from './contexts/profileContext';
 
 const App = () => {
-  const {initialRequestStatus, user} = useAuthContext();
+  const authContext = useAuthContext();
 
-  if (initialRequestStatus === 'loading') {
+  if (authContext?.status === 'loading') {
     return <LoadingView />;
   }
 
-  return user ? (
+  return authContext?.user ? (
     <LocationContextProvider>
       <ProfileContextProvider>
         <SpacesContextProvider>

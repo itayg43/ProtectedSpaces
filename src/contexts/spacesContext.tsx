@@ -52,7 +52,7 @@ type SpacesReducerAction =
   | {type: 'DELETE_SUCCESS'; payload: {id: string}};
 
 export const SpacesContextProvider = (props: PropsWithChildren) => {
-  const {user} = useAuthContext();
+  const authContext = useAuthContext();
   const {location} = useLocationContext();
   const {radiusInM} = useProfileContext();
 
@@ -63,21 +63,21 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const handleAddSpace = useCallback(
     async (formData: AddSpaceFormData) => {
-      if (!user) {
+      if (!authContext?.user) {
         return;
       }
 
       try {
         dispatch({
           type: 'ADD_SUCCESS',
-          payload: await spacesService.add(user, formData),
+          payload: await spacesService.add(authContext.user, formData),
         });
       } catch (error) {
         log.error(error);
         throw new Error('Add space error');
       }
     },
-    [user, dispatch],
+    [authContext, dispatch],
   );
 
   const handleFindSpaceById = useCallback(

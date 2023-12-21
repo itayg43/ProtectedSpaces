@@ -35,7 +35,7 @@ const initialReducerData: UserDataReducerData = {
 };
 
 const useUserData = () => {
-  const {user} = useAuthContext();
+  const authContext = useAuthContext();
   const spacesContext = useSpacesContext();
 
   const [
@@ -44,14 +44,14 @@ const useUserData = () => {
   ] = useReducer(userDataReducer, initialReducerData);
 
   const handleGetInitalData = useCallback(async () => {
-    if (!user) {
+    if (!authContext?.user) {
       return;
     }
 
     try {
       const [sRes, cRes] = await Promise.all([
-        spacesService.findByUserId(user.uid),
-        commentsService.findByUserId(user.uid),
+        spacesService.findByUserId(authContext.user.uid),
+        commentsService.findByUserId(authContext.user.uid),
       ]);
 
       dispatch({
@@ -67,15 +67,18 @@ const useUserData = () => {
       log.error(error);
       dispatch({type: 'GET_INITIAL_FAIL', payload: 'Get initial error'});
     }
-  }, [user]);
+  }, [authContext]);
 
   const handleGetMoreSpaces = useCallback(async () => {
-    if (!user || !spacesLastDoc) {
+    if (!authContext?.user || !spacesLastDoc) {
       return;
     }
 
     try {
-      const res = await spacesService.findByUserId(user.uid, spacesLastDoc);
+      const res = await spacesService.findByUserId(
+        authContext.user.uid,
+        spacesLastDoc,
+      );
       dispatch({
         type: 'GET_MORE_SPACES_SUCCESS',
         payload: {
@@ -86,15 +89,18 @@ const useUserData = () => {
     } catch (error) {
       log.error(error);
     }
-  }, [user, spacesLastDoc]);
+  }, [authContext, spacesLastDoc]);
 
   const handleGetMoreComments = useCallback(async () => {
-    if (!user || !commentsLastDoc) {
+    if (!authContext?.user || !commentsLastDoc) {
       return;
     }
 
     try {
-      const res = await commentsService.findByUserId(user.uid, commentsLastDoc);
+      const res = await commentsService.findByUserId(
+        authContext.user.uid,
+        commentsLastDoc,
+      );
       dispatch({
         type: 'GET_MORE_COMMENTS_SUCCESS',
         payload: {
@@ -105,7 +111,7 @@ const useUserData = () => {
     } catch (error) {
       log.error(error);
     }
-  }, [user, commentsLastDoc]);
+  }, [authContext, commentsLastDoc]);
 
   const handleDeleteSpace = useCallback(
     (id: string) => {

@@ -14,29 +14,18 @@ import type {AuthProvider, RequestStatus} from '../utils/types';
 import alert from '../utils/alert';
 import log from '../utils/log';
 
-type AuthContextData = {
-  initialRequestStatus: RequestStatus;
+type AuthContextParams = {
+  status: RequestStatus;
   user: FirebaseAuthTypes.User | null;
-};
-
-const initialData: AuthContextData = {
-  initialRequestStatus: 'loading',
-  user: null,
-};
-
-type AuthContextParams = AuthContextData & {
   handleSignIn: (provider: AuthProvider) => Promise<void>;
   handleSignOut: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextParams>({
-  ...initialData,
-  handleSignIn: async () => {},
-  handleSignOut: async () => {},
-});
+const AuthContext = createContext<AuthContextParams | null>(null);
 
 export const AuthContextProvider = (props: PropsWithChildren) => {
-  const [data, setData] = useState<AuthContextData>(initialData);
+  const [status, setStatus] = useState<RequestStatus>('loading');
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
   const handleSignIn = useCallback(async (provider: AuthProvider) => {
     try {
@@ -58,30 +47,25 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
 
   const handleAuthStateChange = useCallback(
     (u: FirebaseAuthTypes.User | null) => {
-      setData(currentData => ({
-        user: u,
-        initialRequestStatus:
-          currentData.initialRequestStatus === 'loading'
-            ? 'idle'
-            : currentData.initialRequestStatus,
-      }));
+      setUser(u);
+      setStatus('idle');
     },
     [],
   );
 
   useEffect(() => {
-    const unsubscribe = authService.stateSubscription(handleAuthStateChange);
-
-    return unsubscribe;
+    const unsub = authService.stateSubscription(handleAuthStateChange);
+    return unsub;
   }, [handleAuthStateChange]);
 
   const contextValues = useMemo(
     () => ({
-      ...data,
+      status,
+      user,
       handleSignIn,
       handleSignOut,
     }),
-    [data, handleSignIn, handleSignOut],
+    [status, user, handleSignIn, handleSignOut],
   );
 
   return (
