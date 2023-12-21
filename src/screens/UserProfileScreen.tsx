@@ -17,9 +17,9 @@ const UserProfileScreen = () => {
 
   const navigation = useNavigation<UserProfileScreenNavigationProps>();
 
-  const {radiusInM, handleRadiusChange} = useProfileContext();
+  const profileContext = useProfileContext();
 
-  const [sliderValue, setSliderValue] = useState(radiusInM);
+  const [sliderValue, setSliderValue] = useState(profileContext?.radiusInM);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -46,7 +46,9 @@ const UserProfileScreen = () => {
           maximumValue={MAX_RADIUS_IN_M}
           step={STEP_IN_M}
           value={sliderValue}
-          onSlidingComplete={async value => await handleRadiusChange(value)}
+          onSlidingComplete={async value =>
+            await profileContext?.handleRadiusChange(value)
+          }
           onValueChange={setSliderValue}
           minimumTrackTintColor="#6200ee"
         />

@@ -16,10 +16,7 @@ type ProfileContextParams = {
   handleRadiusChange: (value: number) => Promise<void>;
 };
 
-const ProfileContext = createContext<ProfileContextParams>({
-  radiusInM: DEFAULT_RADIUS_IN_M,
-  handleRadiusChange: async () => {},
-});
+const ProfileContext = createContext<ProfileContextParams | null>(null);
 
 export const ProfileContextProvider = (props: PropsWithChildren) => {
   const [radiusInM, setRadiusInM] = useState(DEFAULT_RADIUS_IN_M);
