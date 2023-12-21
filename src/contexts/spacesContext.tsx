@@ -77,7 +77,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
         throw new Error('Add space error');
       }
     },
-    [authContext, dispatch],
+    [authContext?.user, dispatch],
   );
 
   const handleFindSpaceById = useCallback(

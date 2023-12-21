@@ -79,7 +79,7 @@ const useSpaceComments = (spaceId: string) => {
         throw new Error('Add comment error');
       }
     },
-    [authContext, spaceId],
+    [authContext?.user, spaceId],
   );
 
   useEffect(() => {

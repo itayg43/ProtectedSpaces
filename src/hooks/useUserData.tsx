@@ -67,7 +67,7 @@ const useUserData = () => {
       log.error(error);
       dispatch({type: 'GET_INITIAL_FAIL', payload: 'Get initial error'});
     }
-  }, [authContext]);
+  }, [authContext?.user]);
 
   const handleGetMoreSpaces = useCallback(async () => {
     if (!authContext?.user || !spacesLastDoc) {
@@ -89,7 +89,7 @@ const useUserData = () => {
     } catch (error) {
       log.error(error);
     }
-  }, [authContext, spacesLastDoc]);
+  }, [authContext?.user, spacesLastDoc]);
 
   const handleGetMoreComments = useCallback(async () => {
     if (!authContext?.user || !commentsLastDoc) {
@@ -111,7 +111,7 @@ const useUserData = () => {
     } catch (error) {
       log.error(error);
     }
-  }, [authContext, commentsLastDoc]);
+  }, [authContext?.user, commentsLastDoc]);
 
   const handleDeleteSpace = useCallback(
     (id: string) => {
