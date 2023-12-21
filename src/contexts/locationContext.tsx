@@ -12,9 +12,7 @@ type LocationContextParams = {
   location: Location | null;
 };
 
-const LocationContext = createContext<LocationContextParams>({
-  location: null,
-});
+const LocationContext = createContext<LocationContextParams | null>(null);
 
 export const LocationContextProvider = (props: PropsWithChildren) => {
   const location = useLocation();

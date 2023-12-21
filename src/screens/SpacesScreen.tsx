@@ -23,7 +23,7 @@ const SpacesScreen = () => {
   const stackNavigation = useNavigation<SpacesStackNavigationProp>();
   const screenNavigation = useNavigation<SpacesScreenNavigationProp>();
 
-  const {location} = useLocationContext();
+  const locationContext = useLocationContext();
 
   const spacesContext = useSpacesContext();
 
@@ -74,10 +74,10 @@ const SpacesScreen = () => {
           style={styles.mapContainer}
           provider={PROVIDER_GOOGLE}
           region={
-            location
+            locationContext?.location
               ? {
-                  latitude: location.latitude,
-                  longitude: location.longitude,
+                  latitude: locationContext.location.latitude,
+                  longitude: locationContext.location.longitude,
                   latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
                   longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
                 }

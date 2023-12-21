@@ -53,7 +53,7 @@ type SpacesReducerAction =
 
 export const SpacesContextProvider = (props: PropsWithChildren) => {
   const authContext = useAuthContext();
-  const {location} = useLocationContext();
+  const locationContext = useLocationContext();
   const {radiusInM} = useProfileContext();
 
   const [data, dispatch] = useImmerReducer<
@@ -113,10 +113,10 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
   );
 
   useEffect(() => {
-    if (location) {
-      handleGetSpacesByLocation(location, radiusInM);
+    if (locationContext?.location) {
+      handleGetSpacesByLocation(locationContext.location, radiusInM);
     }
-  }, [location, radiusInM, handleGetSpacesByLocation]);
+  }, [locationContext, radiusInM, handleGetSpacesByLocation]);
 
   const contextValues = useMemo(
     () => ({
