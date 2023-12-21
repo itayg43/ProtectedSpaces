@@ -9,7 +9,7 @@ import {UserProfileScreenNavigationProps} from '../navigators/DrawerNavigator';
 import {useProfileContext} from '../contexts/profileContext';
 
 const MIN_RADIUS_IN_M = 25;
-const MAX_RADIUS_IN_M = 300;
+const MAX_RADIUS_IN_M = 150;
 const STEP_IN_M = 25;
 
 const UserProfileScreen = () => {
@@ -39,7 +39,7 @@ const UserProfileScreen = () => {
       />
 
       <View style={styles.sliderContainer}>
-        <Text style={styles.sliderLabel}>Radius (Meters)</Text>
+        <Text style={styles.sliderTitle}>Radius (Meters):</Text>
 
         <Slider
           minimumValue={MIN_RADIUS_IN_M}
@@ -51,7 +51,16 @@ const UserProfileScreen = () => {
           minimumTrackTintColor="#6200ee"
         />
 
-        <Text style={styles.sliderValueLabel}>{sliderValue}</Text>
+        <View style={styles.sliderLabelsContainer}>
+          <Text style={styles.colorBlack}>{MIN_RADIUS_IN_M}</Text>
+
+          {sliderValue !== MIN_RADIUS_IN_M &&
+            sliderValue !== MAX_RADIUS_IN_M && (
+              <Text style={styles.colorBlack}>{sliderValue}</Text>
+            )}
+
+          <Text style={styles.colorBlack}>{MAX_RADIUS_IN_M}</Text>
+        </View>
       </View>
     </View>
   );
@@ -72,12 +81,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
     padding: 20,
   },
-  sliderLabel: {
+  sliderTitle: {
     color: 'black',
     fontWeight: 'bold',
   },
-  sliderValueLabel: {
-    marginTop: 10,
-    textAlign: 'center',
+  sliderLabelsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  colorBlack: {
+    color: 'black',
   },
 });
