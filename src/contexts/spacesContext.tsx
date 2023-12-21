@@ -5,8 +5,8 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useReducer,
 } from 'react';
+import {useImmerReducer} from 'use-immer';
 
 import type {
   AddSpaceFormData,
@@ -29,23 +29,37 @@ type SpacesContextParams = {
   handleDeleteSpace: (id: string) => void;
 };
 
-const SpacesContext = createContext<SpacesContextParams>({
+const SpacesContext = createContext<SpacesContextParams | null>(null);
+
+type SpacesReducerData = {
+  status: RequestStatus;
+  errorMessage: string;
+  entities: {
+    [id: string]: Space;
+  };
+};
+
+const initialReducerData: SpacesReducerData = {
   status: 'loading',
-  spaces: [],
-  handleAddSpace: async () => {},
-  handleFindSpaceById: () => null,
-  handleDeleteSpace: () => {},
-});
+  errorMessage: '',
+  entities: {},
+};
+
+type SpacesReducerAction =
+  | {type: 'GET_BY_LOCATION_SUCCESS'; payload: Space[]}
+  | {type: 'GET_BY_LOCATION_FAIL'; payload: {message: string}}
+  | {type: 'ADD_SUCCESS'; payload: Space}
+  | {type: 'DELETE_SUCCESS'; payload: {id: string}};
 
 export const SpacesContextProvider = (props: PropsWithChildren) => {
   const {user} = useAuthContext();
   const {location} = useLocationContext();
   const {radiusInM} = useProfileContext();
 
-  const [{status, entities}, dispatch] = useReducer(spacesReducer, {
-    status: 'loading',
-    entities: {},
-  });
+  const [data, dispatch] = useImmerReducer<
+    SpacesReducerData,
+    SpacesReducerAction
+  >(spacesReducer, initialReducerData);
 
   const handleAddSpace = useCallback(
     async (formData: AddSpaceFormData) => {
@@ -55,7 +69,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
       try {
         dispatch({
-          type: 'ADD',
+          type: 'ADD_SUCCESS',
           payload: await spacesService.add(user, formData),
         });
       } catch (error) {
@@ -63,32 +77,39 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
         throw new Error('Add space error');
       }
     },
-    [user],
+    [user, dispatch],
   );
 
   const handleFindSpaceById = useCallback(
     (id: string) => {
-      return entities[id];
+      return data.entities[id];
     },
-    [entities],
+    [data.entities],
   );
 
-  const handleDeleteSpace = useCallback((id: string) => {
-    dispatch({type: 'DELETE', payload: id});
-  }, []);
+  const handleDeleteSpace = useCallback(
+    (id: string) => {
+      dispatch({type: 'DELETE_SUCCESS', payload: {id}});
+    },
+    [dispatch],
+  );
 
   const handleGetSpacesByLocation = useCallback(
     async (l: Location, rInM: number) => {
       try {
         dispatch({
-          type: 'SET',
+          type: 'GET_BY_LOCATION_SUCCESS',
           payload: await spacesService.findByGeohash(l, rInM),
         });
       } catch (error) {
         log.error(error);
+        dispatch({
+          type: 'GET_BY_LOCATION_FAIL',
+          payload: {message: 'Get by location error'},
+        });
       }
     },
-    [],
+    [dispatch],
   );
 
   useEffect(() => {
@@ -99,13 +120,13 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
-      status,
-      spaces: Object.values(entities),
+      status: data.status,
+      spaces: Object.values(data.entities),
       handleAddSpace,
       handleFindSpaceById,
       handleDeleteSpace,
     }),
-    [status, entities, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
+    [data, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
   );
 
   return (
@@ -117,49 +138,29 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
 export const useSpacesContext = () => useContext(SpacesContext);
 
-type SpacesReducerData = {
-  status: RequestStatus;
-  entities: {
-    [id: string]: Space;
-  };
-};
-
-type SpacesReducerAction = {
-  type: 'SET' | 'ADD' | 'DELETE';
-  payload: Space[] | Space | string;
-};
-
-function spacesReducer(
-  data: SpacesReducerData,
-  action: SpacesReducerAction,
-): SpacesReducerData {
+function spacesReducer(data: SpacesReducerData, action: SpacesReducerAction) {
   switch (action.type) {
-    case 'SET': {
-      return {
-        status: data.status === 'loading' ? 'idle' : data.status,
-        entities: normalize.arrayByKey(action.payload as Space[], 'id'),
-      };
+    case 'GET_BY_LOCATION_SUCCESS': {
+      data.status = data.status === 'loading' ? 'idle' : data.status;
+      data.entities = normalize.arrayByKey(action.payload, 'id');
+      break;
     }
 
-    case 'ADD': {
-      const s = action.payload as Space;
-      return {
-        status: data.status,
-        entities: {
-          ...data.entities,
-          [s.id]: s,
-        },
-      };
+    case 'GET_BY_LOCATION_FAIL': {
+      data.status = 'error';
+      data.errorMessage = action.payload.message;
+      break;
     }
 
-    case 'DELETE': {
-      delete data.entities[action.payload as string];
-      return {
-        status: data.status,
-        entities: {
-          ...data.entities,
-        },
-      };
+    case 'ADD_SUCCESS': {
+      const s = action.payload;
+      data.entities[s.id] = s;
+      break;
+    }
+
+    case 'DELETE_SUCCESS': {
+      delete data.entities[action.payload.id];
+      break;
     }
   }
 }

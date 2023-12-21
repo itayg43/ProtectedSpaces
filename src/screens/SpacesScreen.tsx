@@ -25,7 +25,7 @@ const SpacesScreen = () => {
 
   const {location} = useLocationContext();
 
-  const {status, spaces, handleAddSpace} = useSpacesContext();
+  const spacesContext = useSpacesContext();
 
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -39,7 +39,7 @@ const SpacesScreen = () => {
 
   const handleSubmit = async (formData: AddSpaceFormData) => {
     try {
-      await handleAddSpace(formData);
+      await spacesContext?.handleAddSpace(formData);
       handleToggleShowAddModal();
     } catch (error: any) {
       alert.error(error.message);
@@ -47,7 +47,7 @@ const SpacesScreen = () => {
   };
 
   const renderSpacesMarkers = useCallback(() => {
-    return spaces.map(s => (
+    return spacesContext?.spaces.map(s => (
       <Marker
         key={s.id}
         coordinate={{
@@ -61,9 +61,9 @@ const SpacesScreen = () => {
         }
       />
     ));
-  }, [spaces, screenNavigation]);
+  }, [spacesContext, screenNavigation]);
 
-  if (status === 'loading') {
+  if (spacesContext?.status === 'loading') {
     return <LoadingView />;
   }
 

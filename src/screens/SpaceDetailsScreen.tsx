@@ -40,7 +40,7 @@ const SpaceDetailsScreen = () => {
   const route = useRoute<SpaceDetailsScreenRouteProp>();
   const navigation = useNavigation<SpaceDetailsScreenNavigationProp>();
 
-  const {handleFindSpaceById} = useSpacesContext();
+  const spacesContext = useSpacesContext();
 
   const [space, setSpace] = useState<Space | null>(null);
 
@@ -85,9 +85,8 @@ const SpaceDetailsScreen = () => {
   };
 
   useEffect(() => {
-    const s = handleFindSpaceById(route.params.id);
-    setSpace(s);
-  }, [route.params.id, handleFindSpaceById]);
+    setSpace(spacesContext?.handleFindSpaceById(route.params.id) ?? null);
+  }, [route.params.id, spacesContext]);
 
   if (space) {
     return (

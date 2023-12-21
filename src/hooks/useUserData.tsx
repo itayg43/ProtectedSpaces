@@ -36,7 +36,7 @@ const initialReducerData: UserDataReducerData = {
 
 const useUserData = () => {
   const {user} = useAuthContext();
-  const {handleDeleteSpace: handleDeleteFromSpacesContext} = useSpacesContext();
+  const spacesContext = useSpacesContext();
 
   const [
     {status, errorMessage, spaces, spacesLastDoc, comments, commentsLastDoc},
@@ -112,7 +112,7 @@ const useUserData = () => {
       alert.remove(async () => {
         try {
           await spacesService.deleteByIdIncludeComments(id);
-          handleDeleteFromSpacesContext(id);
+          spacesContext?.handleDeleteSpace(id);
           dispatch({type: 'DELETE_SPACE_SUCCESS', payload: id});
         } catch (error) {
           log.error(error);
@@ -120,7 +120,7 @@ const useUserData = () => {
         }
       });
     },
-    [handleDeleteFromSpacesContext],
+    [spacesContext],
   );
 
   const handleDeleteComment = useCallback(
