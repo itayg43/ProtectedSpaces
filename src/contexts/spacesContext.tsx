@@ -141,7 +141,7 @@ export const useSpacesContext = () => useContext(SpacesContext);
 function spacesReducer(data: SpacesReducerData, action: SpacesReducerAction) {
   switch (action.type) {
     case 'GET_BY_LOCATION_SUCCESS': {
-      data.status = data.status === 'loading' ? 'idle' : data.status;
+      data.status = 'success';
       data.entities = normalize.arrayByKey(action.payload, 'id');
       break;
     }
