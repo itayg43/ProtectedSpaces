@@ -1,4 +1,5 @@
-import {useCallback, useEffect, useReducer} from 'react';
+import {useCallback, useEffect} from 'react';
+import {useImmerReducer} from 'use-immer';
 
 import {useAuthContext} from '../contexts/authContext';
 import type {Comment, RequestStatus, Space} from '../utils/types';
@@ -9,21 +10,14 @@ import spacesService from '../services/spacesService';
 import commentsService from '../services/commentsService';
 import {useSpacesContext} from '../contexts/spacesContext';
 
-type SpacesData = {
-  spaces: Space[];
-  spacesLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
-};
-
-type CommentsData = {
-  comments: Comment[];
-  commentsLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
-};
-
 type UserDataReducerData = {
   status: RequestStatus;
   errorMessage: string;
-} & SpacesData &
-  CommentsData;
+  spaces: Space[];
+  spacesLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
+  comments: Comment[];
+  commentsLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
+};
 
 const initialReducerData: UserDataReducerData = {
   status: 'loading',
@@ -34,14 +28,42 @@ const initialReducerData: UserDataReducerData = {
   commentsLastDoc: null,
 };
 
+type UserDataReducerAction =
+  | {
+      type: 'GET_INITIAL_SUCCESS';
+      payload: {
+        spaces: Space[];
+        spacesLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot;
+        comments: Comment[];
+        commentsLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot;
+      };
+    }
+  | {type: 'GET_INITIAL_FAIL'; payload: {message: string}}
+  | {
+      type: 'GET_MORE_SPACES_SUCCESS';
+      payload: {
+        spaces: Space[];
+        spacesLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot;
+      };
+    }
+  | {
+      type: 'GET_MORE_COMMENTS_SUCCESS';
+      payload: {
+        comments: Comment[];
+        commentsLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot;
+      };
+    }
+  | {type: 'DELETE_SPACE_SUCCESS'; payload: {id: string}}
+  | {type: 'DELETE_COMMENT_SUCCESS'; payload: {id: string}};
+
 const useUserData = () => {
   const authContext = useAuthContext();
   const spacesContext = useSpacesContext();
 
-  const [
-    {status, errorMessage, spaces, spacesLastDoc, comments, commentsLastDoc},
-    dispatch,
-  ] = useReducer(userDataReducer, initialReducerData);
+  const [data, dispatch] = useImmerReducer<
+    UserDataReducerData,
+    UserDataReducerAction
+  >(userDataReducer, initialReducerData);
 
   const handleGetInitalData = useCallback(async () => {
     if (!authContext?.user) {
@@ -65,19 +87,22 @@ const useUserData = () => {
       });
     } catch (error) {
       log.error(error);
-      dispatch({type: 'GET_INITIAL_FAIL', payload: 'Get initial error'});
+      dispatch({
+        type: 'GET_INITIAL_FAIL',
+        payload: {message: 'Get data error'},
+      });
     }
-  }, [authContext?.user]);
+  }, [authContext?.user, dispatch]);
 
   const handleGetMoreSpaces = useCallback(async () => {
-    if (!authContext?.user || !spacesLastDoc) {
+    if (!authContext?.user || !data.spacesLastDoc) {
       return;
     }
 
     try {
       const res = await spacesService.findByUserId(
         authContext.user.uid,
-        spacesLastDoc,
+        data.spacesLastDoc,
       );
       dispatch({
         type: 'GET_MORE_SPACES_SUCCESS',
@@ -89,17 +114,17 @@ const useUserData = () => {
     } catch (error) {
       log.error(error);
     }
-  }, [authContext?.user, spacesLastDoc]);
+  }, [authContext?.user, data.spacesLastDoc, dispatch]);
 
   const handleGetMoreComments = useCallback(async () => {
-    if (!authContext?.user || !commentsLastDoc) {
+    if (!authContext?.user || !data.commentsLastDoc) {
       return;
     }
 
     try {
       const res = await commentsService.findByUserId(
         authContext.user.uid,
-        commentsLastDoc,
+        data.commentsLastDoc,
       );
       dispatch({
         type: 'GET_MORE_COMMENTS_SUCCESS',
@@ -111,7 +136,7 @@ const useUserData = () => {
     } catch (error) {
       log.error(error);
     }
-  }, [authContext?.user, commentsLastDoc]);
+  }, [authContext?.user, data.commentsLastDoc, dispatch]);
 
   const handleDeleteSpace = useCallback(
     (id: string) => {
@@ -119,14 +144,14 @@ const useUserData = () => {
         try {
           await spacesService.deleteByIdIncludeComments(id);
           spacesContext?.handleDeleteSpace(id);
-          dispatch({type: 'DELETE_SPACE_SUCCESS', payload: id});
+          dispatch({type: 'DELETE_SPACE_SUCCESS', payload: {id}});
         } catch (error) {
           log.error(error);
           alert.error('Delete space error');
         }
       });
     },
-    [spacesContext],
+    [spacesContext, dispatch],
   );
 
   const handleDeleteComment = useCallback(
@@ -134,14 +159,14 @@ const useUserData = () => {
       alert.remove(async () => {
         try {
           await commentsService.deleteById(spaceId, commentId);
-          dispatch({type: 'DELETE_COMMENT_SUCCESS', payload: commentId});
+          dispatch({type: 'DELETE_COMMENT_SUCCESS', payload: {id: commentId}});
         } catch (error) {
           log.error(error);
           alert.error('Delete comment error');
         }
       });
     },
-    [],
+    [dispatch],
   );
 
   useEffect(() => {
@@ -149,10 +174,10 @@ const useUserData = () => {
   }, [handleGetInitalData]);
 
   return {
-    status,
-    errorMessage,
-    spaces,
-    comments,
+    status: data.status,
+    errorMessage: data.errorMessage,
+    spaces: data.spaces,
+    comments: data.comments,
     handleGetMoreSpaces,
     handleGetMoreComments,
     handleDeleteSpace,
@@ -162,74 +187,49 @@ const useUserData = () => {
 
 export default useUserData;
 
-type GetInitialSuccessPayload = SpacesData & CommentsData;
-
-type UserDataReducerAction = {
-  type:
-    | 'GET_INITIAL_SUCCESS'
-    | 'GET_INITIAL_FAIL'
-    | 'GET_MORE_SPACES_SUCCESS'
-    | 'GET_MORE_COMMENTS_SUCCESS'
-    | 'DELETE_SPACE_SUCCESS'
-    | 'DELETE_COMMENT_SUCCESS';
-  payload: GetInitialSuccessPayload | string | SpacesData | CommentsData;
-};
-
 function userDataReducer(
-  data: UserDataReducerData,
+  draft: UserDataReducerData,
   action: UserDataReducerAction,
-): UserDataReducerData {
+) {
   switch (action.type) {
     case 'GET_INITIAL_SUCCESS': {
-      const payload = action.payload as GetInitialSuccessPayload;
-      return {
-        ...data,
-        status: 'success',
-        ...payload,
-      };
+      draft.status = 'success';
+      draft.spaces = action.payload.spaces;
+      draft.spacesLastDoc = action.payload.spacesLastDoc;
+      draft.comments = action.payload.comments;
+      draft.commentsLastDoc = action.payload.commentsLastDoc;
+      break;
     }
 
     case 'GET_INITIAL_FAIL': {
-      return {
-        ...data,
-        status: 'error',
-        errorMessage: action.payload as string,
-      };
+      draft.status = 'error';
+      draft.errorMessage = action.payload.message;
+      break;
     }
 
     case 'GET_MORE_SPACES_SUCCESS': {
-      const payload = action.payload as SpacesData;
-      return {
-        ...data,
-        spaces: [...data.spaces, ...payload.spaces],
-        spacesLastDoc: payload.spacesLastDoc,
-      };
+      draft.spaces = [...draft.spaces, ...action.payload.spaces];
+      draft.spacesLastDoc = action.payload.spacesLastDoc;
+      break;
     }
 
     case 'GET_MORE_COMMENTS_SUCCESS': {
-      const payload = action.payload as CommentsData;
-      return {
-        ...data,
-        comments: [...data.comments, ...payload.comments],
-        commentsLastDoc: payload.commentsLastDoc,
-      };
+      draft.comments = [...draft.comments, ...action.payload.comments];
+      draft.commentsLastDoc = action.payload.commentsLastDoc;
+      break;
     }
 
     case 'DELETE_SPACE_SUCCESS': {
-      const id = action.payload as string;
-      return {
-        ...data,
-        spaces: data.spaces.filter(s => s.id !== id),
-        comments: data.comments.filter(c => c.spaceId !== id),
-      };
+      draft.spaces = draft.spaces.filter(s => s.id !== action.payload.id);
+      draft.comments = draft.comments.filter(
+        c => c.spaceId !== action.payload.id,
+      );
+      break;
     }
 
     case 'DELETE_COMMENT_SUCCESS': {
-      const id = action.payload as string;
-      return {
-        ...data,
-        comments: data.comments.filter(c => c.id !== id),
-      };
+      draft.comments = draft.comments.filter(c => c.id !== action.payload.id);
+      break;
     }
   }
 }
