@@ -1,5 +1,6 @@
-import {useCallback, useEffect, useReducer} from 'react';
+import {useCallback, useEffect} from 'react';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import {useImmerReducer} from 'use-immer';
 
 import type {AddCommentFormData, Comment, RequestStatus} from '../utils/types';
 import log from '../utils/log';
@@ -10,21 +11,41 @@ type SpaceCommentsReducerData = {
   status: RequestStatus;
   errorMessage: string;
   comments: Comment[];
-  lastCommentDocument: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
+  commentsLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
 };
 
 const initialReducerData: SpaceCommentsReducerData = {
   status: 'loading',
   errorMessage: '',
   comments: [],
-  lastCommentDocument: null,
+  commentsLastDoc: null,
 };
+
+type SpaceCommentsReducerAction =
+  | {
+      type: 'GET_INITIAL_SUCCESS';
+      payload: {
+        comments: Comment[];
+        lastDocument: FirebaseFirestoreTypes.QueryDocumentSnapshot;
+      };
+    }
+  | {type: 'GET_INITIAL_FAIL'; payload: {message: string}}
+  | {
+      type: 'GET_MORE_SUCCESS';
+      payload: {
+        comments: Comment[];
+        lastDocument: FirebaseFirestoreTypes.QueryDocumentSnapshot;
+      };
+    }
+  | {type: 'ADD_SUCCESS'; payload: {comment: Comment}};
 
 const useSpaceComments = (spaceId: string) => {
   const authContext = useAuthContext();
 
-  const [{status, errorMessage, comments, lastCommentDocument}, dispatch] =
-    useReducer(spaceCommentsReducer, initialReducerData);
+  const [data, dispatch] = useImmerReducer<
+    SpaceCommentsReducerData,
+    SpaceCommentsReducerAction
+  >(spaceCommentsReducer, initialReducerData);
 
   const handleGetInitalComments = useCallback(async () => {
     try {
@@ -36,28 +57,28 @@ const useSpaceComments = (spaceId: string) => {
       log.error(error);
       dispatch({
         type: 'GET_INITIAL_FAIL',
-        payload: 'Get comments error',
+        payload: {message: 'Get comments error'},
       });
     }
-  }, [spaceId]);
+  }, [spaceId, dispatch]);
 
   const handleGetMoreComments = useCallback(async () => {
-    if (!lastCommentDocument) {
+    if (!data.commentsLastDoc) {
       return;
     }
 
     try {
       dispatch({
-        type: 'GET_MORE',
+        type: 'GET_MORE_SUCCESS',
         payload: await commentsService.findBySpaceId(
           spaceId,
-          lastCommentDocument,
+          data.commentsLastDoc,
         ),
       });
     } catch (error) {
       log.error(error);
     }
-  }, [spaceId, lastCommentDocument]);
+  }, [spaceId, data.commentsLastDoc, dispatch]);
 
   const handleAddComment = useCallback(
     async (formData: AddCommentFormData) => {
@@ -67,19 +88,21 @@ const useSpaceComments = (spaceId: string) => {
 
       try {
         dispatch({
-          type: 'ADD',
-          payload: await commentsService.add(
-            authContext.user,
-            formData,
-            spaceId,
-          ),
+          type: 'ADD_SUCCESS',
+          payload: {
+            comment: await commentsService.add(
+              authContext.user,
+              formData,
+              spaceId,
+            ),
+          },
         });
       } catch (error) {
         log.error(error);
         throw new Error('Add comment error');
       }
     },
-    [authContext?.user, spaceId],
+    [authContext?.user, spaceId, dispatch],
   );
 
   useEffect(() => {
@@ -87,9 +110,9 @@ const useSpaceComments = (spaceId: string) => {
   }, [handleGetInitalComments]);
 
   return {
-    commentsStatus: status,
-    commentsErrorMessage: errorMessage,
-    comments,
+    commentsStatus: data.status,
+    commentsErrorMessage: data.errorMessage,
+    comments: data.comments,
     handleGetMoreComments,
     handleAddComment,
   };
@@ -97,54 +120,33 @@ const useSpaceComments = (spaceId: string) => {
 
 export default useSpaceComments;
 
-type GetPayload = {
-  comments: Comment[];
-  lastDocument: FirebaseFirestoreTypes.QueryDocumentSnapshot;
-};
-
-type SpaceCommentsReducerAction = {
-  type: 'GET_INITIAL_SUCCESS' | 'GET_INITIAL_FAIL' | 'GET_MORE' | 'ADD';
-  payload: GetPayload | Comment | string;
-};
-
 function spaceCommentsReducer(
   data: SpaceCommentsReducerData,
   action: SpaceCommentsReducerAction,
-): SpaceCommentsReducerData {
+) {
   switch (action.type) {
     case 'GET_INITIAL_SUCCESS': {
-      const {comments, lastDocument} = action.payload as GetPayload;
-      return {
-        ...data,
-        status: 'success',
-        comments,
-        lastCommentDocument: lastDocument,
-      };
+      data.status = 'success';
+      data.comments = action.payload.comments;
+      data.commentsLastDoc = action.payload.lastDocument;
+      break;
     }
 
     case 'GET_INITIAL_FAIL': {
-      return {
-        ...data,
-        status: 'error',
-        errorMessage: action.payload as string,
-      };
+      data.status = 'error';
+      data.errorMessage = action.payload.message;
+      break;
     }
 
-    case 'GET_MORE': {
-      const {comments, lastDocument} = action.payload as GetPayload;
-      return {
-        ...data,
-        comments: [...data.comments, ...comments],
-        lastCommentDocument: lastDocument,
-      };
+    case 'GET_MORE_SUCCESS': {
+      data.comments = [...data.comments, ...action.payload.comments];
+      data.commentsLastDoc = action.payload.lastDocument;
+      break;
     }
 
-    case 'ADD': {
-      const c = action.payload as Comment;
-      return {
-        ...data,
-        comments: [c, ...data.comments],
-      };
+    case 'ADD_SUCCESS': {
+      data.comments = [action.payload.comment, ...data.comments];
+      break;
     }
   }
 }
