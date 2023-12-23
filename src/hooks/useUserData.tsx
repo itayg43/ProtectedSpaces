@@ -9,22 +9,27 @@ import alert from '../utils/alert';
 import spacesService from '../services/spacesService';
 import commentsService from '../services/commentsService';
 import {useSpacesContext} from '../contexts/spacesContext';
+import normalize from '../utils/normalize';
 
 type UserDataReducerData = {
   status: RequestStatus;
   errorMessage: string;
-  spaces: Space[];
+  spaces: {
+    [id: string]: Space;
+  };
   spacesLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
-  comments: Comment[];
+  comments: {
+    [id: string]: Comment;
+  };
   commentsLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot | null;
 };
 
 const initialReducerData: UserDataReducerData = {
   status: 'loading',
   errorMessage: '',
-  spaces: [],
+  spaces: {},
   spacesLastDoc: null,
-  comments: [],
+  comments: {},
   commentsLastDoc: null,
 };
 
@@ -176,8 +181,8 @@ const useUserData = () => {
   return {
     status: data.status,
     errorMessage: data.errorMessage,
-    spaces: data.spaces,
-    comments: data.comments,
+    spaces: Object.values(data.spaces),
+    comments: Object.values(data.comments),
     handleGetMoreSpaces,
     handleGetMoreComments,
     handleDeleteSpace,
@@ -194,9 +199,12 @@ function userDataReducer(
   switch (action.type) {
     case 'GET_INITIAL_SUCCESS': {
       draft.status = 'success';
-      draft.spaces = action.payload.spaces;
+      draft.spaces = normalize.arrayByUniqueKey(action.payload.spaces, 'id');
       draft.spacesLastDoc = action.payload.spacesLastDoc;
-      draft.comments = action.payload.comments;
+      draft.comments = normalize.arrayByUniqueKey(
+        action.payload.comments,
+        'id',
+      );
       draft.commentsLastDoc = action.payload.commentsLastDoc;
       break;
     }
@@ -208,27 +216,34 @@ function userDataReducer(
     }
 
     case 'GET_MORE_SPACES_SUCCESS': {
-      draft.spaces = [...draft.spaces, ...action.payload.spaces];
+      draft.spaces = {
+        ...draft.spaces,
+        ...normalize.arrayByUniqueKey(action.payload.spaces, 'id'),
+      };
       draft.spacesLastDoc = action.payload.spacesLastDoc;
       break;
     }
 
     case 'GET_MORE_COMMENTS_SUCCESS': {
-      draft.comments = [...draft.comments, ...action.payload.comments];
+      draft.comments = {
+        ...draft.comments,
+        ...normalize.arrayByUniqueKey(action.payload.comments, 'id'),
+      };
       draft.commentsLastDoc = action.payload.commentsLastDoc;
       break;
     }
 
     case 'DELETE_SPACE_SUCCESS': {
-      draft.spaces = draft.spaces.filter(s => s.id !== action.payload.id);
-      draft.comments = draft.comments.filter(
+      delete draft.spaces[action.payload.id];
+      const updatedComments = Object.values(draft.comments).filter(
         c => c.spaceId !== action.payload.id,
       );
+      draft.comments = normalize.arrayByUniqueKey(updatedComments, 'id');
       break;
     }
 
     case 'DELETE_COMMENT_SUCCESS': {
-      draft.comments = draft.comments.filter(c => c.id !== action.payload.id);
+      delete draft.comments[action.payload.id];
       break;
     }
   }
