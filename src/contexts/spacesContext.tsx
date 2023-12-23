@@ -145,28 +145,28 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
 export const useSpacesContext = () => useContext(SpacesContext);
 
-function spacesReducer(data: SpacesReducerData, action: SpacesReducerAction) {
+function spacesReducer(draft: SpacesReducerData, action: SpacesReducerAction) {
   switch (action.type) {
     case 'GET_BY_LOCATION_SUCCESS': {
-      data.status = 'success';
-      data.entities = normalize.arrayByUniqueKey(action.payload, 'id');
+      draft.status = 'success';
+      draft.entities = normalize.arrayByUniqueKey(action.payload, 'id');
       break;
     }
 
     case 'GET_BY_LOCATION_FAIL': {
-      data.status = 'error';
-      data.errorMessage = action.payload.message;
+      draft.status = 'error';
+      draft.errorMessage = action.payload.message;
       break;
     }
 
     case 'ADD_SUCCESS': {
       const s = action.payload;
-      data.entities[s.id] = s;
+      draft.entities[s.id] = s;
       break;
     }
 
     case 'DELETE_SUCCESS': {
-      delete data.entities[action.payload.id];
+      delete draft.entities[action.payload.id];
       break;
     }
   }

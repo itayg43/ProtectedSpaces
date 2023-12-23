@@ -121,31 +121,31 @@ const useSpaceComments = (spaceId: string) => {
 export default useSpaceComments;
 
 function spaceCommentsReducer(
-  data: SpaceCommentsReducerData,
+  draft: SpaceCommentsReducerData,
   action: SpaceCommentsReducerAction,
 ) {
   switch (action.type) {
     case 'GET_INITIAL_SUCCESS': {
-      data.status = 'success';
-      data.comments = action.payload.comments;
-      data.commentsLastDoc = action.payload.lastDocument;
+      draft.status = 'success';
+      draft.comments = action.payload.comments;
+      draft.commentsLastDoc = action.payload.lastDocument;
       break;
     }
 
     case 'GET_INITIAL_FAIL': {
-      data.status = 'error';
-      data.errorMessage = action.payload.message;
+      draft.status = 'error';
+      draft.errorMessage = action.payload.message;
       break;
     }
 
     case 'GET_MORE_SUCCESS': {
-      data.comments = [...data.comments, ...action.payload.comments];
-      data.commentsLastDoc = action.payload.lastDocument;
+      draft.comments = [...draft.comments, ...action.payload.comments];
+      draft.commentsLastDoc = action.payload.lastDocument;
       break;
     }
 
     case 'ADD_SUCCESS': {
-      data.comments = [action.payload.comment, ...data.comments];
+      draft.comments = [action.payload.comment, ...draft.comments];
       break;
     }
   }
