@@ -149,7 +149,7 @@ function spacesReducer(data: SpacesReducerData, action: SpacesReducerAction) {
   switch (action.type) {
     case 'GET_BY_LOCATION_SUCCESS': {
       data.status = 'success';
-      data.entities = normalize.arrayByKey(action.payload, 'id');
+      data.entities = normalize.arrayByUniqueKey(action.payload, 'id');
       break;
     }
 
