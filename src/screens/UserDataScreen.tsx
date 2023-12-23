@@ -71,7 +71,12 @@ const UserDataScreen = () => {
             ListFooterComponent={ListFooter}
             ListEmptyComponent={ListEmptyPlaceholder}
             onEndReachedThreshold={0.3}
-            onEndReached={handleGetMoreSpaces}
+            onEndReached={({distanceFromEnd}) => {
+              if (distanceFromEnd <= 0) {
+                return;
+              }
+              handleGetMoreSpaces();
+            }}
           />
         </View>
 

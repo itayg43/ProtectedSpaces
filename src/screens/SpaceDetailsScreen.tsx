@@ -185,7 +185,12 @@ const SpaceDetailsScreen = () => {
                   ItemSeparatorComponent={CommentListSpacer}
                   ListFooterComponent={CommentListFooter}
                   onEndReachedThreshold={0.3}
-                  onEndReached={handleGetMoreComments}
+                  onEndReached={({distanceFromEnd}) => {
+                    if (distanceFromEnd <= 0) {
+                      return;
+                    }
+                    handleGetMoreComments();
+                  }}
                 />
               </View>
             )}
