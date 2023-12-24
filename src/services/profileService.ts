@@ -12,12 +12,24 @@ const setRadius = async (value: number) => {
 
 const getRadius = async () => {
   const storedValue = await AsyncStorage.getItem(RADIUS_KEY);
-  const value = storedValue ? parseInt(storedValue, 10) : DEFAULT_RADIUS_IN_M;
-  log.debug(`GET ${RADIUS_KEY}: ${value}`);
-  return value;
+
+  if (storedValue === null) {
+    log.debug(`GET ${RADIUS_KEY}: null`);
+    setRadius(DEFAULT_RADIUS_IN_M);
+    return DEFAULT_RADIUS_IN_M;
+  }
+
+  log.debug(`GET ${RADIUS_KEY}: ${storedValue}`);
+  return parseInt(storedValue, 10);
+};
+
+const removeRadius = async () => {
+  await AsyncStorage.removeItem(RADIUS_KEY);
+  log.debug(`REMOVE ${RADIUS_KEY}`);
 };
 
 export default {
   setRadius,
   getRadius,
+  removeRadius,
 };

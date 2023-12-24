@@ -14,6 +14,7 @@ import log from '../utils/log';
 type ProfileContextParams = {
   radiusInM: number;
   handleRadiusChange: (value: number) => Promise<void>;
+  handleRemoveStoredData: () => Promise<void>;
 };
 
 const ProfileContext = createContext<ProfileContextParams | null>(null);
@@ -30,9 +31,19 @@ export const ProfileContextProvider = (props: PropsWithChildren) => {
     }
   }, []);
 
+  const handleRemoveStoredData = useCallback(async () => {
+    try {
+      await Promise.all([profileService.removeRadius()]);
+    } catch (error) {
+      log.error(error);
+      throw new Error('Remove stored data error');
+    }
+  }, []);
+
   const handleGetStoredData = useCallback(async () => {
     try {
-      setRadiusInM(await profileService.getRadius());
+      const [r] = await Promise.all([profileService.getRadius()]);
+      setRadiusInM(r);
     } catch (error) {
       log.error(error);
     }
@@ -46,8 +57,9 @@ export const ProfileContextProvider = (props: PropsWithChildren) => {
     () => ({
       radiusInM,
       handleRadiusChange,
+      handleRemoveStoredData,
     }),
-    [radiusInM, handleRadiusChange],
+    [radiusInM, handleRadiusChange, handleRemoveStoredData],
   );
 
   return (

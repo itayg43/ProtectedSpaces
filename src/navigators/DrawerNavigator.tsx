@@ -13,6 +13,8 @@ import {useAuthContext} from '../contexts/authContext';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import UserProfileScreen from '../screens/UserProfileScreen';
 import UserDataScreen from '../screens/UserDataScreen';
+import {useProfileContext} from '../contexts/profileContext';
+import alert from '../utils/alert';
 
 type DrawerParams = {
   spacesStack: undefined;
@@ -73,6 +75,16 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
   const safeAreaInsets = useSafeAreaInsetsContext();
 
   const authContext = useAuthContext();
+  const profileContext = useProfileContext();
+
+  const handleSignOut = async () => {
+    try {
+      await profileContext?.handleRemoveStoredData();
+      await authContext?.handleSignOut();
+    } catch (error: any) {
+      alert.error(error?.message);
+    }
+  };
 
   return (
     <View
@@ -93,11 +105,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
       />
       <Divider />
 
-      <DrawerListItem
-        label="Sign Out"
-        icon="logout"
-        onPress={async () => await authContext?.handleSignOut()}
-      />
+      <DrawerListItem label="Sign Out" icon="logout" onPress={handleSignOut} />
       <Divider />
 
       <Text style={[styles.versionText, {bottom: safeAreaInsets?.bottom}]}>

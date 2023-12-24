@@ -41,7 +41,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
       await authService.signOut();
     } catch (error) {
       log.error(error);
-      alert.error('Sign out error');
+      throw new Error('Sign out error');
     }
   }, []);
 
