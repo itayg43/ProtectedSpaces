@@ -88,127 +88,139 @@ const SpaceDetailsScreen = () => {
     setSpace(spacesContext?.handleFindSpaceById(route.params.id) ?? null);
   }, [route.params.id, spacesContext]);
 
-  if (space) {
-    return (
-      <KeyboardAvoidingView>
-        <View style={styles.container}>
-          {/** IMAGES SECTION */}
+  return (
+    <KeyboardAvoidingView>
+      <View style={styles.container}>
+        {renderImagesSection()}
+        {renderDetailsSection()}
+        {renderCommentsSection()}
 
-          <View style={styles.imagesSectionContainer}>
-            <FlatList
-              data={space.images}
-              keyExtractor={item => item}
-              renderItem={({item, index}) => (
-                <ImageListItem
-                  url={item}
-                  index={index + 1}
-                  total={space.images.length}
-                />
-              )}
-              horizontal
-              snapToInterval={IMAGE_WIDTH}
-              decelerationRate="fast"
-              showsHorizontalScrollIndicator={false}
-              bounces={false}
-            />
+        <Modal
+          isVisible={showAddCommentModal}
+          onDismiss={handleToggleShowAddCommentModal}>
+          <AddCommentForm
+            contentContainerStyle={styles.addCommentFormContainer}
+            onSubmit={handleSubmitComment}
+          />
+        </Modal>
+      </View>
+    </KeyboardAvoidingView>
+  );
+
+  function renderImagesSection() {
+    if (space) {
+      return (
+        <View style={styles.imagesSectionContainer}>
+          <FlatList
+            data={space.images}
+            keyExtractor={item => item}
+            renderItem={({item, index}) => (
+              <ImageListItem
+                url={item}
+                index={index + 1}
+                total={space.images.length}
+              />
+            )}
+            horizontal
+            snapToInterval={IMAGE_WIDTH}
+            decelerationRate="fast"
+            showsHorizontalScrollIndicator={false}
+            bounces={false}
+          />
+
+          <IconButton
+            style={[styles.goBackButton, {top: safeAreaInsets?.top}]}
+            mode="contained"
+            icon="keyboard-backspace"
+            onPress={handleGoBack}
+          />
+        </View>
+      );
+    }
+  }
+
+  function renderDetailsSection() {
+    if (space) {
+      return (
+        <View style={styles.detailsSectionContainer}>
+          <View style={styles.addressAndLinkContainer}>
+            <Text style={styles.address} numberOfLines={1}>
+              {`${space.address.street} ${space.address.number}, ${space.address.city}`}
+            </Text>
 
             <IconButton
-              style={[styles.goBackButton, {top: safeAreaInsets?.top}]}
               mode="contained"
-              icon="keyboard-backspace"
-              onPress={handleGoBack}
+              icon="google-maps"
+              size={22}
+              onPress={handleOpenAddressUrl}
             />
           </View>
 
-          {/** DETAILS SECTION */}
+          <Divider style={styles.divider} />
 
-          <View style={styles.detailsSectionContainer}>
-            <View style={styles.addressAndLinkContainer}>
-              <Text style={styles.address} numberOfLines={1}>
-                {`${space.address.street} ${space.address.number}, ${space.address.city}`}
-              </Text>
+          <Text style={styles.colorBlack}>{space.description}</Text>
 
-              <IconButton
-                mode="contained"
-                icon="google-maps"
-                size={22}
-                onPress={handleOpenAddressUrl}
-              />
-            </View>
+          <View style={styles.userAndTimestampContainer}>
+            <Text style={styles.colorGray}>
+              @{space.user.name.replace(' ', '_')}
+            </Text>
 
-            <Divider style={styles.divider} />
+            <Text style={styles.colorGray}>|</Text>
 
-            <Text style={styles.colorBlack}>{space.description}</Text>
-
-            <View style={styles.userAndTimestampContainer}>
-              <Text style={styles.colorGray}>
-                @{space.user.name.replace(' ', '_')}
-              </Text>
-
-              <Text style={styles.colorGray}>|</Text>
-
-              <Text style={styles.colorGray}>
-                {space.createdAt.toDate().toLocaleDateString()}
-              </Text>
-            </View>
+            <Text style={styles.colorGray}>
+              {space.createdAt.toDate().toLocaleDateString()}
+            </Text>
           </View>
-
-          {/** COMMENTS SECTION */}
-
-          <View
-            style={[
-              styles.commentsSectionContainer,
-              {marginBottom: safeAreaInsets?.bottom},
-            ]}>
-            <View style={styles.commentsSectionTitleContainer}>
-              <Text style={styles.commentsSectionTitle}>Comments</Text>
-
-              <IconButton
-                mode="contained"
-                icon="plus"
-                onPress={handleToggleShowAddCommentModal}
-              />
-            </View>
-
-            {commentsStatus === 'loading' ? (
-              <LoadingView message="Loading Comments..." />
-            ) : commentsStatus === 'error' ? (
-              <ErrorView message={commentsErrorMessage} />
-            ) : (
-              <View style={styles.commentListContainer}>
-                <FlatList
-                  data={comments}
-                  keyExtractor={item => item.id}
-                  renderItem={({item}) => <CommentListItem item={item} />}
-                  ListEmptyComponent={CommentListEmptyPlaceholder}
-                  bounces={false}
-                  ItemSeparatorComponent={CommentListSpacer}
-                  ListFooterComponent={CommentListFooter}
-                  onEndReachedThreshold={0.3}
-                  onEndReached={({distanceFromEnd}) => {
-                    if (distanceFromEnd <= 0) {
-                      return;
-                    }
-                    handleGetMoreComments();
-                  }}
-                />
-              </View>
-            )}
-          </View>
-
-          {/** MODALS */}
-
-          <Modal
-            isVisible={showAddCommentModal}
-            onDismiss={handleToggleShowAddCommentModal}>
-            <AddCommentForm
-              contentContainerStyle={styles.addCommentFormContainer}
-              onSubmit={handleSubmitComment}
-            />
-          </Modal>
         </View>
-      </KeyboardAvoidingView>
-    );
+      );
+    }
+  }
+
+  function renderCommentsSection() {
+    if (space) {
+      return (
+        <View
+          style={[
+            styles.commentsSectionContainer,
+            {marginBottom: safeAreaInsets?.bottom},
+          ]}>
+          <View style={styles.commentsSectionTitleContainer}>
+            <Text style={styles.commentsSectionTitle}>Comments</Text>
+
+            <IconButton
+              mode="contained"
+              icon="plus"
+              onPress={handleToggleShowAddCommentModal}
+            />
+          </View>
+
+          {commentsStatus === 'loading' ? (
+            <LoadingView message="Loading Comments..." />
+          ) : commentsStatus === 'error' ? (
+            <ErrorView message={commentsErrorMessage} />
+          ) : (
+            <View style={styles.commentListContainer}>
+              <FlatList
+                data={comments}
+                keyExtractor={item => item.id}
+                renderItem={({item}) => <CommentListItem item={item} />}
+                ListEmptyComponent={CommentListEmptyPlaceholder}
+                bounces={false}
+                ItemSeparatorComponent={CommentListSpacer}
+                ListFooterComponent={CommentListFooter}
+                onEndReachedThreshold={0.3}
+                onEndReached={({distanceFromEnd}) => {
+                  if (distanceFromEnd <= 0) {
+                    return;
+                  }
+                  handleGetMoreComments();
+                }}
+              />
+            </View>
+          )}
+        </View>
+      );
+    }
   }
 };
 
