@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {FAB} from 'react-native-paper';
@@ -26,19 +26,29 @@ const SpacesScreen = () => {
   const locationContext = useLocationContext();
   const spacesContext = useSpacesContext();
 
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddSpaceModal, setShowAddSpaceModal] = useState(false);
 
-  const handleToggleShowAddModal = () => {
-    setShowAddModal(currentState => !currentState);
+  const handleOpenDrawer = useCallback(() => {
+    stackNavigation.openDrawer();
+  }, [stackNavigation]);
+
+  const handleToggleShowAddSpaceModal = () => {
+    setShowAddSpaceModal(currentState => !currentState);
   };
 
-  const handleSubmit = async (formData: AddSpaceFormData) => {
+  const handleSubmitSpace = async (formData: AddSpaceFormData) => {
     try {
       await spacesContext?.handleAddSpace(formData);
-      handleToggleShowAddModal();
+      handleToggleShowAddSpaceModal();
     } catch (error: any) {
       alert.error(error.message);
     }
+  };
+
+  const handleMapMarkerPress = (spaceId: string) => {
+    screenNavigation.navigate('spaceDetailsScreen', {
+      id: spaceId,
+    });
   };
 
   if (spacesContext?.status === 'loading') {
@@ -48,67 +58,57 @@ const SpacesScreen = () => {
   return (
     <KeyboardAvoidingView>
       <View style={styles.container}>
-        {renderMapSection()}
+        <MapView
+          style={styles.mapContainer}
+          provider={PROVIDER_GOOGLE}
+          region={
+            locationContext?.location
+              ? {
+                  latitude: locationContext.location.latitude,
+                  longitude: locationContext.location.longitude,
+                  latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
+                  longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
+                }
+              : undefined
+          }
+          showsUserLocation>
+          {spacesContext?.spaces.map(s => (
+            <Marker
+              key={s.id}
+              coordinate={{
+                latitude: s.latLng.latitude,
+                longitude: s.latLng.longitude,
+              }}
+              onPress={() => handleMapMarkerPress(s.id)}
+            />
+          ))}
+        </MapView>
 
         <FAB
           style={[styles.drawerFab, {top: safeAreaInsets?.top}]}
           icon="menu"
           size="small"
-          onPress={() => stackNavigation.openDrawer()}
+          onPress={handleOpenDrawer}
         />
 
         <FAB
           style={[styles.addFab, {bottom: safeAreaInsets?.bottom}]}
           icon="plus"
           size="medium"
-          onPress={handleToggleShowAddModal}
+          onPress={handleToggleShowAddSpaceModal}
         />
 
-        <Modal isVisible={showAddModal} onDismiss={handleToggleShowAddModal}>
+        <Modal
+          isVisible={showAddSpaceModal}
+          onDismiss={handleToggleShowAddSpaceModal}>
           <AddSpaceForm
-            contentContainerStyle={styles.addFormContainer}
-            onSubmit={handleSubmit}
+            contentContainerStyle={styles.addSpaceFormContainer}
+            onSubmit={handleSubmitSpace}
           />
         </Modal>
       </View>
     </KeyboardAvoidingView>
   );
-
-  function renderMapSection() {
-    const handleMarkerPress = (id: string) => {
-      screenNavigation.navigate('spaceDetailsScreen', {
-        id,
-      });
-    };
-
-    return (
-      <MapView
-        style={styles.mapContainer}
-        provider={PROVIDER_GOOGLE}
-        region={
-          locationContext?.location
-            ? {
-                latitude: locationContext.location.latitude,
-                longitude: locationContext.location.longitude,
-                latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
-                longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
-              }
-            : undefined
-        }
-        showsUserLocation>
-        {spacesContext?.spaces.map(s => (
-          <Marker
-            key={s.id}
-            coordinate={{
-              latitude: s.latLng.latitude,
-              longitude: s.latLng.longitude,
-            }}
-            onPress={() => handleMarkerPress(s.id)}
-          />
-        ))}
-      </MapView>
-    );
-  }
 };
 
 export default SpacesScreen;
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
 
-  addFormContainer: {
+  addSpaceFormContainer: {
     backgroundColor: 'white',
     padding: 15,
     borderRadius: 10,
