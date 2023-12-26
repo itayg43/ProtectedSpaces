@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {FAB} from 'react-native-paper';
@@ -24,14 +24,9 @@ const SpacesScreen = () => {
   const screenNavigation = useNavigation<SpacesScreenNavigationProp>();
 
   const locationContext = useLocationContext();
-
   const spacesContext = useSpacesContext();
 
   const [showAddModal, setShowAddModal] = useState(false);
-
-  const handleOpenDrawer = () => {
-    stackNavigation.openDrawer();
-  };
 
   const handleToggleShowAddModal = () => {
     setShowAddModal(currentState => !currentState);
@@ -46,23 +41,6 @@ const SpacesScreen = () => {
     }
   };
 
-  const renderSpacesMarkers = useCallback(() => {
-    return spacesContext?.spaces.map(s => (
-      <Marker
-        key={s.id}
-        coordinate={{
-          latitude: s.latLng.latitude,
-          longitude: s.latLng.longitude,
-        }}
-        onPress={() =>
-          screenNavigation.navigate('spaceDetailsScreen', {
-            id: s.id,
-          })
-        }
-      />
-    ));
-  }, [spacesContext, screenNavigation]);
-
   if (spacesContext?.status === 'loading') {
     return <LoadingView />;
   }
@@ -70,28 +48,13 @@ const SpacesScreen = () => {
   return (
     <KeyboardAvoidingView>
       <View style={styles.container}>
-        <MapView
-          style={styles.mapContainer}
-          provider={PROVIDER_GOOGLE}
-          region={
-            locationContext?.location
-              ? {
-                  latitude: locationContext.location.latitude,
-                  longitude: locationContext.location.longitude,
-                  latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
-                  longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
-                }
-              : undefined
-          }
-          showsUserLocation>
-          {renderSpacesMarkers()}
-        </MapView>
+        {renderMapSection()}
 
         <FAB
           style={[styles.drawerFab, {top: safeAreaInsets?.top}]}
           icon="menu"
           size="small"
-          onPress={handleOpenDrawer}
+          onPress={() => stackNavigation.openDrawer()}
         />
 
         <FAB
@@ -100,8 +63,6 @@ const SpacesScreen = () => {
           size="medium"
           onPress={handleToggleShowAddModal}
         />
-
-        {/** MODALS */}
 
         <Modal isVisible={showAddModal} onDismiss={handleToggleShowAddModal}>
           <AddSpaceForm
@@ -112,6 +73,42 @@ const SpacesScreen = () => {
       </View>
     </KeyboardAvoidingView>
   );
+
+  function renderMapSection() {
+    const handleMarkerPress = (id: string) => {
+      screenNavigation.navigate('spaceDetailsScreen', {
+        id,
+      });
+    };
+
+    return (
+      <MapView
+        style={styles.mapContainer}
+        provider={PROVIDER_GOOGLE}
+        region={
+          locationContext?.location
+            ? {
+                latitude: locationContext.location.latitude,
+                longitude: locationContext.location.longitude,
+                latitudeDelta: DEFAULT_MAP_DELTAS.LATITUDE,
+                longitudeDelta: DEFAULT_MAP_DELTAS.LONGITUDE,
+              }
+            : undefined
+        }
+        showsUserLocation>
+        {spacesContext?.spaces.map(s => (
+          <Marker
+            key={s.id}
+            coordinate={{
+              latitude: s.latLng.latitude,
+              longitude: s.latLng.longitude,
+            }}
+            onPress={() => handleMarkerPress(s.id)}
+          />
+        ))}
+      </MapView>
+    );
+  }
 };
 
 export default SpacesScreen;
