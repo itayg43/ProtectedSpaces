@@ -23,9 +23,9 @@ import normalize from '../utils/normalize';
 
 type SpacesContextParams = {
   status: RequestStatus;
+  errorMessage: string;
   spaces: Space[];
   handleAddSpace: (formData: AddSpaceFormData) => Promise<void>;
-  handleFindSpaceById: (id: string) => Space | null;
   handleDeleteSpace: (id: string) => void;
 };
 
@@ -46,10 +46,30 @@ const initialReducerData: SpacesReducerData = {
 };
 
 type SpacesReducerAction =
-  | {type: 'GET_BY_LOCATION_SUCCESS'; payload: Space[]}
-  | {type: 'GET_BY_LOCATION_FAIL'; payload: {message: string}}
-  | {type: 'ADD_SUCCESS'; payload: Space}
-  | {type: 'DELETE_SUCCESS'; payload: {id: string}};
+  | {
+      type: 'GET_BY_LOCATION_SUCCESS';
+      payload: {
+        spaces: Space[];
+      };
+    }
+  | {
+      type: 'GET_BY_LOCATION_FAIL';
+      payload: {
+        message: string;
+      };
+    }
+  | {
+      type: 'ADD_SUCCESS';
+      payload: {
+        space: Space;
+      };
+    }
+  | {
+      type: 'DELETE';
+      payload: {
+        id: string;
+      };
+    };
 
 export const SpacesContextProvider = (props: PropsWithChildren) => {
   const authContext = useAuthContext();
@@ -68,9 +88,12 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
       }
 
       try {
+        const space = await spacesService.add(authContext.user, formData);
         dispatch({
           type: 'ADD_SUCCESS',
-          payload: await spacesService.add(authContext.user, formData),
+          payload: {
+            space,
+          },
         });
       } catch (error) {
         log.error(error);
@@ -80,32 +103,37 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
     [authContext?.user, dispatch],
   );
 
-  const handleFindSpaceById = useCallback(
-    (id: string) => {
-      return data.entities[id];
-    },
-    [data.entities],
-  );
-
   const handleDeleteSpace = useCallback(
     (id: string) => {
-      dispatch({type: 'DELETE_SUCCESS', payload: {id}});
+      if (id in data.entities) {
+        dispatch({
+          type: 'DELETE',
+          payload: {
+            id,
+          },
+        });
+      }
     },
-    [dispatch],
+    [data.entities, dispatch],
   );
 
   const handleGetSpacesByLocation = useCallback(
     async (l: Location, rInM: number) => {
       try {
+        const spaces = await spacesService.findByGeohash(l, rInM);
         dispatch({
           type: 'GET_BY_LOCATION_SUCCESS',
-          payload: await spacesService.findByGeohash(l, rInM),
+          payload: {
+            spaces,
+          },
         });
       } catch (error) {
         log.error(error);
         dispatch({
           type: 'GET_BY_LOCATION_FAIL',
-          payload: {message: 'Get by location error'},
+          payload: {
+            message: 'Get by location error',
+          },
         });
       }
     },
@@ -128,12 +156,12 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
   const contextValues = useMemo(
     () => ({
       status: data.status,
+      errorMessage: data.errorMessage,
       spaces: Object.values(data.entities),
       handleAddSpace,
-      handleFindSpaceById,
       handleDeleteSpace,
     }),
-    [data, handleAddSpace, handleFindSpaceById, handleDeleteSpace],
+    [data, handleAddSpace, handleDeleteSpace],
   );
 
   return (
@@ -148,25 +176,28 @@ export const useSpacesContext = () => useContext(SpacesContext);
 function spacesReducer(draft: SpacesReducerData, action: SpacesReducerAction) {
   switch (action.type) {
     case 'GET_BY_LOCATION_SUCCESS': {
+      const {spaces} = action.payload;
       draft.status = 'success';
-      draft.entities = normalize.arrayByUniqueKey(action.payload, 'id');
+      draft.entities = normalize.arrayByUniqueKey(spaces, 'id');
       break;
     }
 
     case 'GET_BY_LOCATION_FAIL': {
+      const {message} = action.payload;
       draft.status = 'error';
-      draft.errorMessage = action.payload.message;
+      draft.errorMessage = message;
       break;
     }
 
     case 'ADD_SUCCESS': {
-      const s = action.payload;
-      draft.entities[s.id] = s;
+      const {space} = action.payload;
+      draft.entities[space.id] = space;
       break;
     }
 
-    case 'DELETE_SUCCESS': {
-      delete draft.entities[action.payload.id];
+    case 'DELETE': {
+      const {id} = action.payload;
+      delete draft.entities[id];
       break;
     }
   }
