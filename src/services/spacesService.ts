@@ -35,6 +35,12 @@ const add = async (
   return space;
 };
 
+const findById = async (id: string) => {
+  const docSnap = await spacesColl.doc(id).get();
+
+  return docSnap.data() ?? null;
+};
+
 const findByUserId = async (
   id: string,
   lastDocument?: FirebaseFirestoreTypes.QueryDocumentSnapshot,
@@ -103,6 +109,7 @@ const deleteByIdIncludeComments = async (id: string) => {
 
 export default {
   add,
+  findById,
   findByUserId,
   findByGeohash,
   deleteByIdIncludeComments,

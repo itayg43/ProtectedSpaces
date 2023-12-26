@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -14,7 +14,7 @@ import FastImage from 'react-native-fast-image';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
 import log from '../utils/log';
-import type {AddCommentFormData, Comment, Space} from '../utils/types';
+import type {AddCommentFormData, Comment} from '../utils/types';
 import {
   SpaceDetailsScreenNavigationProp,
   SpaceDetailsScreenRouteProp,
@@ -24,8 +24,7 @@ import Modal from '../components/Modal';
 import AddCommentForm from '../components/forms/AddCommentForm';
 import alert from '../utils/alert';
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
-import {useSpacesContext} from '../contexts/spacesContext';
-import useSpaceComments from '../hooks/useSpaceComments';
+import useSpaceComments from '../hooks/useSpaceDetails';
 import LoadingView from '../components/views/LoadingView';
 import ErrorView from '../components/views/ErrorView';
 
@@ -40,13 +39,10 @@ const SpaceDetailsScreen = () => {
   const route = useRoute<SpaceDetailsScreenRouteProp>();
   const navigation = useNavigation<SpaceDetailsScreenNavigationProp>();
 
-  const spacesContext = useSpacesContext();
-
-  const [space, setSpace] = useState<Space | null>(null);
-
   const {
-    commentsStatus,
-    commentsErrorMessage,
+    status,
+    errorMessage,
+    space,
     comments,
     handleGetMoreComments,
     handleAddComment,
@@ -54,9 +50,9 @@ const SpaceDetailsScreen = () => {
 
   const [showAddCommentModal, setShowAddCommentModal] = useState(false);
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     navigation.goBack();
-  };
+  }, [navigation]);
 
   const handleOpenAddressUrl = async () => {
     if (!space) {
@@ -84,9 +80,13 @@ const SpaceDetailsScreen = () => {
     }
   };
 
-  useEffect(() => {
-    setSpace(spacesContext?.handleFindSpaceById(route.params.id) ?? null);
-  }, [route.params.id, spacesContext]);
+  if (status === 'loading') {
+    return <LoadingView />;
+  }
+
+  if (status === 'error') {
+    return <ErrorView message={errorMessage} onGoBack={handleGoBack} />;
+  }
 
   return (
     <KeyboardAvoidingView>
@@ -194,30 +194,24 @@ const SpaceDetailsScreen = () => {
             />
           </View>
 
-          {commentsStatus === 'loading' ? (
-            <LoadingView message="Loading Comments..." />
-          ) : commentsStatus === 'error' ? (
-            <ErrorView message={commentsErrorMessage} />
-          ) : (
-            <View style={styles.commentListContainer}>
-              <FlatList
-                data={comments}
-                keyExtractor={item => item.id}
-                renderItem={({item}) => <CommentListItem item={item} />}
-                ListEmptyComponent={CommentListEmptyPlaceholder}
-                bounces={false}
-                ItemSeparatorComponent={CommentListSpacer}
-                ListFooterComponent={CommentListFooter}
-                onEndReachedThreshold={0.3}
-                onEndReached={({distanceFromEnd}) => {
-                  if (distanceFromEnd <= 0) {
-                    return;
-                  }
-                  handleGetMoreComments();
-                }}
-              />
-            </View>
-          )}
+          <View style={styles.commentListContainer}>
+            <FlatList
+              data={comments}
+              keyExtractor={item => item.id}
+              renderItem={({item}) => <CommentListItem item={item} />}
+              ListEmptyComponent={CommentListEmptyPlaceholder}
+              bounces={false}
+              ItemSeparatorComponent={CommentListSpacer}
+              ListFooterComponent={CommentListFooter}
+              onEndReachedThreshold={0.3}
+              onEndReached={({distanceFromEnd}) => {
+                if (distanceFromEnd <= 0) {
+                  return;
+                }
+                handleGetMoreComments();
+              }}
+            />
+          </View>
         </View>
       );
     }
