@@ -74,7 +74,7 @@ const useSpaceDetails = (id: string) => {
       ]);
 
       if (space === null) {
-        throw new Error('');
+        throw new Error(`No space with the id: ${id}`);
       }
 
       dispatch({
