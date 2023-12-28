@@ -38,7 +38,7 @@ const SpacesScreen = () => {
 
   const handleSubmitSpace = async (formData: AddSpaceFormData) => {
     try {
-      await spacesContext?.handleAddSpace(formData);
+      await spacesContext.handleAddSpace(formData);
       handleToggleShowAddSpaceModal();
     } catch (error: any) {
       alert.error(error.message);
@@ -51,7 +51,7 @@ const SpacesScreen = () => {
     });
   };
 
-  if (spacesContext?.status === 'loading') {
+  if (spacesContext.status === 'loading') {
     return <LoadingView />;
   }
 
@@ -72,7 +72,7 @@ const SpacesScreen = () => {
               : undefined
           }
           showsUserLocation>
-          {spacesContext?.spaces.map(s => (
+          {spacesContext.spaces.map(s => (
             <Marker
               key={s.id}
               coordinate={{
@@ -84,19 +84,23 @@ const SpacesScreen = () => {
           ))}
         </MapView>
 
-        <FAB
-          style={[styles.drawerFab, {top: safeAreaInsets?.top}]}
-          icon="menu"
-          size="small"
-          onPress={handleOpenDrawer}
-        />
+        {locationContext.location && (
+          <FAB
+            style={[styles.drawerFab, {top: safeAreaInsets?.top}]}
+            icon="menu"
+            size="small"
+            onPress={handleOpenDrawer}
+          />
+        )}
 
-        <FAB
-          style={[styles.addFab, {bottom: safeAreaInsets?.bottom}]}
-          icon="plus"
-          size="medium"
-          onPress={handleToggleShowAddSpaceModal}
-        />
+        {locationContext.location && (
+          <FAB
+            style={[styles.addFab, {bottom: safeAreaInsets?.bottom}]}
+            icon="plus"
+            size="medium"
+            onPress={handleToggleShowAddSpaceModal}
+          />
+        )}
 
         <Modal
           isVisible={showAddSpaceModal}

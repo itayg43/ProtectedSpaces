@@ -29,7 +29,15 @@ type SpacesContextParams = {
   handleDeleteSpace: (id: string) => void;
 };
 
-const SpacesContext = createContext<SpacesContextParams | null>(null);
+const initialContextParams: SpacesContextParams = {
+  status: 'loading',
+  errorMessage: '',
+  spaces: [],
+  handleAddSpace: async () => {},
+  handleDeleteSpace: () => {},
+};
+
+const SpacesContext = createContext<SpacesContextParams>(initialContextParams);
 
 type SpacesReducerData = {
   status: RequestStatus;
@@ -71,7 +79,7 @@ type SpacesReducerAction =
       };
     };
 
-export const SpacesContextProvider = (props: PropsWithChildren) => {
+export const SpacesContextProvider = ({children}: PropsWithChildren) => {
   const authContext = useAuthContext();
   const locationContext = useLocationContext();
   const profileContext = useProfileContext();
@@ -166,7 +174,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   return (
     <SpacesContext.Provider value={contextValues}>
-      {props.children}
+      {children}
     </SpacesContext.Provider>
   );
 };
