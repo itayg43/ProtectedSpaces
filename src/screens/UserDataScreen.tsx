@@ -13,7 +13,7 @@ import ErrorView from '../components/views/ErrorView';
 import {UserDataScreenNavigationProps} from '../navigators/DrawerNavigator';
 
 const UserDataScreen = () => {
-  const safeAreaInsets = useSafeAreaInsetsContext();
+  const safeAreaInsetsContext = useSafeAreaInsetsContext();
 
   const navigation = useNavigation<UserDataScreenNavigationProps>();
 
@@ -44,7 +44,10 @@ const UserDataScreen = () => {
     <View
       style={[
         styles.container,
-        {marginTop: safeAreaInsets?.top, marginBottom: safeAreaInsets?.bottom},
+        {
+          marginTop: safeAreaInsetsContext.top,
+          marginBottom: safeAreaInsetsContext.bottom,
+        },
       ]}>
       <IconButton
         style={styles.goBackButton}

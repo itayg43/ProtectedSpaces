@@ -13,7 +13,7 @@ const MAX_RADIUS_IN_M = 150;
 const STEP_IN_M = 25;
 
 const UserProfileScreen = () => {
-  const safeAreaInsets = useSafeAreaInsetsContext();
+  const safeAreaInsetsContext = useSafeAreaInsetsContext();
 
   const navigation = useNavigation<UserProfileScreenNavigationProps>();
 
@@ -29,7 +29,10 @@ const UserProfileScreen = () => {
     <View
       style={[
         styles.container,
-        {marginTop: safeAreaInsets?.top, marginBottom: safeAreaInsets?.bottom},
+        {
+          marginTop: safeAreaInsetsContext.top,
+          marginBottom: safeAreaInsetsContext.bottom,
+        },
       ]}>
       <IconButton
         style={styles.goBackButton}

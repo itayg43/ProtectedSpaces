@@ -11,11 +11,17 @@ type SafeAreaInsetsContextParams = {
   bottom: number;
 };
 
-const SafeAreaInsetsContext = createContext<SafeAreaInsetsContextParams | null>(
-  null,
-);
+const initialContextParams: SafeAreaInsetsContextParams = {
+  top: 0,
+  bottom: 0,
+};
 
-export const SafeAreaInsetsContextProvider = (props: PropsWithChildren) => {
+const SafeAreaInsetsContext =
+  createContext<SafeAreaInsetsContextParams>(initialContextParams);
+
+export const SafeAreaInsetsContextProvider = ({
+  children,
+}: PropsWithChildren) => {
   const insets = useSafeAreaInsets();
 
   const contextValues = useMemo(
@@ -28,7 +34,7 @@ export const SafeAreaInsetsContextProvider = (props: PropsWithChildren) => {
 
   return (
     <SafeAreaInsetsContext.Provider value={contextValues}>
-      {props.children}
+      {children}
     </SafeAreaInsetsContext.Provider>
   );
 };

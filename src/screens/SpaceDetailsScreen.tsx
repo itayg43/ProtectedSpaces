@@ -34,7 +34,7 @@ const IMAGE_WIDTH = SCREEN_WIDTH;
 const IMAGE_HEIGHT = 300;
 
 const SpaceDetailsScreen = () => {
-  const safeAreaInsets = useSafeAreaInsetsContext();
+  const safeAreaInsetsContext = useSafeAreaInsetsContext();
 
   const route = useRoute<SpaceDetailsScreenRouteProp>();
   const navigation = useNavigation<SpaceDetailsScreenNavigationProp>();
@@ -129,7 +129,7 @@ const SpaceDetailsScreen = () => {
           />
 
           <IconButton
-            style={[styles.goBackButton, {top: safeAreaInsets?.top}]}
+            style={[styles.goBackButton, {top: safeAreaInsetsContext.top}]}
             mode="contained"
             icon="keyboard-backspace"
             onPress={handleGoBack}
@@ -182,7 +182,7 @@ const SpaceDetailsScreen = () => {
         <View
           style={[
             styles.commentsSectionContainer,
-            {marginBottom: safeAreaInsets?.bottom},
+            {marginBottom: safeAreaInsetsContext.bottom},
           ]}>
           <View style={styles.commentsSectionTitleContainer}>
             <Text style={styles.commentsSectionTitle}>Comments</Text>

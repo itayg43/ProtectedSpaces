@@ -72,7 +72,7 @@ const DrawerNavigator = () => {
 export default DrawerNavigator;
 
 function DrawerContent({navigation}: DrawerContentComponentProps) {
-  const safeAreaInsets = useSafeAreaInsetsContext();
+  const safeAreaInsetsContext = useSafeAreaInsetsContext();
 
   const authContext = useAuthContext();
   const profileContext = useProfileContext();
@@ -90,7 +90,10 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
     <View
       style={[
         styles.container,
-        {marginTop: safeAreaInsets?.top, marginBottom: safeAreaInsets?.bottom},
+        {
+          marginTop: safeAreaInsetsContext.top,
+          marginBottom: safeAreaInsetsContext.bottom,
+        },
       ]}>
       <DrawerListItem
         label={authContext.user?.displayName ?? ''}
@@ -108,7 +111,8 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
       <DrawerListItem label="Sign Out" icon="logout" onPress={handleSignOut} />
       <Divider />
 
-      <Text style={[styles.versionText, {bottom: safeAreaInsets?.bottom}]}>
+      <Text
+        style={[styles.versionText, {bottom: safeAreaInsetsContext.bottom}]}>
         Version: 0.0.1
       </Text>
     </View>

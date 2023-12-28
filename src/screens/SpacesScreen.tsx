@@ -18,7 +18,7 @@ import {useSpacesContext} from '../contexts/spacesContext';
 import LoadingView from '../components/views/LoadingView';
 
 const SpacesScreen = () => {
-  const safeAreaInsets = useSafeAreaInsetsContext();
+  const safeAreaInsetsContext = useSafeAreaInsetsContext();
 
   const stackNavigation = useNavigation<SpacesStackNavigationProp>();
   const screenNavigation = useNavigation<SpacesScreenNavigationProp>();
@@ -86,7 +86,7 @@ const SpacesScreen = () => {
 
         {locationContext.location && (
           <FAB
-            style={[styles.drawerFab, {top: safeAreaInsets?.top}]}
+            style={[styles.drawerFab, {top: safeAreaInsetsContext.top}]}
             icon="menu"
             size="small"
             onPress={handleOpenDrawer}
@@ -95,7 +95,7 @@ const SpacesScreen = () => {
 
         {locationContext.location && (
           <FAB
-            style={[styles.addFab, {bottom: safeAreaInsets?.bottom}]}
+            style={[styles.addFab, {bottom: safeAreaInsetsContext.bottom}]}
             icon="plus"
             size="medium"
             onPress={handleToggleShowAddSpaceModal}
