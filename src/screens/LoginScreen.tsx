@@ -13,7 +13,7 @@ const LoginScreen = () => {
       <GoogleSigninButton
         size={GoogleSigninButton.Size.Wide}
         color={GoogleSigninButton.Color.Dark}
-        onPress={async () => await authContext?.handleSignIn('Google')}
+        onPress={async () => await authContext.handleSignIn('Google')}
       />
     </SafeView>
   );

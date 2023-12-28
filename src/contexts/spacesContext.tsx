@@ -83,7 +83,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
 
   const handleAddSpace = useCallback(
     async (formData: AddSpaceFormData) => {
-      if (!authContext?.user) {
+      if (authContext.user === null) {
         return;
       }
 
@@ -100,7 +100,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
         throw new Error('Add space error');
       }
     },
-    [authContext?.user, dispatch],
+    [authContext.user, dispatch],
   );
 
   const handleDeleteSpace = useCallback(

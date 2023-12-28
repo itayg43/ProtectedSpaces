@@ -120,7 +120,7 @@ const useSpaceDetails = (id: string) => {
 
   const handleAddComment = useCallback(
     async (formData: AddCommentFormData) => {
-      if (!authContext?.user) {
+      if (authContext.user === null) {
         return;
       }
 
@@ -141,7 +141,7 @@ const useSpaceDetails = (id: string) => {
         throw new Error('Add comment error');
       }
     },
-    [authContext?.user, id, dispatch],
+    [authContext.user, id, dispatch],
   );
 
   useEffect(() => {

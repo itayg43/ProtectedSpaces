@@ -21,9 +21,16 @@ type AuthContextParams = {
   handleSignOut: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextParams | null>(null);
+const initialContextParams: AuthContextParams = {
+  status: 'loading',
+  user: null,
+  handleSignIn: async () => {},
+  handleSignOut: async () => {},
+};
 
-export const AuthContextProvider = (props: PropsWithChildren) => {
+const AuthContext = createContext<AuthContextParams>(initialContextParams);
+
+export const AuthContextProvider = ({children}: PropsWithChildren) => {
   const [status, setStatus] = useState<RequestStatus>('loading');
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
@@ -55,6 +62,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
 
   useEffect(() => {
     const unsub = authService.stateSubscription(handleAuthStateChange);
+
     return unsub;
   }, [handleAuthStateChange]);
 
@@ -70,7 +78,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
 
   return (
     <AuthContext.Provider value={contextValues}>
-      {props.children}
+      {children}
     </AuthContext.Provider>
   );
 };

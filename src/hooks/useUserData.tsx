@@ -66,14 +66,16 @@ const useUserData = () => {
   >(userDataReducer, initialReducerData);
 
   const handleGetInitalData = useCallback(async () => {
-    if (!authContext?.user) {
+    if (authContext.user === null) {
       return;
     }
 
     try {
+      const {uid} = authContext.user;
+
       const [sRes, cRes] = await Promise.all([
-        spacesService.findByUserId(authContext.user.uid),
-        commentsService.findByUserId(authContext.user.uid),
+        spacesService.findByUserId(uid),
+        commentsService.findByUserId(uid),
       ]);
 
       dispatch({
@@ -92,10 +94,10 @@ const useUserData = () => {
         payload: {message: 'Get data error'},
       });
     }
-  }, [authContext?.user, dispatch]);
+  }, [authContext.user, dispatch]);
 
   const handleGetMoreSpaces = useCallback(async () => {
-    if (!authContext?.user || !data.spacesLastDoc) {
+    if (authContext.user === null || !data.spacesLastDoc) {
       return;
     }
 
@@ -114,10 +116,10 @@ const useUserData = () => {
     } catch (error) {
       log.error(error);
     }
-  }, [authContext?.user, data.spacesLastDoc, dispatch]);
+  }, [authContext.user, data.spacesLastDoc, dispatch]);
 
   const handleGetMoreComments = useCallback(async () => {
-    if (!authContext?.user || !data.commentsLastDoc) {
+    if (authContext.user === null || !data.commentsLastDoc) {
       return;
     }
 
@@ -136,7 +138,7 @@ const useUserData = () => {
     } catch (error) {
       log.error(error);
     }
-  }, [authContext?.user, data.commentsLastDoc, dispatch]);
+  }, [authContext.user, data.commentsLastDoc, dispatch]);
 
   const handleDeleteSpace = useCallback(
     (id: string) => {

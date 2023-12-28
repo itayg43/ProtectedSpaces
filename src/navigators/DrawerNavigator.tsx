@@ -80,7 +80,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
   const handleSignOut = async () => {
     try {
       await profileContext?.handleRemoveStoredData();
-      await authContext?.handleSignOut();
+      await authContext.handleSignOut();
     } catch (error: any) {
       alert.error(error?.message);
     }
@@ -93,7 +93,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
         {marginTop: safeAreaInsets?.top, marginBottom: safeAreaInsets?.bottom},
       ]}>
       <DrawerListItem
-        label={authContext?.user?.displayName ?? ''}
+        label={authContext.user?.displayName ?? ''}
         icon="face-man-profile"
         onPress={() => navigation.navigate('userProfileScreen')}
       />
