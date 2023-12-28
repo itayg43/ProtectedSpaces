@@ -1,9 +1,4 @@
-import React, {
-  PropsWithChildren,
-  createContext,
-  useContext,
-  useMemo,
-} from 'react';
+import React, {PropsWithChildren, createContext, useContext} from 'react';
 
 import {Location} from '../utils/types';
 import useLocation from '../hooks/useLocation';
@@ -12,16 +7,19 @@ type LocationContextParams = {
   location: Location | null;
 };
 
-const LocationContext = createContext<LocationContextParams | null>(null);
+const initialContextParams: LocationContextParams = {
+  location: null,
+};
 
-export const LocationContextProvider = (props: PropsWithChildren) => {
+const LocationContext =
+  createContext<LocationContextParams>(initialContextParams);
+
+export const LocationContextProvider = ({children}: PropsWithChildren) => {
   const location = useLocation();
 
-  const contextValues = useMemo(() => ({location}), [location]);
-
   return (
-    <LocationContext.Provider value={contextValues}>
-      {props.children}
+    <LocationContext.Provider value={{location}}>
+      {children}
     </LocationContext.Provider>
   );
 };

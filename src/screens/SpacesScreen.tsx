@@ -62,7 +62,7 @@ const SpacesScreen = () => {
           style={styles.mapContainer}
           provider={PROVIDER_GOOGLE}
           region={
-            locationContext?.location
+            locationContext.location
               ? {
                   latitude: locationContext.location.latitude,
                   longitude: locationContext.location.longitude,
