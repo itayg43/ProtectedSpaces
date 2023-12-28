@@ -9,15 +9,18 @@ import {NavigationContainer} from '@react-navigation/native';
 
 import App from './src/App';
 import {AuthContextProvider} from './src/contexts/authContext';
+import {LocationContextProvider} from './src/contexts/locationContext';
 
 const RootApp = () => {
   return (
     <GestureHandlerRootView style={styles.rootContainer}>
       <PaperProvider>
         <NavigationContainer>
-          <AuthContextProvider>
-            <App />
-          </AuthContextProvider>
+          <LocationContextProvider>
+            <AuthContextProvider>
+              <App />
+            </AuthContextProvider>
+          </LocationContextProvider>
         </NavigationContainer>
       </PaperProvider>
     </GestureHandlerRootView>
