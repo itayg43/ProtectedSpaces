@@ -145,7 +145,7 @@ const useUserData = () => {
       alert.remove(async () => {
         try {
           await spacesService.deleteByIdIncludeComments(id);
-          spacesContext?.handleDeleteSpace(id);
+          spacesContext.handleDeleteSpace(id);
           dispatch({type: 'DELETE_SPACE_SUCCESS', payload: {id}});
         } catch (error) {
           log.error(error);
