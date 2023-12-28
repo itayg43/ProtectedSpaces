@@ -17,9 +17,16 @@ type ProfileContextParams = {
   handleRemoveStoredData: () => Promise<void>;
 };
 
-const ProfileContext = createContext<ProfileContextParams | null>(null);
+const initialContextParams: ProfileContextParams = {
+  radiusInM: DEFAULT_RADIUS_IN_M,
+  handleRadiusChange: async () => {},
+  handleRemoveStoredData: async () => {},
+};
 
-export const ProfileContextProvider = (props: PropsWithChildren) => {
+const ProfileContext =
+  createContext<ProfileContextParams>(initialContextParams);
+
+export const ProfileContextProvider = ({children}: PropsWithChildren) => {
   const [radiusInM, setRadiusInM] = useState(DEFAULT_RADIUS_IN_M);
 
   const handleRadiusChange = useCallback(async (value: number) => {
@@ -64,7 +71,7 @@ export const ProfileContextProvider = (props: PropsWithChildren) => {
 
   return (
     <ProfileContext.Provider value={contextValues}>
-      {props.children}
+      {children}
     </ProfileContext.Provider>
   );
 };

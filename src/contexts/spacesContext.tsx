@@ -141,7 +141,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
   );
 
   useEffect(() => {
-    if (locationContext.location && profileContext?.radiusInM) {
+    if (locationContext.location) {
       handleGetSpacesByLocation(
         locationContext.location,
         profileContext.radiusInM,
@@ -149,7 +149,7 @@ export const SpacesContextProvider = (props: PropsWithChildren) => {
     }
   }, [
     locationContext.location,
-    profileContext?.radiusInM,
+    profileContext.radiusInM,
     handleGetSpacesByLocation,
   ]);
 
