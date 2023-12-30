@@ -13,6 +13,7 @@ import authService from '../services/authService';
 import type {AuthProvider, RequestStatus} from '../utils/types';
 import alert from '../utils/alert';
 import log from '../utils/log';
+import {statusCodes} from '@react-native-google-signin/google-signin';
 
 type AuthContextParams = {
   status: RequestStatus;
@@ -40,7 +41,12 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     try {
       setStatus('loading');
       await authService.signIn(provider);
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === statusCodes.SIGN_IN_CANCELLED) {
+        setStatus('idle');
+        return;
+      }
+
       log.error(error);
       setStatus('error');
       alert.error('Sign in error');
