@@ -4,7 +4,6 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useState,
 } from 'react';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
@@ -17,6 +16,7 @@ import {statusCodes} from '@react-native-google-signin/google-signin';
 
 type AuthContextParams = {
   status: RequestStatus;
+  isNewSignIn: boolean;
   user: FirebaseAuthTypes.User | null;
   handleSignIn: (provider: AuthProvider) => Promise<void>;
   handleSignOut: () => Promise<void>;
@@ -24,6 +24,7 @@ type AuthContextParams = {
 
 const initialContextParams: AuthContextParams = {
   status: 'idle',
+  isNewSignIn: false,
   user: null,
   handleSignIn: async () => {},
   handleSignOut: async () => {},
@@ -33,6 +34,7 @@ const AuthContext = createContext<AuthContextParams>(initialContextParams);
 
 export const AuthContextProvider = ({children}: PropsWithChildren) => {
   const [status, setStatus] = useState<RequestStatus>('idle');
+  const [isNewSignIn, setIsNewSignIn] = useState(false);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(
     authService.getCurrentUser(),
   );
@@ -41,6 +43,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     try {
       setStatus('loading');
       await authService.signIn(provider);
+      setIsNewSignIn(true);
     } catch (error: any) {
       if (error?.code === statusCodes.SIGN_IN_CANCELLED) {
         setStatus('idle');
@@ -56,6 +59,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
   const handleSignOut = useCallback(async () => {
     try {
       await authService.signOut();
+      setIsNewSignIn(false);
     } catch (error) {
       log.error(error);
       throw new Error('Sign out error');
@@ -76,18 +80,15 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     return unsub;
   }, [handleAuthStateChange]);
 
-  const contextValues = useMemo(
-    () => ({
-      status,
-      user,
-      handleSignIn,
-      handleSignOut,
-    }),
-    [status, user, handleSignIn, handleSignOut],
-  );
-
   return (
-    <AuthContext.Provider value={contextValues}>
+    <AuthContext.Provider
+      value={{
+        status,
+        isNewSignIn,
+        user,
+        handleSignIn,
+        handleSignOut,
+      }}>
       {children}
     </AuthContext.Provider>
   );
