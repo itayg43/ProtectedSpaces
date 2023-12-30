@@ -18,7 +18,7 @@ import {useLocationContext} from './locationContext';
 import spacesService from '../services/spacesService';
 import log from '../utils/log';
 import {useAuthContext} from './authContext';
-import {useProfileContext} from './profileContext';
+import {ProfileReducerActionType, useProfileContext} from './profileContext';
 import normalize from '../utils/normalize';
 
 type SpacesContextParams = {
@@ -149,15 +149,22 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
   );
 
   useEffect(() => {
-    if (locationContext.location !== null) {
-      handleGetSpacesByLocation(
-        locationContext.location,
-        profileContext.radiusInM,
-      );
+    if (
+      locationContext.location === null ||
+      profileContext.lastReducerActionType ===
+        ProfileReducerActionType.REMOVE_STORED_DATA
+    ) {
+      return;
     }
+
+    handleGetSpacesByLocation(
+      locationContext.location,
+      profileContext.radiusInM,
+    );
   }, [
     locationContext.location,
     profileContext.radiusInM,
+    profileContext.lastReducerActionType,
     handleGetSpacesByLocation,
   ]);
 
