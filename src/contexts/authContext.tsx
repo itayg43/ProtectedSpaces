@@ -22,7 +22,7 @@ type AuthContextParams = {
 };
 
 const initialContextParams: AuthContextParams = {
-  status: 'loading',
+  status: 'idle',
   user: null,
   handleSignIn: async () => {},
   handleSignOut: async () => {},
@@ -31,14 +31,18 @@ const initialContextParams: AuthContextParams = {
 const AuthContext = createContext<AuthContextParams>(initialContextParams);
 
 export const AuthContextProvider = ({children}: PropsWithChildren) => {
-  const [status, setStatus] = useState<RequestStatus>('loading');
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [status, setStatus] = useState<RequestStatus>('idle');
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(
+    authService.getCurrentUser(),
+  );
 
   const handleSignIn = useCallback(async (provider: AuthProvider) => {
     try {
+      setStatus('loading');
       await authService.signIn(provider);
     } catch (error) {
       log.error(error);
+      setStatus('error');
       alert.error('Sign in error');
     }
   }, []);

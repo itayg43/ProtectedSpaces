@@ -30,10 +30,15 @@ const stateSubscription = (
   return authClient.onAuthStateChanged(onChange);
 };
 
+const getCurrentUser = () => {
+  return authClient.currentUser;
+};
+
 export default {
   signIn,
   signOut,
   stateSubscription,
+  getCurrentUser,
 };
 
 async function googleSignIn() {
