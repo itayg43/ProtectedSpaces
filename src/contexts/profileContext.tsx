@@ -4,7 +4,6 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
 } from 'react';
 import {useImmerReducer} from 'use-immer';
 
@@ -115,19 +114,14 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
     handleGetStoredData();
   }, [handleGetStoredData]);
 
-  const contextValues = useMemo(
-    () => ({
-      radiusInM: data.radiusInM,
-      handleGetStoredData,
-      handleRemoveStoredData,
-      handleRadiusChange,
-      lastReducerActionType: data.lastReducerActionType,
-    }),
-    [data, handleGetStoredData, handleRemoveStoredData, handleRadiusChange],
-  );
-
   return (
-    <ProfileContext.Provider value={contextValues}>
+    <ProfileContext.Provider
+      value={{
+        radiusInM: data.radiusInM,
+        lastReducerActionType: data.lastReducerActionType,
+        handleRemoveStoredData,
+        handleRadiusChange,
+      }}>
       {children}
     </ProfileContext.Provider>
   );
