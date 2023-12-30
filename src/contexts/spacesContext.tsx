@@ -161,15 +161,19 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
     handleGetSpacesByLocation,
   ]);
 
+  const entitiesAsArray = useMemo(() => {
+    return Object.values(data.entities);
+  }, [data.entities]);
+
   const contextValues = useMemo(
     () => ({
       status: data.status,
       errorMessage: data.errorMessage,
-      spaces: Object.values(data.entities),
+      spaces: entitiesAsArray,
       handleAddSpace,
       handleDeleteSpace,
     }),
-    [data, handleAddSpace, handleDeleteSpace],
+    [data, entitiesAsArray, handleAddSpace, handleDeleteSpace],
   );
 
   return (
