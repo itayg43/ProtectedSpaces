@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {IconButton} from 'react-native-paper';
 import Slider from '@react-native-community/slider';
@@ -7,23 +7,35 @@ import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {useNavigation} from '@react-navigation/native';
 import {UserProfileScreenNavigationProps} from '../navigators/DrawerNavigator';
 import {useProfileContext} from '../contexts/profileContext';
+import alert from '../utils/alert';
 
 const MIN_RADIUS_IN_M = 25;
 const MAX_RADIUS_IN_M = 150;
 const STEP_IN_M = 25;
 
 const UserProfileScreen = () => {
-  const safeAreaInsetsContext = useSafeAreaInsetsContext();
-
   const navigation = useNavigation<UserProfileScreenNavigationProps>();
 
+  const safeAreaInsetsContext = useSafeAreaInsetsContext();
   const profileContext = useProfileContext();
 
   const [sliderValue, setSliderValue] = useState(profileContext.radiusInM);
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     navigation.goBack();
-  };
+  }, [navigation]);
+
+  const handleRadiusChange = useCallback(
+    async (value: number) => {
+      try {
+        await profileContext.handleRadiusChange(value);
+      } catch (error: any) {
+        setSliderValue(profileContext.radiusInM);
+        alert.error(error?.message);
+      }
+    },
+    [profileContext],
+  );
 
   return (
     <View
@@ -49,9 +61,7 @@ const UserProfileScreen = () => {
           maximumValue={MAX_RADIUS_IN_M}
           step={STEP_IN_M}
           value={sliderValue}
-          onSlidingComplete={async value =>
-            await profileContext.handleRadiusChange(value)
-          }
+          onSlidingComplete={handleRadiusChange}
           onValueChange={setSliderValue}
           minimumTrackTintColor="#6200ee"
         />

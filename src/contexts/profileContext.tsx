@@ -5,56 +5,101 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useState,
 } from 'react';
+import {useImmerReducer} from 'use-immer';
 
 import profileService, {DEFAULT_RADIUS_IN_M} from '../services/profileService';
 import log from '../utils/log';
 
 type ProfileContextParams = {
   radiusInM: number;
-  handleRadiusChange: (value: number) => Promise<void>;
   handleRemoveStoredData: () => Promise<void>;
+  handleRadiusChange: (value: number) => Promise<void>;
 };
 
 const initialContextParams: ProfileContextParams = {
   radiusInM: DEFAULT_RADIUS_IN_M,
-  handleRadiusChange: async () => {},
   handleRemoveStoredData: async () => {},
+  handleRadiusChange: async () => {},
 };
 
 const ProfileContext =
   createContext<ProfileContextParams>(initialContextParams);
 
-export const ProfileContextProvider = ({children}: PropsWithChildren) => {
-  const [radiusInM, setRadiusInM] = useState(DEFAULT_RADIUS_IN_M);
+type ProfileReducerData = {
+  radiusInM: number;
+};
 
-  const handleRadiusChange = useCallback(async (value: number) => {
+const initialReducerData: ProfileReducerData = {
+  radiusInM: DEFAULT_RADIUS_IN_M,
+};
+
+type ProfileReducerAction =
+  | {
+      type: 'GET_STORED_DATA';
+      payload: {
+        radiusInM: number;
+      };
+    }
+  | {
+      type: 'REMOVE_STORED_DATA';
+    }
+  | {
+      type: 'RADIUS_CHANGE';
+      payload: {
+        radiusInM: number;
+      };
+    };
+
+export const ProfileContextProvider = ({children}: PropsWithChildren) => {
+  const [data, dispatch] = useImmerReducer<
+    ProfileReducerData,
+    ProfileReducerAction
+  >(profileReducer, initialReducerData);
+
+  const handleGetStoredData = useCallback(async () => {
     try {
-      await profileService.setRadius(value);
-      setRadiusInM(value);
+      const [radiusInM] = await Promise.all([profileService.getRadius()]);
+      dispatch({
+        type: 'GET_STORED_DATA',
+        payload: {
+          radiusInM,
+        },
+      });
     } catch (error) {
       log.error(error);
     }
-  }, []);
+  }, [dispatch]);
 
   const handleRemoveStoredData = useCallback(async () => {
     try {
       await Promise.all([profileService.removeRadius()]);
+      dispatch({
+        type: 'REMOVE_STORED_DATA',
+      });
     } catch (error) {
       log.error(error);
       throw new Error('Remove stored data error');
     }
-  }, []);
+  }, [dispatch]);
 
-  const handleGetStoredData = useCallback(async () => {
-    try {
-      const [r] = await Promise.all([profileService.getRadius()]);
-      setRadiusInM(r);
-    } catch (error) {
-      log.error(error);
-    }
-  }, []);
+  const handleRadiusChange = useCallback(
+    async (value: number) => {
+      try {
+        await profileService.setRadius(value);
+        dispatch({
+          type: 'RADIUS_CHANGE',
+          payload: {
+            radiusInM: value,
+          },
+        });
+      } catch (error) {
+        log.error(error);
+        throw new Error('Radius change error');
+      }
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     handleGetStoredData();
@@ -62,11 +107,12 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
 
   const contextValues = useMemo(
     () => ({
-      radiusInM,
-      handleRadiusChange,
+      radiusInM: data.radiusInM,
+      handleGetStoredData,
       handleRemoveStoredData,
+      handleRadiusChange,
     }),
-    [radiusInM, handleRadiusChange, handleRemoveStoredData],
+    [data, handleGetStoredData, handleRemoveStoredData, handleRadiusChange],
   );
 
   return (
@@ -77,3 +123,26 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
 };
 
 export const useProfileContext = () => useContext(ProfileContext);
+
+function profileReducer(
+  draft: ProfileReducerData,
+  action: ProfileReducerAction,
+) {
+  switch (action.type) {
+    case 'GET_STORED_DATA': {
+      const {radiusInM} = action.payload;
+      draft.radiusInM = radiusInM;
+      break;
+    }
+
+    case 'REMOVE_STORED_DATA': {
+      return initialReducerData;
+    }
+
+    case 'RADIUS_CHANGE': {
+      const {radiusInM} = action.payload;
+      draft.radiusInM = radiusInM;
+      break;
+    }
+  }
+}
