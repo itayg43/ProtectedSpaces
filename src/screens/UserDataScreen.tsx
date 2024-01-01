@@ -1,44 +1,38 @@
 /* eslint-disable react-native/no-inline-styles */
 
-import React from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {FlatList, StyleSheet, Text, View} from 'react-native';
 
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {IconButton} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
-import {Comment, Space} from '../utils/types';
-import useUserData from '../hooks/useUserData';
-import LoadingView from '../components/views/LoadingView';
-import ErrorView from '../components/views/ErrorView';
+import {Space} from '../utils/types';
+// import LoadingView from '../components/views/LoadingView';
+// import ErrorView from '../components/views/ErrorView';
 import {UserDataScreenNavigationProps} from '../navigators/DrawerNavigator';
+import {useProfileContext} from '../contexts/profileContext';
 
 const UserDataScreen = () => {
-  const safeAreaInsetsContext = useSafeAreaInsetsContext();
-
   const navigation = useNavigation<UserDataScreenNavigationProps>();
 
-  const {
-    status,
-    errorMessage,
-    spaces,
-    comments,
-    handleGetMoreSpaces,
-    handleGetMoreComments,
-    handleDeleteSpace,
-    handleDeleteComment,
-  } = useUserData();
+  const safeAreaInsetsContext = useSafeAreaInsetsContext();
+  const {spaces, handleGetSpaces} = useProfileContext();
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     navigation.goBack();
-  };
+  }, [navigation]);
 
-  if (status === 'loading') {
-    return <LoadingView />;
-  }
+  useEffect(() => {
+    handleGetSpaces();
+  }, [handleGetSpaces]);
 
-  if (status === 'error') {
-    return <ErrorView message={errorMessage} onGoBack={handleGoBack} />;
-  }
+  // if (status === 'loading') {
+  //   return <LoadingView />;
+  // }
+
+  // if (status === 'error') {
+  //   return <ErrorView message={errorMessage} onGoBack={handleGoBack} />;
+  // }
 
   return (
     <View
@@ -64,26 +58,16 @@ const UserDataScreen = () => {
             data={spaces}
             keyExtractor={item => item.id}
             renderItem={({item}) => (
-              <SpaceListItem
-                item={item}
-                onDelete={() => handleDeleteSpace(item.id)}
-              />
+              <SpaceListItem item={item} onDelete={() => null} />
             )}
             bounces={false}
             ItemSeparatorComponent={ListItemSeparator}
             ListFooterComponent={ListFooter}
             ListEmptyComponent={ListEmptyPlaceholder}
-            onEndReachedThreshold={0.3}
-            onEndReached={({distanceFromEnd}) => {
-              if (distanceFromEnd <= 0) {
-                return;
-              }
-              handleGetMoreSpaces();
-            }}
           />
         </View>
 
-        <View style={styles.listContainer}>
+        {/* <View style={styles.listContainer}>
           <Text style={styles.listLabel}>Comments</Text>
 
           <FlatList
@@ -102,7 +86,7 @@ const UserDataScreen = () => {
             onEndReachedThreshold={0.3}
             onEndReached={handleGetMoreComments}
           />
-        </View>
+        </View> */}
       </View>
     </View>
   );
@@ -133,26 +117,26 @@ function SpaceListItem({item, onDelete}: SpaceListItemProps) {
   );
 }
 
-type CommentListItemProps = {
-  item: Comment;
-  onDelete: () => void;
-};
+// type CommentListItemProps = {
+//   item: Comment;
+//   onDelete: () => void;
+// };
 
-function CommentListItem({item, onDelete}: CommentListItemProps) {
-  return (
-    <View style={styles.listItemContainer}>
-      <View style={styles.listItemDetailsContainer}>
-        <Text style={styles.colorBlack}>{item.value}</Text>
+// function CommentListItem({item, onDelete}: CommentListItemProps) {
+//   return (
+//     <View style={styles.listItemContainer}>
+//       <View style={styles.listItemDetailsContainer}>
+//         <Text style={styles.colorBlack}>{item.value}</Text>
 
-        <Text style={styles.colorGray}>
-          {item.createdAt.toDate().toLocaleDateString()}
-        </Text>
-      </View>
+//         <Text style={styles.colorGray}>
+//           {item.createdAt.toDate().toLocaleDateString()}
+//         </Text>
+//       </View>
 
-      <IconButton mode="contained" icon="trash-can" onPress={onDelete} />
-    </View>
-  );
-}
+//       <IconButton mode="contained" icon="trash-can" onPress={onDelete} />
+//     </View>
+//   );
+// }
 
 function ListEmptyPlaceholder() {
   return (

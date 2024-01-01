@@ -9,32 +9,42 @@ import {useImmerReducer} from 'use-immer';
 
 import profileService from '../services/profileService';
 import log from '../utils/log';
+import type {Space} from '../utils/types';
+import spacesService from '../services/spacesService';
+import {useAuthContext} from './authContext';
 
 type ProfileReducerData = {
   radiusInM: number | null;
+  spaces: Space[];
 };
 
 const initialReducerData: ProfileReducerData = {
   radiusInM: null,
+  spaces: [],
 };
 
 type ProfileContextParams = ProfileReducerData & {
   handleRadiusChange: (value: number) => Promise<void>;
   handleRemoveRadius: () => Promise<void>;
+  handleGetSpaces: () => Promise<void>;
 };
 
 const ProfileContext = createContext<ProfileContextParams>({
   ...initialReducerData,
   handleRadiusChange: async () => {},
   handleRemoveRadius: async () => {},
+  handleGetSpaces: async () => {},
 });
 
 type ProfileReducerAction =
   | {type: 'GET_RADIUS'; payload: {radiusInM: number}}
   | {type: 'CHANGE_RADIUS'; payload: {radiusInM: number}}
-  | {type: 'REMOVE_RADIUS'};
+  | {type: 'REMOVE_RADIUS'}
+  | {type: 'GET_SPACES'; payload: {spaces: Space[]}};
 
 export const ProfileContextProvider = ({children}: PropsWithChildren) => {
+  const authContext = useAuthContext();
+
   const [data, dispatch] = useImmerReducer<
     ProfileReducerData,
     ProfileReducerAction
@@ -48,6 +58,17 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
       log.error(error);
     }
   }, [dispatch]);
+
+  const handleGetSpaces = useCallback(async () => {
+    if (authContext.user !== null) {
+      try {
+        const spaces = await spacesService.findByUserId(authContext.user.uid);
+        dispatch({type: 'GET_SPACES', payload: {spaces}});
+      } catch (error) {
+        log.error(error);
+      }
+    }
+  }, [authContext.user, dispatch]);
 
   const handleRadiusChange = useCallback(
     async (value: number) => {
@@ -80,8 +101,10 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
     <ProfileContext.Provider
       value={{
         radiusInM: data.radiusInM,
+        spaces: data.spaces,
         handleRemoveRadius,
         handleRadiusChange,
+        handleGetSpaces,
       }}>
       {children}
     </ProfileContext.Provider>
@@ -98,6 +121,12 @@ function profileReducer(
     case 'GET_RADIUS': {
       const {radiusInM} = action.payload;
       draft.radiusInM = radiusInM;
+      break;
+    }
+
+    case 'GET_SPACES': {
+      const {spaces} = action.payload;
+      draft.spaces = spaces;
       break;
     }
 

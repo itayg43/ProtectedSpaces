@@ -1,6 +1,4 @@
-import firestore, {
-  FirebaseFirestoreTypes,
-} from '@react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import * as geofire from 'geofire-common';
 
@@ -41,23 +39,10 @@ const findById = async (id: string) => {
   return docSnap.data() ?? null;
 };
 
-const findByUserId = async (
-  id: string,
-  lastDocument?: FirebaseFirestoreTypes.QueryDocumentSnapshot,
-  limit: number = 5,
-) => {
-  let query = spacesColl.orderBy('createdAt', 'desc');
-
-  if (lastDocument) {
-    query = query.startAfter(lastDocument);
-  }
-
-  const snap = await query.where('user.id', '==', id).limit(limit).get();
-
-  return {
-    spaces: snap.docs.map(doc => doc.data()),
-    lastDocument: snap.docs[snap.docs.length - 1],
-  };
+const findByUserId = async (id: string) => {
+  const query = spacesColl.where('user.id', '==', id);
+  const querySnap = await query.get();
+  return querySnap.docs.map(docSnap => docSnap.data());
 };
 
 // https://cloud.google.com/firestore/docs/solutions/geoqueries#web-version-9_2
