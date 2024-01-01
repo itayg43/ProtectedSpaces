@@ -26,6 +26,7 @@ type AuthReducerData = {
   user: FirebaseAuthTypes.User | null;
   lastAction: AuthReducerActionType | null;
 };
+
 const initialReducerData: AuthReducerData = {
   status: 'idle',
   user: null,
