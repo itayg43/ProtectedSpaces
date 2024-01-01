@@ -14,23 +14,14 @@ import type {AuthProvider, RequestStatus} from '../utils/types';
 import alert from '../utils/alert';
 import log from '../utils/log';
 
-enum AuthReducerActionType {
-  SIGN_IN = 'SIGN_IN',
-  SIGN_IN_CANCELLED = 'SIGN_IN_CANCELLED',
-  SIGN_IN_FAIL = 'SIGN_IN_FAIL',
-  AUTH_STATE_CHANGE = 'AUTH_STATE_CHANGE',
-}
-
 type AuthReducerData = {
   status: RequestStatus;
   user: FirebaseAuthTypes.User | null;
-  lastAction: AuthReducerActionType | null;
 };
 
 const initialReducerData: AuthReducerData = {
   status: 'idle',
   user: null,
-  lastAction: null,
 };
 
 type AuthContextParams = AuthReducerData & {
@@ -45,21 +36,10 @@ const AuthContext = createContext<AuthContextParams>({
 });
 
 type AuthReducerAction =
-  | {
-      type: AuthReducerActionType.SIGN_IN;
-    }
-  | {
-      type: AuthReducerActionType.SIGN_IN_CANCELLED;
-    }
-  | {
-      type: AuthReducerActionType.SIGN_IN_FAIL;
-    }
-  | {
-      type: AuthReducerActionType.AUTH_STATE_CHANGE;
-      payload: {
-        user: FirebaseAuthTypes.User | null;
-      };
-    };
+  | {type: 'SIGN_IN'}
+  | {type: 'SIGN_IN_CANCELLED'}
+  | {type: 'SIGN_IN_FAIL'}
+  | {type: 'AUTH_STATE_CHANGE'; payload: {user: FirebaseAuthTypes.User | null}};
 
 export const AuthContextProvider = ({children}: PropsWithChildren) => {
   const [data, dispatch] = useImmerReducer<AuthReducerData, AuthReducerAction>(
@@ -70,16 +50,16 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
   const handleSignIn = useCallback(
     async (provider: AuthProvider) => {
       try {
-        dispatch({type: AuthReducerActionType.SIGN_IN});
+        dispatch({type: 'SIGN_IN'});
         await authService.signIn(provider);
       } catch (error: any) {
         if (error?.code === statusCodes.SIGN_IN_CANCELLED) {
-          dispatch({type: AuthReducerActionType.SIGN_IN_CANCELLED});
+          dispatch({type: 'SIGN_IN_CANCELLED'});
           return;
         }
 
         log.error(error);
-        dispatch({type: AuthReducerActionType.SIGN_IN_FAIL});
+        dispatch({type: 'SIGN_IN_FAIL'});
         alert.error('Sign in error');
       }
     },
@@ -97,12 +77,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
 
   const handleAuthStateChange = useCallback(
     (user: FirebaseAuthTypes.User | null) => {
-      dispatch({
-        type: AuthReducerActionType.AUTH_STATE_CHANGE,
-        payload: {
-          user,
-        },
-      });
+      dispatch({type: 'AUTH_STATE_CHANGE', payload: {user}});
     },
     [dispatch],
   );
@@ -118,7 +93,6 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
       value={{
         status: data.status,
         user: data.user,
-        lastAction: data.lastAction,
         handleSignIn,
         handleSignOut,
       }}>
@@ -131,25 +105,22 @@ export const useAuthContext = () => useContext(AuthContext);
 
 function authReducer(draft: AuthReducerData, action: AuthReducerAction) {
   switch (action.type) {
-    case AuthReducerActionType.SIGN_IN: {
+    case 'SIGN_IN': {
       draft.status = 'loading';
-      draft.lastAction = action.type;
       break;
     }
 
-    case AuthReducerActionType.SIGN_IN_CANCELLED: {
+    case 'SIGN_IN_CANCELLED': {
       draft.status = 'idle';
-      draft.lastAction = action.type;
       break;
     }
 
-    case AuthReducerActionType.SIGN_IN_FAIL: {
+    case 'SIGN_IN_FAIL': {
       draft.status = 'error';
-      draft.lastAction = action.type;
       break;
     }
 
-    case AuthReducerActionType.AUTH_STATE_CHANGE: {
+    case 'AUTH_STATE_CHANGE': {
       const {user} = action.payload;
       draft.status = 'idle';
       draft.user = user;
