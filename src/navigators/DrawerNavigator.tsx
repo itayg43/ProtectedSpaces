@@ -102,7 +102,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
       />
 
       <DrawerListItem
-        label="My Spaces & Comments"
+        label="My Spaces"
         icon="home-city"
         onPress={() => navigation.navigate('userDataScreen')}
       />
