@@ -21,24 +21,6 @@ import {useAuthContext} from './authContext';
 import {ProfileReducerActionType, useProfileContext} from './profileContext';
 import normalize from '../utils/normalize';
 
-type SpacesContextParams = {
-  status: RequestStatus;
-  errorMessage: string;
-  spaces: Space[];
-  handleAddSpace: (formData: AddSpaceFormData) => Promise<void>;
-  handleDeleteSpace: (id: string) => void;
-};
-
-const initialContextParams: SpacesContextParams = {
-  status: 'loading',
-  errorMessage: '',
-  spaces: [],
-  handleAddSpace: async () => {},
-  handleDeleteSpace: () => {},
-};
-
-const SpacesContext = createContext<SpacesContextParams>(initialContextParams);
-
 type SpacesReducerData = {
   status: RequestStatus;
   errorMessage: string;
@@ -52,6 +34,21 @@ const initialReducerData: SpacesReducerData = {
   errorMessage: '',
   entities: {},
 };
+
+type SpacesContextParams = Omit<SpacesReducerData, 'entities'> & {
+  spaces: Space[];
+} & {
+  handleAddSpace: (formData: AddSpaceFormData) => Promise<void>;
+  handleDeleteSpace: (id: string) => void;
+};
+
+const SpacesContext = createContext<SpacesContextParams>({
+  status: initialReducerData.status,
+  errorMessage: initialReducerData.errorMessage,
+  spaces: [],
+  handleAddSpace: async () => {},
+  handleDeleteSpace: () => {},
+});
 
 type SpacesReducerAction =
   | {
