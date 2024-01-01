@@ -7,52 +7,32 @@ import React, {
 } from 'react';
 import {useImmerReducer} from 'use-immer';
 
-import profileService, {DEFAULT_RADIUS_IN_M} from '../services/profileService';
+import profileService from '../services/profileService';
 import log from '../utils/log';
 
-export enum ProfileReducerActionType {
-  GET_STORED_DATA = 'GET_STORED_DATA',
-  REMOVE_STORED_DATA = 'REMOVE_STORED_DATA',
-  RADIUS_CHANGE = 'RADIUS_CHANGE',
-}
-
 type ProfileReducerData = {
-  radiusInM: number;
-  lastAction: ProfileReducerActionType | null;
+  radiusInM: number | null;
 };
 
 const initialReducerData: ProfileReducerData = {
-  radiusInM: DEFAULT_RADIUS_IN_M,
-  lastAction: null,
+  radiusInM: null,
 };
 
 type ProfileContextParams = ProfileReducerData & {
-  handleRemoveStoredData: () => Promise<void>;
   handleRadiusChange: (value: number) => Promise<void>;
+  handleRemoveRadius: () => Promise<void>;
 };
 
 const ProfileContext = createContext<ProfileContextParams>({
   ...initialReducerData,
-  handleRemoveStoredData: async () => {},
   handleRadiusChange: async () => {},
+  handleRemoveRadius: async () => {},
 });
 
 type ProfileReducerAction =
-  | {
-      type: ProfileReducerActionType.GET_STORED_DATA;
-      payload: {
-        radiusInM: number;
-      };
-    }
-  | {
-      type: ProfileReducerActionType.REMOVE_STORED_DATA;
-    }
-  | {
-      type: ProfileReducerActionType.RADIUS_CHANGE;
-      payload: {
-        radiusInM: number;
-      };
-    };
+  | {type: 'GET_RADIUS'; payload: {radiusInM: number}}
+  | {type: 'CHANGE_RADIUS'; payload: {radiusInM: number}}
+  | {type: 'REMOVE_RADIUS'};
 
 export const ProfileContextProvider = ({children}: PropsWithChildren) => {
   const [data, dispatch] = useImmerReducer<
@@ -60,29 +40,12 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
     ProfileReducerAction
   >(profileReducer, initialReducerData);
 
-  const handleGetStoredData = useCallback(async () => {
+  const handleGetRadius = useCallback(async () => {
     try {
-      const [radiusInM] = await Promise.all([profileService.getRadius()]);
-      dispatch({
-        type: ProfileReducerActionType.GET_STORED_DATA,
-        payload: {
-          radiusInM,
-        },
-      });
+      const radiusInM = await profileService.getRadius();
+      dispatch({type: 'GET_RADIUS', payload: {radiusInM}});
     } catch (error) {
       log.error(error);
-    }
-  }, [dispatch]);
-
-  const handleRemoveStoredData = useCallback(async () => {
-    try {
-      await Promise.all([profileService.removeRadius()]);
-      dispatch({
-        type: ProfileReducerActionType.REMOVE_STORED_DATA,
-      });
-    } catch (error) {
-      log.error(error);
-      throw new Error('Remove stored data error');
     }
   }, [dispatch]);
 
@@ -90,12 +53,7 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
     async (value: number) => {
       try {
         await profileService.setRadius(value);
-        dispatch({
-          type: ProfileReducerActionType.RADIUS_CHANGE,
-          payload: {
-            radiusInM: value,
-          },
-        });
+        dispatch({type: 'CHANGE_RADIUS', payload: {radiusInM: value}});
       } catch (error) {
         log.error(error);
         throw new Error('Radius change error');
@@ -104,16 +62,25 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
     [dispatch],
   );
 
+  const handleRemoveRadius = useCallback(async () => {
+    try {
+      await profileService.removeRadius();
+      dispatch({type: 'REMOVE_RADIUS'});
+    } catch (error) {
+      log.error(error);
+      throw new Error('Remove stored data error');
+    }
+  }, [dispatch]);
+
   useEffect(() => {
-    handleGetStoredData();
-  }, [handleGetStoredData]);
+    handleGetRadius();
+  }, [handleGetRadius]);
 
   return (
     <ProfileContext.Provider
       value={{
         radiusInM: data.radiusInM,
-        lastAction: data.lastAction,
-        handleRemoveStoredData,
+        handleRemoveRadius,
         handleRadiusChange,
       }}>
       {children}
@@ -128,23 +95,20 @@ function profileReducer(
   action: ProfileReducerAction,
 ) {
   switch (action.type) {
-    case ProfileReducerActionType.GET_STORED_DATA: {
+    case 'GET_RADIUS': {
       const {radiusInM} = action.payload;
       draft.radiusInM = radiusInM;
-      draft.lastAction = action.type;
       break;
     }
 
-    case ProfileReducerActionType.REMOVE_STORED_DATA: {
-      draft.radiusInM = DEFAULT_RADIUS_IN_M;
-      draft.lastAction = action.type;
+    case 'CHANGE_RADIUS': {
+      const {radiusInM} = action.payload;
+      draft.radiusInM = radiusInM;
       break;
     }
 
-    case ProfileReducerActionType.RADIUS_CHANGE: {
-      const {radiusInM} = action.payload;
-      draft.radiusInM = radiusInM;
-      draft.lastAction = action.type;
+    case 'REMOVE_RADIUS': {
+      draft.radiusInM = null;
       break;
     }
   }

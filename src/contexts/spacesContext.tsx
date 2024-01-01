@@ -18,7 +18,7 @@ import {useLocationContext} from './locationContext';
 import spacesService from '../services/spacesService';
 import log from '../utils/log';
 import {useAuthContext} from './authContext';
-import {ProfileReducerActionType, useProfileContext} from './profileContext';
+import {useProfileContext} from './profileContext';
 import normalize from '../utils/normalize';
 
 type SpacesReducerData = {
@@ -51,30 +51,10 @@ const SpacesContext = createContext<SpacesContextParams>({
 });
 
 type SpacesReducerAction =
-  | {
-      type: 'GET_BY_LOCATION_SUCCESS';
-      payload: {
-        spaces: Space[];
-      };
-    }
-  | {
-      type: 'GET_BY_LOCATION_FAIL';
-      payload: {
-        message: string;
-      };
-    }
-  | {
-      type: 'ADD_SUCCESS';
-      payload: {
-        space: Space;
-      };
-    }
-  | {
-      type: 'DELETE';
-      payload: {
-        id: string;
-      };
-    };
+  | {type: 'GET_BY_LOCATION_SUCCESS'; payload: {spaces: Space[]}}
+  | {type: 'GET_BY_LOCATION_FAIL'; payload: {message: string}}
+  | {type: 'ADD_SUCCESS'; payload: {space: Space}}
+  | {type: 'DELETE'; payload: {id: string}};
 
 export const SpacesContextProvider = ({children}: PropsWithChildren) => {
   const authContext = useAuthContext();
@@ -88,21 +68,14 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
 
   const handleAddSpace = useCallback(
     async (formData: AddSpaceFormData) => {
-      if (authContext.user === null) {
-        return;
-      }
-
-      try {
-        const space = await spacesService.add(authContext.user, formData);
-        dispatch({
-          type: 'ADD_SUCCESS',
-          payload: {
-            space,
-          },
-        });
-      } catch (error) {
-        log.error(error);
-        throw new Error('Add space error');
+      if (authContext.user !== null) {
+        try {
+          const space = await spacesService.add(authContext.user, formData);
+          dispatch({type: 'ADD_SUCCESS', payload: {space}});
+        } catch (error) {
+          log.error(error);
+          throw new Error('Add space error');
+        }
       }
     },
     [authContext.user, dispatch],
@@ -111,12 +84,7 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
   const handleDeleteSpace = useCallback(
     (id: string) => {
       if (id in data.entities) {
-        dispatch({
-          type: 'DELETE',
-          payload: {
-            id,
-          },
-        });
+        dispatch({type: 'DELETE', payload: {id}});
       }
     },
     [data.entities, dispatch],
@@ -126,19 +94,12 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
     async (l: Location, rInM: number) => {
       try {
         const spaces = await spacesService.findByGeohash(l, rInM);
-        dispatch({
-          type: 'GET_BY_LOCATION_SUCCESS',
-          payload: {
-            spaces,
-          },
-        });
+        dispatch({type: 'GET_BY_LOCATION_SUCCESS', payload: {spaces}});
       } catch (error) {
         log.error(error);
         dispatch({
           type: 'GET_BY_LOCATION_FAIL',
-          payload: {
-            message: 'Get by location error',
-          },
+          payload: {message: 'Get by location error'},
         });
       }
     },
@@ -147,20 +108,17 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
 
   useEffect(() => {
     if (
-      locationContext.location === null ||
-      profileContext.lastAction === ProfileReducerActionType.REMOVE_STORED_DATA
+      locationContext.location !== null &&
+      profileContext.radiusInM !== null
     ) {
-      return;
+      handleGetSpacesByLocation(
+        locationContext.location,
+        profileContext.radiusInM,
+      );
     }
-
-    handleGetSpacesByLocation(
-      locationContext.location,
-      profileContext.radiusInM,
-    );
   }, [
     locationContext.location,
     profileContext.radiusInM,
-    profileContext.lastAction,
     handleGetSpacesByLocation,
   ]);
 

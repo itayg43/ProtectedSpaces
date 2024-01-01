@@ -8,6 +8,7 @@ import {useNavigation} from '@react-navigation/native';
 import {UserProfileScreenNavigationProps} from '../navigators/DrawerNavigator';
 import {useProfileContext} from '../contexts/profileContext';
 import alert from '../utils/alert';
+import {DEFAULT_RADIUS_IN_M} from '../services/profileService';
 
 const MIN_RADIUS_IN_M = 25;
 const MAX_RADIUS_IN_M = 150;
@@ -19,23 +20,22 @@ const UserProfileScreen = () => {
   const safeAreaInsetsContext = useSafeAreaInsetsContext();
   const profileContext = useProfileContext();
 
-  const [sliderValue, setSliderValue] = useState(profileContext.radiusInM);
+  const radiusInM = profileContext.radiusInM || DEFAULT_RADIUS_IN_M;
+
+  const [sliderValue, setSliderValue] = useState(radiusInM);
 
   const handleGoBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
-  const handleRadiusChange = useCallback(
-    async (value: number) => {
-      try {
-        await profileContext.handleRadiusChange(value);
-      } catch (error: any) {
-        setSliderValue(profileContext.radiusInM);
-        alert.error(error?.message);
-      }
-    },
-    [profileContext],
-  );
+  const handleRadiusChange = async (value: number) => {
+    try {
+      await profileContext.handleRadiusChange(value);
+    } catch (error: any) {
+      setSliderValue(radiusInM);
+      alert.error(error?.message);
+    }
+  };
 
   return (
     <View
