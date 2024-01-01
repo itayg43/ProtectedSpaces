@@ -9,16 +9,20 @@ import {useImmerReducer} from 'use-immer';
 
 import profileService from '../services/profileService';
 import log from '../utils/log';
-import type {Space} from '../utils/types';
+import type {RequestStatus, Space} from '../utils/types';
 import spacesService from '../services/spacesService';
 import {useAuthContext} from './authContext';
 
 type ProfileReducerData = {
+  getSpacesStatus: RequestStatus;
+  errorMessage: string;
   radiusInM: number | null;
   spaces: Space[];
 };
 
 const initialReducerData: ProfileReducerData = {
+  getSpacesStatus: 'idle',
+  errorMessage: '',
   radiusInM: null,
   spaces: [],
 };
@@ -40,7 +44,9 @@ type ProfileReducerAction =
   | {type: 'GET_RADIUS'; payload: {radiusInM: number}}
   | {type: 'CHANGE_RADIUS'; payload: {radiusInM: number}}
   | {type: 'REMOVE_RADIUS'}
-  | {type: 'GET_SPACES'; payload: {spaces: Space[]}};
+  | {type: 'GET_SPACES'}
+  | {type: 'GET_SPACES_SUCCESS'; payload: {spaces: Space[]}}
+  | {type: 'GET_SPACES_FAIL'; payload: {message: string}};
 
 export const ProfileContextProvider = ({children}: PropsWithChildren) => {
   const authContext = useAuthContext();
@@ -62,10 +68,15 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
   const handleGetSpaces = useCallback(async () => {
     if (authContext.user !== null) {
       try {
+        dispatch({type: 'GET_SPACES'});
         const spaces = await spacesService.findByUserId(authContext.user.uid);
-        dispatch({type: 'GET_SPACES', payload: {spaces}});
+        dispatch({type: 'GET_SPACES_SUCCESS', payload: {spaces}});
       } catch (error) {
         log.error(error);
+        dispatch({
+          type: 'GET_SPACES_FAIL',
+          payload: {message: 'Get spaces error'},
+        });
       }
     }
   }, [authContext.user, dispatch]);
@@ -100,6 +111,8 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
   return (
     <ProfileContext.Provider
       value={{
+        getSpacesStatus: data.getSpacesStatus,
+        errorMessage: data.errorMessage,
         radiusInM: data.radiusInM,
         spaces: data.spaces,
         handleRemoveRadius,
@@ -124,12 +137,6 @@ function profileReducer(
       break;
     }
 
-    case 'GET_SPACES': {
-      const {spaces} = action.payload;
-      draft.spaces = spaces;
-      break;
-    }
-
     case 'CHANGE_RADIUS': {
       const {radiusInM} = action.payload;
       draft.radiusInM = radiusInM;
@@ -138,6 +145,25 @@ function profileReducer(
 
     case 'REMOVE_RADIUS': {
       draft.radiusInM = null;
+      break;
+    }
+
+    case 'GET_SPACES': {
+      draft.getSpacesStatus = 'loading';
+      break;
+    }
+
+    case 'GET_SPACES_SUCCESS': {
+      const {spaces} = action.payload;
+      draft.getSpacesStatus = 'success';
+      draft.spaces = spaces;
+      break;
+    }
+
+    case 'GET_SPACES_FAIL': {
+      const {message} = action.payload;
+      draft.getSpacesStatus = 'error';
+      draft.errorMessage = message;
       break;
     }
   }

@@ -7,8 +7,8 @@ import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {IconButton} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import {Space} from '../utils/types';
-// import LoadingView from '../components/views/LoadingView';
-// import ErrorView from '../components/views/ErrorView';
+import LoadingView from '../components/views/LoadingView';
+import ErrorView from '../components/views/ErrorView';
 import {UserDataScreenNavigationProps} from '../navigators/DrawerNavigator';
 import {useProfileContext} from '../contexts/profileContext';
 
@@ -16,7 +16,8 @@ const UserDataScreen = () => {
   const navigation = useNavigation<UserDataScreenNavigationProps>();
 
   const safeAreaInsetsContext = useSafeAreaInsetsContext();
-  const {spaces, handleGetSpaces} = useProfileContext();
+  const {getSpacesStatus, errorMessage, spaces, handleGetSpaces} =
+    useProfileContext();
 
   const handleGoBack = useCallback(() => {
     navigation.goBack();
@@ -26,13 +27,13 @@ const UserDataScreen = () => {
     handleGetSpaces();
   }, [handleGetSpaces]);
 
-  // if (status === 'loading') {
-  //   return <LoadingView />;
-  // }
+  if (getSpacesStatus === 'loading') {
+    return <LoadingView />;
+  }
 
-  // if (status === 'error') {
-  //   return <ErrorView message={errorMessage} onGoBack={handleGoBack} />;
-  // }
+  if (getSpacesStatus === 'error') {
+    return <ErrorView message={errorMessage} onGoBack={handleGoBack} />;
+  }
 
   return (
     <View
