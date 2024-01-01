@@ -16,32 +16,26 @@ export enum ProfileReducerActionType {
   RADIUS_CHANGE = 'RADIUS_CHANGE',
 }
 
-type ProfileContextParams = {
-  radiusInM: number;
-  handleRemoveStoredData: () => Promise<void>;
-  handleRadiusChange: (value: number) => Promise<void>;
-  lastReducerActionType: ProfileReducerActionType | null;
-};
-
-const initialContextParams: ProfileContextParams = {
-  radiusInM: DEFAULT_RADIUS_IN_M,
-  handleRemoveStoredData: async () => {},
-  handleRadiusChange: async () => {},
-  lastReducerActionType: null,
-};
-
-const ProfileContext =
-  createContext<ProfileContextParams>(initialContextParams);
-
 type ProfileReducerData = {
   radiusInM: number;
-  lastReducerActionType: ProfileReducerActionType | null;
+  lastAction: ProfileReducerActionType | null;
 };
 
 const initialReducerData: ProfileReducerData = {
   radiusInM: DEFAULT_RADIUS_IN_M,
-  lastReducerActionType: null,
+  lastAction: null,
 };
+
+type ProfileContextParams = ProfileReducerData & {
+  handleRemoveStoredData: () => Promise<void>;
+  handleRadiusChange: (value: number) => Promise<void>;
+};
+
+const ProfileContext = createContext<ProfileContextParams>({
+  ...initialReducerData,
+  handleRemoveStoredData: async () => {},
+  handleRadiusChange: async () => {},
+});
 
 type ProfileReducerAction =
   | {
@@ -118,7 +112,7 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
     <ProfileContext.Provider
       value={{
         radiusInM: data.radiusInM,
-        lastReducerActionType: data.lastReducerActionType,
+        lastAction: data.lastAction,
         handleRemoveStoredData,
         handleRadiusChange,
       }}>
@@ -137,20 +131,20 @@ function profileReducer(
     case ProfileReducerActionType.GET_STORED_DATA: {
       const {radiusInM} = action.payload;
       draft.radiusInM = radiusInM;
-      draft.lastReducerActionType = action.type;
+      draft.lastAction = action.type;
       break;
     }
 
     case ProfileReducerActionType.REMOVE_STORED_DATA: {
       draft.radiusInM = DEFAULT_RADIUS_IN_M;
-      draft.lastReducerActionType = action.type;
+      draft.lastAction = action.type;
       break;
     }
 
     case ProfileReducerActionType.RADIUS_CHANGE: {
       const {radiusInM} = action.payload;
       draft.radiusInM = radiusInM;
-      draft.lastReducerActionType = action.type;
+      draft.lastAction = action.type;
       break;
     }
   }

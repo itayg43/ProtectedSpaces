@@ -151,8 +151,7 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
   useEffect(() => {
     if (
       locationContext.location === null ||
-      profileContext.lastReducerActionType ===
-        ProfileReducerActionType.REMOVE_STORED_DATA
+      profileContext.lastAction === ProfileReducerActionType.REMOVE_STORED_DATA
     ) {
       return;
     }
@@ -164,7 +163,7 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
   }, [
     locationContext.location,
     profileContext.radiusInM,
-    profileContext.lastReducerActionType,
+    profileContext.lastAction,
     handleGetSpacesByLocation,
   ]);
 
