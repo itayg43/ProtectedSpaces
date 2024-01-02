@@ -15,9 +15,9 @@ export const commentsSubCollection = (spaceId: string) =>
     `${Collection.Spaces}/${spaceId}/${SubColletion.Comments}`,
   );
 
-const commentsSubCollectionGroup = firestoreClient.collectionGroup<Comment>(
-  SubColletion.Comments,
-);
+// const commentsSubCollectionGroup = firestoreClient.collectionGroup<Comment>(
+//   SubColletion.Comments,
+// );
 
 const add = async (
   user: FirebaseAuthTypes.User,
@@ -33,39 +33,20 @@ const add = async (
 
 const findBySpaceId = async (
   id: string,
-  lastDocument?: FirebaseFirestoreTypes.QueryDocumentSnapshot,
+  lastDoc?: FirebaseFirestoreTypes.QueryDocumentSnapshot,
   limit: number = 5,
 ) => {
   let query = commentsSubCollection(id).orderBy('createdAt', 'desc');
 
-  if (lastDocument) {
-    query = query.startAfter(lastDocument);
+  if (lastDoc) {
+    query = query.startAfter(lastDoc);
   }
 
-  const snap = await query.limit(limit).get();
+  const querySnap = await query.limit(limit).get();
 
   return {
-    comments: snap.docs.map(doc => doc.data()) as Comment[],
-    lastDocument: snap.docs[snap.docs.length - 1],
-  };
-};
-
-const findByUserId = async (
-  id: string,
-  lastDocument?: FirebaseFirestoreTypes.QueryDocumentSnapshot,
-  limit: number = 5,
-) => {
-  let query = commentsSubCollectionGroup.orderBy('createdAt', 'desc');
-
-  if (lastDocument) {
-    query = query.startAfter(lastDocument);
-  }
-
-  const snap = await query.where('user.id', '==', id).limit(limit).get();
-
-  return {
-    comments: snap.docs.map(doc => doc.data()),
-    lastDocument: snap.docs[snap.docs.length - 1],
+    comments: querySnap.docs.map(docSnap => docSnap.data()) as Comment[],
+    commentsLastDoc: querySnap.docs[querySnap.docs.length - 1],
   };
 };
 
@@ -76,7 +57,6 @@ const deleteById = async (spaceId: string, commentId: string) => {
 export default {
   add,
   findBySpaceId,
-  findByUserId,
   deleteById,
 };
 

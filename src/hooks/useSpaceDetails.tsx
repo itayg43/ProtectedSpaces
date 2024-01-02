@@ -35,28 +35,18 @@ type SpaceDetailsReducerAction =
       payload: {
         space: Space;
         comments: Comment[];
-        commentsLastDocument: FirebaseFirestoreTypes.QueryDocumentSnapshot;
+        commentsLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot;
       };
     }
-  | {
-      type: 'GET_INITIAL_DATA_FAIL';
-      payload: {
-        message: string;
-      };
-    }
+  | {type: 'GET_INITIAL_DATA_FAIL'; payload: {message: string}}
   | {
       type: 'GET_MORE_COMMENTS_SUCCESS';
       payload: {
         comments: Comment[];
-        commentsLastDocument: FirebaseFirestoreTypes.QueryDocumentSnapshot;
+        commentsLastDoc: FirebaseFirestoreTypes.QueryDocumentSnapshot;
       };
     }
-  | {
-      type: 'ADD_COMMENT_SUCCESS';
-      payload: {
-        comment: Comment;
-      };
-    };
+  | {type: 'ADD_COMMENT_SUCCESS'; payload: {comment: Comment}};
 
 const useSpaceDetails = (id: string) => {
   const authContext = useAuthContext();
@@ -68,7 +58,7 @@ const useSpaceDetails = (id: string) => {
 
   const handleGetInitalData = useCallback(async () => {
     try {
-      const [space, commentsRes] = await Promise.all([
+      const [space, {comments, commentsLastDoc}] = await Promise.all([
         spacesService.findById(id),
         commentsService.findBySpaceId(id),
       ]);
@@ -79,66 +69,48 @@ const useSpaceDetails = (id: string) => {
 
       dispatch({
         type: 'GET_INITIAL_DATA_SUCCESS',
-        payload: {
-          space,
-          comments: commentsRes.comments,
-          commentsLastDocument: commentsRes.lastDocument,
-        },
+        payload: {space, comments, commentsLastDoc},
       });
     } catch (error) {
       log.error(error);
       dispatch({
         type: 'GET_INITIAL_DATA_FAIL',
-        payload: {
-          message: 'Get data error',
-        },
+        payload: {message: 'Get data error'},
       });
     }
   }, [id, dispatch]);
 
   const handleGetMoreComments = useCallback(async () => {
-    if (!data.commentsLastDoc) {
-      return;
-    }
-
-    try {
-      const commentsRes = await commentsService.findBySpaceId(
-        id,
-        data.commentsLastDoc,
-      );
-      dispatch({
-        type: 'GET_MORE_COMMENTS_SUCCESS',
-        payload: {
-          comments: commentsRes.comments,
-          commentsLastDocument: commentsRes.lastDocument,
-        },
-      });
-    } catch (error) {
-      log.error(error);
+    if (data.commentsLastDoc !== null) {
+      try {
+        const {comments, commentsLastDoc} = await commentsService.findBySpaceId(
+          id,
+          data.commentsLastDoc,
+        );
+        dispatch({
+          type: 'GET_MORE_COMMENTS_SUCCESS',
+          payload: {comments, commentsLastDoc},
+        });
+      } catch (error) {
+        log.error(error);
+      }
     }
   }, [id, data.commentsLastDoc, dispatch]);
 
   const handleAddComment = useCallback(
     async (formData: AddCommentFormData) => {
-      if (authContext.user === null) {
-        return;
-      }
-
-      try {
-        const comment = await commentsService.add(
-          authContext.user,
-          formData,
-          id,
-        );
-        dispatch({
-          type: 'ADD_COMMENT_SUCCESS',
-          payload: {
-            comment,
-          },
-        });
-      } catch (error) {
-        log.error(error);
-        throw new Error('Add comment error');
+      if (authContext.user !== null) {
+        try {
+          const comment = await commentsService.add(
+            authContext.user,
+            formData,
+            id,
+          );
+          dispatch({type: 'ADD_COMMENT_SUCCESS', payload: {comment}});
+        } catch (error) {
+          log.error(error);
+          throw new Error('Add comment error');
+        }
       }
     },
     [authContext.user, id, dispatch],
@@ -166,11 +138,11 @@ function spaceDetailsReducer(
 ) {
   switch (action.type) {
     case 'GET_INITIAL_DATA_SUCCESS': {
-      const {space, comments, commentsLastDocument} = action.payload;
+      const {space, comments, commentsLastDoc} = action.payload;
       draft.status = 'success';
       draft.space = space;
       draft.comments = comments;
-      draft.commentsLastDoc = commentsLastDocument;
+      draft.commentsLastDoc = commentsLastDoc;
       break;
     }
 
@@ -182,9 +154,9 @@ function spaceDetailsReducer(
     }
 
     case 'GET_MORE_COMMENTS_SUCCESS': {
-      const {comments, commentsLastDocument} = action.payload;
+      const {comments, commentsLastDoc} = action.payload;
       draft.comments = [...draft.comments, ...comments];
-      draft.commentsLastDoc = commentsLastDocument;
+      draft.commentsLastDoc = commentsLastDoc;
       break;
     }
 
