@@ -51,6 +51,12 @@ export type Space = {
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
 
+export type LocalStoredSpace = {
+  id: string;
+  address: Address;
+  createdAt: number;
+};
+
 export type AddSpaceFormData = z.infer<typeof addSpaceValidationSchema>;
 
 export type AddCommentFormData = z.infer<typeof addCommentValidationSchema>;
