@@ -7,9 +7,9 @@ import React, {
 } from 'react';
 import {useImmerReducer} from 'use-immer';
 
-import profileService from '../services/profileService';
+import profileService, {DEFAULT_RADIUS_IN_M} from '../services/profileService';
 import log from '../utils/log';
-import type {RequestStatus, Space} from '../utils/types';
+import type {LocalStoredSpace, RequestStatus} from '../utils/types';
 import spacesService from '../services/spacesService';
 import {useAuthContext} from './authContext';
 
@@ -17,7 +17,7 @@ type ProfileReducerData = {
   getSpacesStatus: RequestStatus;
   errorMessage: string;
   radiusInM: number | null;
-  spaces: Space[] | null;
+  spaces: LocalStoredSpace[] | null;
 };
 
 const initialReducerData: ProfileReducerData = {
@@ -29,24 +29,24 @@ const initialReducerData: ProfileReducerData = {
 
 type ProfileContextParams = ProfileReducerData & {
   handleRadiusChange: (value: number) => Promise<void>;
-  handleRemoveRadius: () => Promise<void>;
   handleGetSpaces: () => Promise<void>;
+  handleRemoveStoredData: () => Promise<void>;
 };
 
 const ProfileContext = createContext<ProfileContextParams>({
   ...initialReducerData,
   handleRadiusChange: async () => {},
-  handleRemoveRadius: async () => {},
   handleGetSpaces: async () => {},
+  handleRemoveStoredData: async () => {},
 });
 
 type ProfileReducerAction =
-  | {type: 'GET_RADIUS'; payload: {radiusInM: number}}
+  | {type: 'GET_RADIUS_SUCCESS'; payload: {radiusInM: number}}
+  | {type: 'GET_RADIUS_FAIL'; payload: {defaultRadiusInM: number}}
   | {type: 'CHANGE_RADIUS'; payload: {radiusInM: number}}
-  | {type: 'REMOVE_RADIUS'}
-  | {type: 'GET_SPACES'}
-  | {type: 'GET_SPACES_SUCCESS'; payload: {spaces: Space[]}}
-  | {type: 'GET_SPACES_FAIL'; payload: {message: string}};
+  | {type: 'GET_SPACES_SUCCESS'; payload: {spaces: LocalStoredSpace[]}}
+  | {type: 'GET_SPACES_FAIL'; payload: {message: string}}
+  | {type: 'REMOVE_STORED_DATA'};
 
 export const ProfileContextProvider = ({children}: PropsWithChildren) => {
   const authContext = useAuthContext();
@@ -59,18 +59,39 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
   const handleGetRadius = useCallback(async () => {
     try {
       const radiusInM = await profileService.getRadius();
-      dispatch({type: 'GET_RADIUS', payload: {radiusInM}});
+      dispatch({type: 'GET_RADIUS_SUCCESS', payload: {radiusInM}});
     } catch (error) {
       log.error(error);
+      dispatch({
+        type: 'GET_RADIUS_FAIL',
+        payload: {defaultRadiusInM: DEFAULT_RADIUS_IN_M},
+      });
     }
   }, [dispatch]);
 
   const handleGetSpaces = useCallback(async () => {
     if (authContext.user !== null) {
       try {
-        dispatch({type: 'GET_SPACES'});
-        const spaces = await spacesService.findByUserId(authContext.user.uid);
-        dispatch({type: 'GET_SPACES_SUCCESS', payload: {spaces}});
+        let spaces: LocalStoredSpace[];
+
+        if (authContext.isNewSignIn === true) {
+          const s = await spacesService.findByUserId(authContext.user.uid);
+
+          spaces = s.map(currS => ({
+            id: currS.id,
+            address: currS.address,
+            createdAt: currS.createdAt.toMillis(),
+          }));
+
+          await profileService.setSpaces(spaces);
+        } else {
+          spaces = await profileService.getSpaces();
+        }
+
+        dispatch({
+          type: 'GET_SPACES_SUCCESS',
+          payload: {spaces},
+        });
       } catch (error) {
         log.error(error);
         dispatch({
@@ -79,7 +100,7 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
         });
       }
     }
-  }, [authContext.user, dispatch]);
+  }, [authContext.user, authContext.isNewSignIn, dispatch]);
 
   const handleRadiusChange = useCallback(
     async (value: number) => {
@@ -94,19 +115,27 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
     [dispatch],
   );
 
-  const handleRemoveRadius = useCallback(async () => {
+  const handleRemoveStoredData = useCallback(async () => {
     try {
-      await profileService.removeRadius();
-      dispatch({type: 'REMOVE_RADIUS'});
+      await Promise.all([
+        profileService.removeRadius(),
+        profileService.removeSpaces(),
+      ]);
+      dispatch({type: 'REMOVE_STORED_DATA'});
     } catch (error) {
       log.error(error);
       throw new Error('Remove stored data error');
     }
   }, [dispatch]);
 
+  const handleGetStoredData = useCallback(async () => {
+    await Promise.all([handleGetRadius(), handleGetSpaces()]);
+  }, [handleGetRadius, handleGetSpaces]);
+
   useEffect(() => {
-    handleGetRadius();
-  }, [handleGetRadius]);
+    handleGetStoredData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <ProfileContext.Provider
@@ -115,9 +144,9 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
         errorMessage: data.errorMessage,
         radiusInM: data.radiusInM,
         spaces: data.spaces,
-        handleRemoveRadius,
         handleRadiusChange,
         handleGetSpaces,
+        handleRemoveStoredData,
       }}>
       {children}
     </ProfileContext.Provider>
@@ -131,25 +160,21 @@ function profileReducer(
   action: ProfileReducerAction,
 ) {
   switch (action.type) {
-    case 'GET_RADIUS': {
+    case 'GET_RADIUS_SUCCESS': {
       const {radiusInM} = action.payload;
       draft.radiusInM = radiusInM;
+      break;
+    }
+
+    case 'GET_RADIUS_FAIL': {
+      const {defaultRadiusInM} = action.payload;
+      draft.radiusInM = defaultRadiusInM;
       break;
     }
 
     case 'CHANGE_RADIUS': {
       const {radiusInM} = action.payload;
       draft.radiusInM = radiusInM;
-      break;
-    }
-
-    case 'REMOVE_RADIUS': {
-      draft.radiusInM = null;
-      break;
-    }
-
-    case 'GET_SPACES': {
-      draft.getSpacesStatus = 'loading';
       break;
     }
 
@@ -165,6 +190,10 @@ function profileReducer(
       draft.getSpacesStatus = 'error';
       draft.errorMessage = message;
       break;
+    }
+
+    case 'REMOVE_STORED_DATA': {
+      return initialReducerData;
     }
   }
 }

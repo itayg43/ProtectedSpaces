@@ -16,11 +16,13 @@ import log from '../utils/log';
 
 type AuthReducerData = {
   status: RequestStatus;
+  isNewSignIn: boolean;
   user: FirebaseAuthTypes.User | null;
 };
 
 const initialReducerData: AuthReducerData = {
   status: 'idle',
+  isNewSignIn: false,
   user: null,
 };
 
@@ -92,6 +94,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     <AuthContext.Provider
       value={{
         status: data.status,
+        isNewSignIn: data.isNewSignIn,
         user: data.user,
         handleSignIn,
         handleSignOut,
@@ -107,6 +110,7 @@ function authReducer(draft: AuthReducerData, action: AuthReducerAction) {
   switch (action.type) {
     case 'SIGN_IN': {
       draft.status = 'loading';
+      draft.isNewSignIn = true;
       break;
     }
 
