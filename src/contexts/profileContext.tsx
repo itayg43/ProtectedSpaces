@@ -17,14 +17,14 @@ type ProfileReducerData = {
   getSpacesStatus: RequestStatus;
   errorMessage: string;
   radiusInM: number | null;
-  spaces: Space[];
+  spaces: Space[] | null;
 };
 
 const initialReducerData: ProfileReducerData = {
   getSpacesStatus: 'idle',
   errorMessage: '',
   radiusInM: null,
-  spaces: [],
+  spaces: null,
 };
 
 type ProfileContextParams = ProfileReducerData & {

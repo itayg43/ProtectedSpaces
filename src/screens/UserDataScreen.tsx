@@ -24,8 +24,10 @@ const UserDataScreen = () => {
   }, [navigation]);
 
   useEffect(() => {
-    handleGetSpaces();
-  }, [handleGetSpaces]);
+    if (spaces === null) {
+      handleGetSpaces();
+    }
+  }, [spaces, handleGetSpaces]);
 
   if (getSpacesStatus === 'loading') {
     return <LoadingView />;
