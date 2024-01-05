@@ -27,14 +27,14 @@ const initialReducerData: AuthReducerData = {
 };
 
 type AuthContextParams = AuthReducerData & {
-  handleSignIn: (provider: AuthProvider) => Promise<void>;
-  handleSignOut: () => Promise<void>;
+  signIn: (provider: AuthProvider) => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextParams>({
   ...initialReducerData,
-  handleSignIn: async () => {},
-  handleSignOut: async () => {},
+  signIn: async () => {},
+  signOut: async () => {},
 });
 
 type AuthReducerAction =
@@ -96,8 +96,8 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
         status: data.status,
         isNewSignIn: data.isNewSignIn,
         user: data.user,
-        handleSignIn,
-        handleSignOut,
+        signIn: handleSignIn,
+        signOut: handleSignOut,
       }}>
       {children}
     </AuthContext.Provider>
