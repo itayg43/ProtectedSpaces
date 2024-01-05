@@ -49,7 +49,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     initialReducerData,
   );
 
-  const handleSignIn = useCallback(
+  const signIn = useCallback(
     async (provider: AuthProvider) => {
       try {
         dispatch({type: 'SIGN_IN'});
@@ -68,7 +68,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     [dispatch],
   );
 
-  const handleSignOut = useCallback(async () => {
+  const signOut = useCallback(async () => {
     try {
       await authService.signOut();
     } catch (error) {
@@ -77,7 +77,7 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
     }
   }, []);
 
-  const handleAuthStateChange = useCallback(
+  const authStateChange = useCallback(
     (user: FirebaseAuthTypes.User | null) => {
       dispatch({type: 'AUTH_STATE_CHANGE', payload: {user}});
     },
@@ -85,10 +85,10 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
   );
 
   useEffect(() => {
-    const unsub = authService.stateSubscription(handleAuthStateChange);
+    const unsub = authService.stateSubscription(authStateChange);
 
     return unsub;
-  }, [handleAuthStateChange]);
+  }, [authStateChange]);
 
   return (
     <AuthContext.Provider
@@ -96,8 +96,8 @@ export const AuthContextProvider = ({children}: PropsWithChildren) => {
         status: data.status,
         isNewSignIn: data.isNewSignIn,
         user: data.user,
-        signIn: handleSignIn,
-        signOut: handleSignOut,
+        signIn,
+        signOut,
       }}>
       {children}
     </AuthContext.Provider>
