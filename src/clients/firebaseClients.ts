@@ -5,5 +5,8 @@ import storage from '@react-native-firebase/storage';
 export const authClient = auth();
 
 export const firestoreClient = firestore();
+(async () => {
+  await firestoreClient.settings({persistence: false});
+})();
 
 export const storageClient = storage();
