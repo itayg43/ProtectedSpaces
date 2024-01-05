@@ -208,8 +208,6 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
 export const useSpacesContext = () => useContext(SpacesContext);
 
 function spacesReducer(draft: SpacesReducerData, action: SpacesReducerAction) {
-  console.log(action.type);
-
   switch (action.type) {
     // GET SPACES
     case 'GET_SPACES_SUCCESS': {
