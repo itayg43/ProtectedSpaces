@@ -30,7 +30,7 @@ const UserProfileScreen = () => {
 
   const handleRadiusChange = async (value: number) => {
     try {
-      await profileContext.handleRadiusChange(value);
+      await profileContext.changeRadius(value);
     } catch (error: any) {
       setSliderValue(radiusInM);
       alert.error(error?.message);

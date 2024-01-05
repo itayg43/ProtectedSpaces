@@ -79,7 +79,7 @@ function DrawerContent({navigation}: DrawerContentComponentProps) {
 
   const handleSignOut = async () => {
     try {
-      await profileContext.handleRemoveStoredData();
+      await profileContext.removeStoredData();
       await authContext.signOut();
     } catch (error: any) {
       alert.error(error?.message);
