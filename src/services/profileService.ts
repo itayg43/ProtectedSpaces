@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type {LocalStoredSpace} from '../utils/types';
+import type {LocalStoredSpace, Space} from '../utils/types';
 import log from '../utils/log';
 
 const RADIUS_KEY = 'radiusInM';
@@ -55,3 +55,11 @@ export default {
   getSpaces,
   removeSpaces,
 };
+
+export function convertSpaceToLocalStoredSpace(s: Space): LocalStoredSpace {
+  return {
+    id: s.id,
+    address: s.address,
+    createdAt: s.createdAt.toMillis(),
+  };
+}

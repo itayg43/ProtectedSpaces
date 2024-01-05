@@ -7,7 +7,10 @@ import React, {
 } from 'react';
 import {useImmerReducer} from 'use-immer';
 
-import profileService, {DEFAULT_RADIUS_IN_M} from '../services/profileService';
+import profileService, {
+  DEFAULT_RADIUS_IN_M,
+  convertSpaceToLocalStoredSpace,
+} from '../services/profileService';
 import log from '../utils/log';
 import type {LocalStoredSpace, RequestStatus} from '../utils/types';
 import spacesService from '../services/spacesService';
@@ -75,14 +78,8 @@ export const ProfileContextProvider = ({children}: PropsWithChildren) => {
         let spaces: LocalStoredSpace[];
 
         if (authContext.isNewSignIn === true) {
-          const s = await spacesService.findByUserId(authContext.user.uid);
-
-          spaces = s.map(currS => ({
-            id: currS.id,
-            address: currS.address,
-            createdAt: currS.createdAt.toMillis(),
-          }));
-
+          const res = await spacesService.findByUserId(authContext.user.uid);
+          spaces = res.map(v => convertSpaceToLocalStoredSpace(v));
           await profileService.setSpaces(spaces);
         } else {
           spaces = await profileService.getSpaces();
