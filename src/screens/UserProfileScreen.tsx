@@ -8,7 +8,7 @@ import {useNavigation} from '@react-navigation/native';
 import {UserProfileScreenNavigationProps} from '../navigators/DrawerNavigator';
 import {useProfileContext} from '../contexts/profileContext';
 import alert from '../utils/alert';
-import {DEFAULT_RADIUS_IN_M} from '../services/profileService';
+import {DEFAULT_RADIUS_IN_M} from '../services/localStorageService';
 
 const MIN_RADIUS_IN_M = 25;
 const MAX_RADIUS_IN_M = 150;

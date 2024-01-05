@@ -18,11 +18,10 @@ import {useSpacesContext} from '../contexts/spacesContext';
 import LoadingView from '../components/views/LoadingView';
 
 const SpacesScreen = () => {
-  const safeAreaInsetsContext = useSafeAreaInsetsContext();
-
   const stackNavigation = useNavigation<SpacesStackNavigationProp>();
   const screenNavigation = useNavigation<SpacesScreenNavigationProp>();
 
+  const safeAreaInsetsContext = useSafeAreaInsetsContext();
   const locationContext = useLocationContext();
   const spacesContext = useSpacesContext();
 
@@ -41,7 +40,7 @@ const SpacesScreen = () => {
       await spacesContext.addSpace(formData);
       handleToggleShowAddSpaceModal();
     } catch (error: any) {
-      alert.error(error.message);
+      alert.error(error?.message);
     }
   };
 
@@ -51,7 +50,7 @@ const SpacesScreen = () => {
     });
   };
 
-  if (spacesContext.status === 'loading') {
+  if (spacesContext.getSpacesStatus === 'loading') {
     return <LoadingView />;
   }
 

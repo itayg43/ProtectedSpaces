@@ -51,9 +51,16 @@ export type Space = {
   createdAt: FirebaseFirestoreTypes.Timestamp;
 };
 
-export type LocalStoredSpace = {
-  id: string;
-  address: Address;
+export type UserSpace = Omit<
+  Space,
+  | 'images'
+  | 'type'
+  | 'description'
+  | 'user'
+  | 'geohash'
+  | 'latLng'
+  | 'createdAt'
+> & {
   createdAt: number;
 };
 

@@ -10,6 +10,7 @@ import {useImmerReducer} from 'use-immer';
 
 import type {
   AddSpaceFormData,
+  UserSpace,
   Location,
   RequestStatus,
   Space,
@@ -20,41 +21,66 @@ import log from '../utils/log';
 import {useAuthContext} from './authContext';
 import {useProfileContext} from './profileContext';
 import normalize from '../utils/normalize';
+import localStorageService from '../services/localStorageService';
 
 type SpacesReducerData = {
-  status: RequestStatus;
+  getSpacesStatus: RequestStatus;
+  getUserSpacesStatus: RequestStatus;
   errorMessage: string;
-  entities: {
+  spacesEntities: {
     [id: string]: Space;
+  };
+  userSpacesEntities: {
+    [id: string]: UserSpace;
   };
 };
 
 const initialReducerData: SpacesReducerData = {
-  status: 'loading',
+  getSpacesStatus: 'loading',
+  getUserSpacesStatus: 'idle',
   errorMessage: '',
-  entities: {},
+  spacesEntities: {},
+  userSpacesEntities: {},
 };
 
-type SpacesContextParams = Omit<SpacesReducerData, 'entities'> & {
+type SpacesContextParams = Omit<
+  SpacesReducerData,
+  'spacesEntities' | 'userSpacesEntities'
+> & {
   spaces: Space[];
+  userSpaces: UserSpace[];
 } & {
+  getUserSpaces: () => Promise<void>;
   addSpace: (formData: AddSpaceFormData) => Promise<void>;
-  deleteSpace: (id: string) => void;
+  deleteSpace: (id: string) => Promise<void>;
 };
 
 const SpacesContext = createContext<SpacesContextParams>({
-  status: initialReducerData.status,
+  getSpacesStatus: initialReducerData.getSpacesStatus,
+  getUserSpacesStatus: initialReducerData.getUserSpacesStatus,
   errorMessage: initialReducerData.errorMessage,
   spaces: [],
+  userSpaces: [],
+  getUserSpaces: async () => {},
   addSpace: async () => {},
-  deleteSpace: () => {},
+  deleteSpace: async () => {},
 });
 
 type SpacesReducerAction =
-  | {type: 'GET_BY_LOCATION_SUCCESS'; payload: {spaces: Space[]}}
-  | {type: 'GET_BY_LOCATION_FAIL'; payload: {message: string}}
-  | {type: 'ADD_SUCCESS'; payload: {space: Space}}
-  | {type: 'DELETE'; payload: {id: string}};
+  // GET SPACES
+  | {type: 'GET_SPACES_SUCCESS'; payload: {spaces: Space[]}}
+  | {type: 'GET_SPACES_FAIL'; payload: {message: string}}
+
+  // GET USER SPACES
+  | {type: 'GET_USER_SPACES'}
+  | {type: 'GET_USER_SPACES_SUCCESS'; payload: {userSpaces: UserSpace[]}}
+  | {type: 'GET_USER_SPACES_FAIL'; payload: {message: string}}
+
+  // ADD SPACE
+  | {type: 'ADD_SPACE_SUCCESS'; payload: {space: Space}}
+
+  // DELETE SPACE
+  | {type: 'DELETE_SPACE_SUCCESS'; payload: {id: string}};
 
 export const SpacesContextProvider = ({children}: PropsWithChildren) => {
   const authContext = useAuthContext();
@@ -66,41 +92,88 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
     SpacesReducerAction
   >(spacesReducer, initialReducerData);
 
+  const spaces = useMemo(() => {
+    return Object.values(data.spacesEntities);
+  }, [data.spacesEntities]);
+
+  const userSpaces = useMemo(() => {
+    return Object.values(data.userSpacesEntities);
+  }, [data.userSpacesEntities]);
+
+  const getSpaces = useCallback(
+    async (location: Location, radiusInM: number) => {
+      try {
+        const s = await spacesService.findByGeohash(location, radiusInM);
+        dispatch({type: 'GET_SPACES_SUCCESS', payload: {spaces: s}});
+      } catch (error) {
+        log.error(error);
+        dispatch({
+          type: 'GET_SPACES_FAIL',
+          payload: {message: 'Get by location error'},
+        });
+      }
+    },
+    [dispatch],
+  );
+
+  const getUserSpaces = useCallback(async () => {
+    if (authContext.user === null) {
+      return;
+    }
+
+    try {
+      dispatch({type: 'GET_USER_SPACES'});
+
+      let uSpaces: UserSpace[];
+
+      if (authContext.isNewSignIn === true) {
+        const values = await spacesService.findByUserId(authContext.user.uid);
+        uSpaces = values.map(v => convertSpaceToUserSpace(v));
+        await localStorageService.setUserSpaces(uSpaces);
+      } else {
+        uSpaces = await localStorageService.getUserSpaces();
+      }
+
+      dispatch({
+        type: 'GET_USER_SPACES_SUCCESS',
+        payload: {userSpaces: uSpaces},
+      });
+    } catch (error) {
+      log.error(error);
+      dispatch({
+        type: 'GET_USER_SPACES_FAIL',
+        payload: {message: 'Get user spaces error'},
+      });
+    }
+  }, [authContext.user, authContext.isNewSignIn, dispatch]);
+
   const addSpace = useCallback(
     async (formData: AddSpaceFormData) => {
-      if (authContext.user !== null) {
-        try {
-          const space = await spacesService.add(authContext.user, formData);
-          dispatch({type: 'ADD_SUCCESS', payload: {space}});
-        } catch (error) {
-          log.error(error);
-          throw new Error('Add space error');
-        }
+      if (authContext.user === null) {
+        return;
+      }
+
+      try {
+        const space = await spacesService.add(authContext.user, formData);
+        await localStorageService.addUserSpace(space);
+        dispatch({type: 'ADD_SPACE_SUCCESS', payload: {space}});
+      } catch (error) {
+        log.error(error);
+        throw new Error('Add space error');
       }
     },
     [authContext.user, dispatch],
   );
 
   const deleteSpace = useCallback(
-    (id: string) => {
-      if (id in data.entities) {
-        dispatch({type: 'DELETE', payload: {id}});
-      }
-    },
-    [data.entities, dispatch],
-  );
-
-  const getSpaces = useCallback(
-    async (location: Location, radiusInM: number) => {
+    async (id: string) => {
       try {
-        const spaces = await spacesService.findByGeohash(location, radiusInM);
-        dispatch({type: 'GET_BY_LOCATION_SUCCESS', payload: {spaces}});
+        await spacesService.deleteByIdIncludeComments(id);
+        await localStorageService.deleteUserSpace(id);
+        dispatch({type: 'DELETE_SPACE_SUCCESS', payload: {id}});
       } catch (error) {
         log.error(error);
-        dispatch({
-          type: 'GET_BY_LOCATION_FAIL',
-          payload: {message: 'Get by location error'},
-        });
+        throw new Error('Delete space error');
       }
     },
     [dispatch],
@@ -115,16 +188,15 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
     }
   }, [locationContext.location, profileContext.radiusInM, getSpaces]);
 
-  const entitiesAsArray = useMemo(() => {
-    return Object.values(data.entities);
-  }, [data.entities]);
-
   return (
     <SpacesContext.Provider
       value={{
-        status: data.status,
+        getSpacesStatus: data.getSpacesStatus,
+        getUserSpacesStatus: data.getUserSpacesStatus,
         errorMessage: data.errorMessage,
-        spaces: entitiesAsArray,
+        spaces,
+        userSpaces,
+        getUserSpaces,
         addSpace,
         deleteSpace,
       }}>
@@ -136,31 +208,70 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
 export const useSpacesContext = () => useContext(SpacesContext);
 
 function spacesReducer(draft: SpacesReducerData, action: SpacesReducerAction) {
+  console.log(action.type);
+
   switch (action.type) {
-    case 'GET_BY_LOCATION_SUCCESS': {
+    // GET SPACES
+    case 'GET_SPACES_SUCCESS': {
       const {spaces} = action.payload;
-      draft.status = 'success';
-      draft.entities = normalize.arrayByUniqueKey(spaces, 'id');
+      draft.getSpacesStatus = 'success';
+      draft.spacesEntities = normalize.arrayByUniqueKey(spaces, 'id');
       break;
     }
 
-    case 'GET_BY_LOCATION_FAIL': {
+    case 'GET_SPACES_FAIL': {
       const {message} = action.payload;
-      draft.status = 'error';
+      draft.getSpacesStatus = 'error';
       draft.errorMessage = message;
       break;
     }
 
-    case 'ADD_SUCCESS': {
-      const {space} = action.payload;
-      draft.entities[space.id] = space;
+    // GET USER SPACES
+    case 'GET_USER_SPACES': {
+      draft.getUserSpacesStatus = 'loading';
       break;
     }
 
-    case 'DELETE': {
+    case 'GET_USER_SPACES_SUCCESS': {
+      const {userSpaces} = action.payload;
+      draft.getUserSpacesStatus = 'success';
+      draft.userSpacesEntities = normalize.arrayByUniqueKey(userSpaces, 'id');
+      break;
+    }
+
+    case 'GET_USER_SPACES_FAIL': {
+      const {message} = action.payload;
+      draft.getUserSpacesStatus = 'error';
+      draft.errorMessage = message;
+      break;
+    }
+
+    // ADD SPACE
+    case 'ADD_SPACE_SUCCESS': {
+      const {space} = action.payload;
+      draft.spacesEntities[space.id] = space;
+      draft.userSpacesEntities[space.id] = convertSpaceToUserSpace(space);
+      break;
+    }
+
+    // DELETE SPACE
+    case 'DELETE_SPACE_SUCCESS': {
       const {id} = action.payload;
-      delete draft.entities[id];
+
+      if (id in draft.spacesEntities) {
+        delete draft.spacesEntities[id];
+      }
+
+      delete draft.userSpacesEntities[id];
       break;
     }
   }
+}
+
+export function convertSpaceToUserSpace(s: Space): UserSpace {
+  return {
+    id: s.id,
+    address: s.address,
+    createdAt: s.createdAt.toMillis(),
+  };
 }

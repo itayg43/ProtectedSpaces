@@ -1,33 +1,51 @@
 /* eslint-disable react-native/no-inline-styles */
 
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {FlatList, StyleSheet, Text, View} from 'react-native';
 
 import {useSafeAreaInsetsContext} from '../contexts/safeAreaInsetsContext';
 import {IconButton} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
-import type {LocalStoredSpace} from '../utils/types';
 import LoadingView from '../components/views/LoadingView';
 import ErrorView from '../components/views/ErrorView';
 import {UserDataScreenNavigationProps} from '../navigators/DrawerNavigator';
-import {useProfileContext} from '../contexts/profileContext';
+import {useSpacesContext} from '../contexts/spacesContext';
+import type {UserSpace} from '../utils/types';
+import alert from '../utils/alert';
 
 const UserDataScreen = () => {
   const navigation = useNavigation<UserDataScreenNavigationProps>();
 
   const safeAreaInsetsContext = useSafeAreaInsetsContext();
-  const {getSpacesStatus, errorMessage, spaces} = useProfileContext();
+  const spacesContext = useSpacesContext();
 
   const handleGoBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
-  if (getSpacesStatus === 'loading') {
+  const handleDeleteSpace = (id: string) => {
+    alert.remove(async () => {
+      try {
+        await spacesContext.deleteSpace(id);
+      } catch (error: any) {
+        alert.error(error?.message);
+      }
+    });
+  };
+
+  useEffect(() => {
+    spacesContext.getUserSpaces();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spacesContext.getUserSpaces]);
+
+  if (spacesContext.getUserSpacesStatus === 'loading') {
     return <LoadingView />;
   }
 
-  if (getSpacesStatus === 'error') {
-    return <ErrorView message={errorMessage} onGoBack={handleGoBack} />;
+  if (spacesContext.getUserSpacesStatus === 'error') {
+    return (
+      <ErrorView message={spacesContext.errorMessage} onGoBack={handleGoBack} />
+    );
   }
 
   return (
@@ -48,13 +66,16 @@ const UserDataScreen = () => {
 
       <View style={styles.listsContainer}>
         <View style={styles.listContainer}>
-          <Text style={styles.listLabel}>Spaces</Text>
+          <Text style={styles.listLabel}>My Spaces</Text>
 
           <FlatList
-            data={spaces}
+            data={spacesContext.userSpaces}
             keyExtractor={item => item.id}
             renderItem={({item}) => (
-              <SpaceListItem item={item} onDelete={() => null} />
+              <SpaceListItem
+                item={item}
+                onDelete={() => handleDeleteSpace(item.id)}
+              />
             )}
             bounces={false}
             ItemSeparatorComponent={ListItemSeparator}
@@ -70,7 +91,7 @@ const UserDataScreen = () => {
 export default UserDataScreen;
 
 type SpaceListItemProps = {
-  item: LocalStoredSpace;
+  item: UserSpace;
   onDelete: () => void;
 };
 
