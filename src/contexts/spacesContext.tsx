@@ -51,6 +51,7 @@ type SpacesContextParams = Omit<
   userSpaces: UserSpace[];
 } & {
   getUserSpaces: () => Promise<void>;
+  removeUserSpaces: () => Promise<void>;
   addSpace: (formData: AddSpaceFormData) => Promise<void>;
   deleteSpace: (id: string) => Promise<void>;
 };
@@ -62,6 +63,7 @@ const SpacesContext = createContext<SpacesContextParams>({
   spaces: [],
   userSpaces: [],
   getUserSpaces: async () => {},
+  removeUserSpaces: async () => {},
   addSpace: async () => {},
   deleteSpace: async () => {},
 });
@@ -75,6 +77,9 @@ type SpacesReducerAction =
   | {type: 'GET_USER_SPACES'}
   | {type: 'GET_USER_SPACES_SUCCESS'; payload: {userSpaces: UserSpace[]}}
   | {type: 'GET_USER_SPACES_FAIL'; payload: {message: string}}
+
+  // REMOVE USER SPACES
+  | {type: 'REMOVE_USERS_SPACES'}
 
   // ADD SPACE
   | {type: 'ADD_SPACE_SUCCESS'; payload: {space: Space}}
@@ -147,6 +152,16 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
     }
   }, [authContext.user, authContext.isNewSignIn, dispatch]);
 
+  const removeUserSpaces = useCallback(async () => {
+    try {
+      await localStorageService.removeUserSpaces();
+      dispatch({type: 'REMOVE_USERS_SPACES'});
+    } catch (error) {
+      log.error(error);
+      throw new Error('Remove users spaces error');
+    }
+  }, [dispatch]);
+
   const addSpace = useCallback(
     async (formData: AddSpaceFormData) => {
       if (authContext.user === null) {
@@ -197,6 +212,7 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
         spaces,
         userSpaces,
         getUserSpaces,
+        removeUserSpaces,
         addSpace,
         deleteSpace,
       }}>
@@ -241,6 +257,11 @@ function spacesReducer(draft: SpacesReducerData, action: SpacesReducerAction) {
       const {message} = action.payload;
       draft.getUserSpacesStatus = 'error';
       draft.errorMessage = message;
+      break;
+    }
+
+    case 'REMOVE_USERS_SPACES': {
+      draft.userSpacesEntities = {};
       break;
     }
 

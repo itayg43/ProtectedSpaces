@@ -15,6 +15,7 @@ import UserProfileScreen from '../screens/UserProfileScreen';
 import UserDataScreen from '../screens/UserDataScreen';
 import {useProfileContext} from '../contexts/profileContext';
 import alert from '../utils/alert';
+import {useSpacesContext} from '../contexts/spacesContext';
 
 type DrawerParams = {
   spacesStack: undefined;
@@ -73,13 +74,14 @@ export default DrawerNavigator;
 
 function DrawerContent({navigation}: DrawerContentComponentProps) {
   const safeAreaInsetsContext = useSafeAreaInsetsContext();
-
   const authContext = useAuthContext();
   const profileContext = useProfileContext();
+  const spacesContext = useSpacesContext();
 
   const handleSignOut = async () => {
     try {
       await profileContext.removeRadius();
+      await spacesContext.removeUserSpaces();
       await authContext.signOut();
     } catch (error: any) {
       alert.error(error?.message);
