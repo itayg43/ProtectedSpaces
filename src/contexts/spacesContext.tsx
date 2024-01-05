@@ -38,16 +38,16 @@ const initialReducerData: SpacesReducerData = {
 type SpacesContextParams = Omit<SpacesReducerData, 'entities'> & {
   spaces: Space[];
 } & {
-  handleAddSpace: (formData: AddSpaceFormData) => Promise<void>;
-  handleDeleteSpace: (id: string) => void;
+  addSpace: (formData: AddSpaceFormData) => Promise<void>;
+  deleteSpace: (id: string) => void;
 };
 
 const SpacesContext = createContext<SpacesContextParams>({
   status: initialReducerData.status,
   errorMessage: initialReducerData.errorMessage,
   spaces: [],
-  handleAddSpace: async () => {},
-  handleDeleteSpace: () => {},
+  addSpace: async () => {},
+  deleteSpace: () => {},
 });
 
 type SpacesReducerAction =
@@ -66,7 +66,7 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
     SpacesReducerAction
   >(spacesReducer, initialReducerData);
 
-  const handleAddSpace = useCallback(
+  const addSpace = useCallback(
     async (formData: AddSpaceFormData) => {
       if (authContext.user !== null) {
         try {
@@ -81,7 +81,7 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
     [authContext.user, dispatch],
   );
 
-  const handleDeleteSpace = useCallback(
+  const deleteSpace = useCallback(
     (id: string) => {
       if (id in data.entities) {
         dispatch({type: 'DELETE', payload: {id}});
@@ -90,10 +90,10 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
     [data.entities, dispatch],
   );
 
-  const handleGetSpacesByLocation = useCallback(
-    async (l: Location, rInM: number) => {
+  const getSpaces = useCallback(
+    async (location: Location, radiusInM: number) => {
       try {
-        const spaces = await spacesService.findByGeohash(l, rInM);
+        const spaces = await spacesService.findByGeohash(location, radiusInM);
         dispatch({type: 'GET_BY_LOCATION_SUCCESS', payload: {spaces}});
       } catch (error) {
         log.error(error);
@@ -111,16 +111,9 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
       locationContext.location !== null &&
       profileContext.radiusInM !== null
     ) {
-      handleGetSpacesByLocation(
-        locationContext.location,
-        profileContext.radiusInM,
-      );
+      getSpaces(locationContext.location, profileContext.radiusInM);
     }
-  }, [
-    locationContext.location,
-    profileContext.radiusInM,
-    handleGetSpacesByLocation,
-  ]);
+  }, [locationContext.location, profileContext.radiusInM, getSpaces]);
 
   const entitiesAsArray = useMemo(() => {
     return Object.values(data.entities);
@@ -132,8 +125,8 @@ export const SpacesContextProvider = ({children}: PropsWithChildren) => {
         status: data.status,
         errorMessage: data.errorMessage,
         spaces: entitiesAsArray,
-        handleAddSpace,
-        handleDeleteSpace,
+        addSpace,
+        deleteSpace,
       }}>
       {children}
     </SpacesContext.Provider>

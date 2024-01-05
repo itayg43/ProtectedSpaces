@@ -38,7 +38,7 @@ const SpacesScreen = () => {
 
   const handleSubmitSpace = async (formData: AddSpaceFormData) => {
     try {
-      await spacesContext.handleAddSpace(formData);
+      await spacesContext.addSpace(formData);
       handleToggleShowAddSpaceModal();
     } catch (error: any) {
       alert.error(error.message);
