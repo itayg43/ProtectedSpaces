@@ -2,9 +2,9 @@
 
 A collaborative cross-platform mobile app for discovering and sharing nearby safe spaces with commenting features.
 
-● Firebase - Google Authentication, Firestore (NoSQL), Storage.
-● Geohash.
-● GPS management.
+* Firebase - Google Authentication, Firestore (NoSQL), Storage.
+* Geohash.
+* GPS management.
 
 Stack: React Native (TS), Context, Custom hooks.
 
